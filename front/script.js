@@ -1,77 +1,4 @@
-const products = [
-  {
-    id: 1,
-    name: "Aurora Smart Speaker",
-    category: "tech",
-    price: 129.99,
-    rating: 4.7,
-    tag: "Bestseller",
-    image: "https://images.unsplash.com/photo-1512446816042-444d641267d4?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 2,
-    name: "Nimbus Air Purifier",
-    category: "home",
-    price: 249.0,
-    rating: 4.9,
-    tag: "Eco",
-    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 3,
-    name: "Pulse Fitness Band",
-    category: "fitness",
-    price: 89.5,
-    rating: 4.6,
-    tag: "New",
-    image: "https://images.unsplash.com/photo-1518441902117-fc8b0c201d19?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 4,
-    name: "Lumen Desk Lamp",
-    category: "home",
-    price: 58.0,
-    rating: 4.4,
-    tag: "Limited",
-    image: "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 5,
-    name: "Stride Eco Sneakers",
-    category: "fashion",
-    price: 145.0,
-    rating: 4.5,
-    tag: "Trending",
-    image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 6,
-    name: "Vista Travel Backpack",
-    category: "fashion",
-    price: 110.0,
-    rating: 4.3,
-    tag: "Travel",
-    image: "https://images.unsplash.com/photo-1514474959185-1472d4e46f4e?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 7,
-    name: "Halo Aroma Diffuser",
-    category: "home",
-    price: 64.99,
-    rating: 4.8,
-    tag: "Relax",
-    image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 8,
-    name: "Zen Smart Watch",
-    category: "tech",
-    price: 219.0,
-    rating: 4.7,
-    tag: "Editor pick",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
-  },
-];
+const products = [];
 
 const state = {
   cart: new Map(),
@@ -83,6 +10,36 @@ const state = {
   stock: 72,
   user: JSON.parse(localStorage.getItem("user") || "null"),
 };
+
+// Load products from database
+async function loadProducts() {
+  try {
+    console.log("Starting to load products...");
+    const response = await getProducts();
+    console.log("API Response:", response);
+    if (response.success && Array.isArray(response.data)) {
+      products.length = 0; // Clear array
+      // Convert string values to proper types
+      const convertedProducts = response.data.map(product => ({
+        ...product,
+        price: parseFloat(product.price),
+        rating: parseFloat(product.rating),
+        stock: parseInt(product.stock)
+      }));
+      console.log("Converted products:", convertedProducts);
+      products.push(...convertedProducts); // Add products from database
+      console.log("Products array after push:", products);
+      applyFilters(); // Render products
+      console.log("applyFilters called");
+    } else {
+      console.error("Failed to load products: Invalid response structure");
+      showToast("Failed to load products");
+    }
+  } catch (error) {
+    console.error("Error loading products:", error);
+    showToast("Error loading products");
+  }
+}
 
 const productGrid = document.getElementById("productGrid");
 const cartCount = document.getElementById("cartCount");
@@ -524,7 +481,7 @@ if (checkoutBtn) {
 }
 
 setTheme(state.theme);
-applyFilters();
+loadProducts(); // Load products from database
 updateCounts();
 renderCart();
 updateCountdown();

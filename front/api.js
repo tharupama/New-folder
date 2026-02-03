@@ -69,6 +69,11 @@ async function submitContact(name, email, subject, message) {
   });
 }
 
+// Get products function
+async function getProducts() {
+  return apiCall(`${API_BASE_URL}/products/list.php`, 'GET');
+}
+
 // Logout function
 async function logoutUser() {
   return apiCall(API_ENDPOINTS.logout, 'POST');

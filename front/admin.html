@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — Admin Panel</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .admin-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 40px;
+        background: var(--surface);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+      }
+
+      .admin-header {
+        margin-bottom: 32px;
+      }
+
+      .admin-header h2 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+
+      .admin-header p {
+        color: var(--muted);
+      }
+
+      .admin-form {
+        display: grid;
+        gap: 16px;
+      }
+
+      .form-group {
+        display: grid;
+        gap: 8px;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: transparent;
+        color: var(--text);
+        font-size: 1rem;
+        transition: border 0.2s ease;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .form-group input::placeholder,
+      .form-group textarea::placeholder {
+        color: var(--muted);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .admin-form button {
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+
+      .error-message {
+        color: #ef4444;
+        font-size: 0.9rem;
+        padding: 8px;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 8px;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .success-message {
+        color: #10b981;
+        font-size: 0.9rem;
+        padding: 8px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 8px;
+        display: none;
+      }
+
+      .success-message.show {
+        display: block;
+      }
+
+      .product-list {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+      }
+
+      .product-list h3 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+      }
+
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      }
+
+      .product-card {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+      }
+
+      .product-card h4 {
+        margin: 0 0 8px 0;
+        font-size: 1rem;
+      }
+
+      .product-card p {
+        margin: 4px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .product-price {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 1.1rem;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-bottom: 24px;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">BL</span>
+          <div>
+            <h1>BUY LK</h1>
+            <p>Premium picks for everyday life</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="../front/index.html">Home</a>
+          <a href="admin.html">Admin</a>
+        </nav>
+      </header>
+
+      <div class="admin-container">
+        <a href="../front/index.html" class="back-link">← Back to Shop</a>
+
+        <div class="admin-header">
+          <h2>Admin Panel</h2>
+          <p>Add and manage products</p>
+        </div>
+
+        <div id="errorMsg" class="error-message"></div>
+        <div id="successMsg" class="success-message"></div>
+
+        <form class="admin-form" id="productForm">
+          <div class="form-group">
+            <label for="adminKey">Admin Key</label>
+            <input
+              type="password"
+              id="adminKey"
+              name="adminKey"
+              placeholder="Enter admin password"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="productName">Product Name *</label>
+            <input
+              type="text"
+              id="productName"
+              name="productName"
+              placeholder="e.g., Aurora Smart Speaker"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <select id="category" name="category" required>
+                <option value="">Select category</option>
+                <option value="tech">Tech</option>
+                <option value="home">Home</option>
+                <option value="fitness">Fitness</option>
+                <option value="fashion">Fashion</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="price">Price ($) *</label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                placeholder="0.00"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rating">Rating (0-5)</label>
+              <input
+                type="number"
+                id="rating"
+                name="rating"
+                placeholder="4.5"
+                min="0"
+                max="5"
+                step="0.1"
+                value="4.5"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="tag">Tag</label>
+              <input
+                type="text"
+                id="tag"
+                name="tag"
+                placeholder="e.g., Bestseller, New, Eco"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="stock">Stock Count</label>
+            <input
+              type="number"
+              id="stock"
+              name="stock"
+              placeholder="50"
+              min="0"
+              value="50"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Product description"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Image URL</label>
+            <input
+              type="url"
+              id="image"
+              name="image"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+
+          <button type="submit" class="primary-btn">Add Product</button>
+        </form>
+
+        <div class="product-list">
+          <h3>Current Products</h3>
+          <div class="products-grid" id="productsGrid">
+            <p>Loading products...</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Support</a>
+        </div>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../front/api.js"></script>
+    <script>
+      const productForm = document.getElementById("productForm");
+      const errorMsg = document.getElementById("errorMsg");
+      const successMsg = document.getElementById("successMsg");
+      const productsGrid = document.getElementById("productsGrid");
+
+      const showToast = (message) => {
+        const toast = document.getElementById("toast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2400);
+      };
+
+      const loadProducts = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost/New%20folder/backend/products/list.php"
+          );
+          const result = await response.json();
+
+          if (result.success && result.data.length > 0) {
+            productsGrid.innerHTML = result.data
+              .map(
+                (product) => `
+              <div class="product-card">
+                <h4>${product.name}</h4>
+                <p><strong>Category:</strong> ${product.category}</p>
+                <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
+                <p><strong>Rating:</strong> ★ ${product.rating}</p>
+                <p><strong>Stock:</strong> ${product.stock}</p>
+                ${product.tag ? `<p><strong>Tag:</strong> ${product.tag}</p>` : ""}
+              </div>
+            `
+              )
+              .join("");
+          } else {
+            productsGrid.innerHTML = "<p>No products yet. Add your first product!</p>";
+          }
+        } catch (error) {
+          console.error("Error loading products:", error);
+          productsGrid.innerHTML = "<p>Error loading products</p>";
+        }
+      };
+
+      productForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const adminKey = document.getElementById("adminKey").value.trim();
+        const productName = document.getElementById("productName").value.trim();
+        const category = document.getElementById("category").value.trim();
+        const price = parseFloat(document.getElementById("price").value);
+        const rating = parseFloat(document.getElementById("rating").value) || 4.5;
+        const tag = document.getElementById("tag").value.trim();
+        const stock = parseInt(document.getElementById("stock").value) || 50;
+        const description = document.getElementById("description").value.trim();
+        const image = document.getElementById("image").value.trim();
+
+        if (!adminKey) {
+          errorMsg.textContent = "Admin key is required";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        if (!productName || !category || !price) {
+          errorMsg.textContent = "Product name, category, and price are required";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        if (price <= 0) {
+          errorMsg.textContent = "Price must be greater than 0";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        errorMsg.classList.remove("show");
+        successMsg.classList.remove("show");
+
+        const submitBtn = productForm.querySelector("button");
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Adding...";
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch(
+            "http://localhost/New%20folder/backend/products/list.php",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                adminKey,
+                name: productName,
+                category,
+                price,
+                rating,
+                tag,
+                stock,
+                description,
+                image,
+              }),
+            }
+          );
+
+          const result = await response.json();
+
+          if (result.success) {
+            successMsg.textContent = "Product added successfully!";
+            successMsg.classList.add("show");
+            showToast("Product added!");
+            productForm.reset();
+            document.getElementById("rating").value = "4.5";
+            document.getElementById("stock").value = "50";
+            loadProducts();
+          } else {
+            errorMsg.textContent = result.message || "Failed to add product";
+            errorMsg.classList.add("show");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          errorMsg.textContent = "An error occurred. Please try again.";
+          errorMsg.classList.add("show");
+        } finally {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Load products on page load
+      loadProducts();
+
+      // Set theme
+      const theme = localStorage.getItem("theme") || "light";
+      document.documentElement.dataset.theme = theme;
+    </script>
+  </body>
+</html>
