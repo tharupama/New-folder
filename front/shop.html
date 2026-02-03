@@ -10,25 +10,30 @@
     <div class="app">
       <header class="topbar">
         <div class="brand">
-          <span class="logo">BL</span>
+          <img src="assests/logo.png" alt="BUY LK" class="logo-img">
           <div>
             <h1>BUY LK</h1>
             <p>Premium picks for everyday life</p>
           </div>
         </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
         <nav class="nav">
           <a href="index.html">Home</a>
           <a href="shop.html">Shop</a>
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
+          <button class="nav-cart" id="cartBtn">
+            🛒 Cart <span id="cartCount">0</span>
+          </button>
         </nav>
         <div class="actions">
           <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
           <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
             ❤️ <span id="wishlistCount">0</span>
-          </button>
-          <button class="primary-btn" id="cartBtn">
-            Cart <span id="cartCount">0</span>
           </button>
           <div id="authLinks" class="auth-links">
             <a href="login.html" class="primary-btn">Sign in</a>
@@ -92,7 +97,7 @@
       <section class="products" id="productGrid"></section>
 
       <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <p>© 2026 BUY LK. Crafted for modern shoppers. (GROUP NO-10 E‑Commerce PROJECT)</p>
         <div class="footer-links">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>

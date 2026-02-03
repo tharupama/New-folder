@@ -446,6 +446,22 @@ if (closeCart) {
   closeCart.addEventListener("click", toggleCart);
 }
 
+const menuToggle = document.getElementById("menuToggle");
+if (menuToggle) {
+  menuToggle.addEventListener("click", () => {
+    menuToggle.classList.toggle("active");
+    document.body.classList.toggle("mobile-menu-open");
+  });
+
+  const navLinks = document.querySelectorAll(".nav a");
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      menuToggle.classList.remove("active");
+      document.body.classList.remove("mobile-menu-open");
+    });
+  });
+}
+
 const themeToggle = document.getElementById("themeToggle");
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
