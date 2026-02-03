@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — Shop</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">BL</span>
+          <div>
+            <h1>BUY LK</h1>
+            <p>Premium picks for everyday life</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+          <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
+            ❤️ <span id="wishlistCount">0</span>
+          </button>
+          <button class="primary-btn" id="cartBtn">
+            Cart <span id="cartCount">0</span>
+          </button>
+          <div id="authLinks" class="auth-links">
+            <a href="login.html" class="ghost-btn">Sign in</a>
+            <a href="signup.html" class="primary-btn">Sign up</a>
+          </div>
+          <div id="userMenu" class="user-menu" style="display: none;">
+            <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="logoutBtn" class="ghost-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-content">
+          <p class="badge">Shop all</p>
+          <h2>Find the best picks, curated for your lifestyle.</h2>
+          <p>
+            Filter by category, compare ratings, and add favorites to your wishlist.
+          </p>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <span>Today’s highlight</span>
+            <span class="timer" id="countdown">02:48:19</span>
+          </div>
+          <div class="hero-card-body">
+            <h3>Member savings</h3>
+            <p>Spend $200 and unlock free shipping.</p>
+            <button class="primary-btn" id="bundleDeal">Unlock deal</button>
+          </div>
+          <div class="hero-card-footer">
+            <span>Stock moving fast</span>
+            <div class="progress">
+              <div class="progress-fill" id="stockProgress"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls">
+        <div class="search">
+          <input type="text" id="searchInput" placeholder="Search products" />
+          <button class="icon-btn" id="searchClear">✕</button>
+        </div>
+        <div class="filters">
+          <select id="categoryFilter">
+            <option value="all">All categories</option>
+            <option value="tech">Tech</option>
+            <option value="home">Home</option>
+            <option value="fashion">Fashion</option>
+            <option value="fitness">Fitness</option>
+          </select>
+          <select id="sortFilter">
+            <option value="featured">Sort: Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Top rated</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="products" id="productGrid"></section>
+
+      <footer class="footer">
+        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Support</a>
+        </div>
+      </footer>
+    </div>
+
+    <aside class="cart-drawer" id="cartDrawer">
+      <div class="cart-header">
+        <h3>Your cart</h3>
+        <button class="icon-btn" id="closeCart">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="cartShipping">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="primary-btn" id="checkoutBtn">Checkout</button>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

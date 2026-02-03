@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — About</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">BL</span>
+          <div>
+            <h1>BUY LK</h1>
+            <p>Premium picks for everyday life</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+          <button class="primary-btn" id="cartBtn">
+            Cart <span id="cartCount">0</span>
+          </button>
+          <div id="authLinks" class="auth-links">
+            <a href="login.html" class="ghost-btn">Sign in</a>
+            <a href="signup.html" class="primary-btn">Sign up</a>
+          </div>
+          <div id="userMenu" class="user-menu" style="display: none;">
+            <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="logoutBtn" class="ghost-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-content">
+          <p class="badge">Our story</p>
+          <h2>Design-led shopping with a human touch.</h2>
+          <p>
+            BUY LK partners with global makers and local studios to bring you
+            thoughtful products, faster delivery, and a seamless shopping experience.
+          </p>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <span>Trusted by</span>
+            <span class="timer">120k+ customers</span>
+          </div>
+          <div class="hero-card-body">
+            <h3>Our promise</h3>
+            <p>Quality, transparency, and sustainability in every order.</p>
+            <button class="primary-btn">Meet the team</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="about">
+        <div>
+          <h3>What we value</h3>
+          <p>
+            We invest in durable materials, timeless design, and ethical sourcing.
+            Every product is tested, reviewed, and backed by our 30‑day comfort promise.
+          </p>
+        </div>
+        <div>
+          <h3>Community first</h3>
+          <p>
+            BUY LK supports local creators and donates a portion of every purchase to
+            sustainability initiatives across Asia and beyond.
+          </p>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="deal-card">
+          <h3>Fast delivery</h3>
+          <p>Same‑day dispatch on 95% of orders.</p>
+        </div>
+        <div class="deal-card highlight">
+          <h3>Support that cares</h3>
+          <p>Live chat, 24/7 ticketing, and easy returns.</p>
+        </div>
+        <div class="deal-card">
+          <h3>Secure payments</h3>
+          <p>All major cards, wallets, and BNPL options.</p>
+        </div>
+      </section>
+
+      <section class="about">
+        <div class="newsletter">
+          <h4>Stay in the loop</h4>
+          <p>Get weekly drops, price alerts, and curated inspiration.</p>
+          <form id="newsletterForm">
+            <input type="email" id="newsletterEmail" placeholder="Email address" required />
+            <button class="primary-btn" type="submit">Notify me</button>
+          </form>
+          <span id="newsletterMsg"></span>
+        </div>
+        <div>
+          <h4>Need help?</h4>
+          <p>Support hours: 9 AM – 10 PM (GMT+5:30)</p>
+          <p>Contact: support@buylk.com</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Support</a>
+        </div>
+      </footer>
+    </div>
+
+    <aside class="cart-drawer" id="cartDrawer">
+      <div class="cart-header">
+        <h3>Your cart</h3>
+        <button class="icon-btn" id="closeCart">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="cartShipping">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="primary-btn" id="checkoutBtn">Checkout</button>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

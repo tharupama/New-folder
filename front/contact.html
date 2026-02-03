@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — Contact</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">BL</span>
+          <div>
+            <h1>BUY LK</h1>
+            <p>Premium picks for everyday life</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+          <button class="primary-btn" id="cartBtn">
+            Cart <span id="cartCount">0</span>
+          </button>
+          <div id="authLinks" class="auth-links">
+            <a href="login.html" class="ghost-btn">Sign in</a>
+            <a href="signup.html" class="primary-btn">Sign up</a>
+          </div>
+          <div id="userMenu" class="user-menu" style="display: none;">
+            <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="logoutBtn" class="ghost-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-content">
+          <p class="badge">We’re here to help</p>
+          <h2>Contact BUY LK support anytime you need us.</h2>
+          <p>
+            Chat with our team, request a call back, or ask about your order status.
+          </p>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <span>Avg response time</span>
+            <span class="timer">2 mins</span>
+          </div>
+          <div class="hero-card-body">
+            <h3>Support channels</h3>
+            <p>Email, live chat, and WhatsApp support available.</p>
+            <button class="primary-btn">Open live chat</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="about">
+        <div>
+          <h3>Contact details</h3>
+          <p>Email: support@buylk.com</p>
+          <p>Phone: +94 11 234 5678</p>
+          <p>Hours: 9 AM – 10 PM (GMT+5:30)</p>
+        </div>
+        <div class="newsletter">
+          <h4>Send us a message</h4>
+          <form id="contactForm">
+            <input type="text" id="contactName" placeholder="Your name" required />
+            <input type="email" id="contactEmail" placeholder="Your email" required />
+            <input type="text" id="contactSubject" placeholder="Subject" />
+            <textarea id="contactMessage" placeholder="Your message" rows="4" required style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: transparent; color: var(--text); font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
+            <button class="primary-btn" type="submit">Send message</button>
+          </form>
+          <span id="contactMsg" style="display: block; margin-top: 12px;"></span>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="deal-card">
+          <h3>Order tracking</h3>
+          <p>Get live updates on your delivery status.</p>
+          <button class="ghost-btn">Track order</button>
+        </div>
+        <div class="deal-card highlight">
+          <h3>Returns & exchanges</h3>
+          <p>Start a return in under 2 minutes.</p>
+          <button class="primary-btn">Start return</button>
+        </div>
+        <div class="deal-card">
+          <h3>Bulk orders</h3>
+          <p>Custom quotes for teams and businesses.</p>
+          <button class="ghost-btn">Request quote</button>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Support</a>
+        </div>
+      </footer>
+    </div>
+
+    <aside class="cart-drawer" id="cartDrawer">
+      <div class="cart-header">
+        <h3>Your cart</h3>
+        <button class="icon-btn" id="closeCart">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="cartShipping">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="primary-btn" id="checkoutBtn">Checkout</button>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

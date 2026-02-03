@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — Sign Up</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .auth-container {
+        max-width: 420px;
+        margin: 60px auto;
+        padding: 40px;
+        background: var(--surface);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .auth-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+      }
+
+      .auth-header p {
+        color: var(--muted);
+      }
+
+      .auth-form {
+        display: grid;
+        gap: 16px;
+      }
+
+      .form-group {
+        display: grid;
+        gap: 8px;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .form-group input {
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: transparent;
+        color: var(--text);
+        font-size: 1rem;
+        transition: border 0.2s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .form-group input::placeholder {
+        color: var(--muted);
+      }
+
+      .auth-form button {
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+
+      .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 24px 0;
+      }
+
+      .auth-divider::before,
+      .auth-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .social-login {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .social-btn {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: transparent;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s ease;
+      }
+
+      .social-btn:hover {
+        background: var(--bg);
+      }
+
+      .auth-footer {
+        text-align: center;
+        margin-top: 24px;
+        color: var(--muted);
+      }
+
+      .auth-footer a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .checkbox-group input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        margin-top: 2px;
+        flex-shrink: 0;
+      }
+
+      .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .error-message {
+        color: #ef4444;
+        font-size: 0.9rem;
+        padding: 8px;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 8px;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .password-strength {
+        font-size: 0.85rem;
+        margin-top: 4px;
+        padding: 4px 0;
+      }
+
+      .strength-weak {
+        color: #ef4444;
+      }
+
+      .strength-medium {
+        color: #f59e0b;
+      }
+
+      .strength-strong {
+        color: #10b981;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">BL</span>
+          <div>
+            <h1>BUY LK</h1>
+            <p>Premium picks for everyday life</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+          <button class="primary-btn" id="cartBtn">
+            Cart <span id="cartCount">0</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="auth-container">
+        <div class="auth-header">
+          <h2>Join BUY LK</h2>
+          <p>Create an account to get started with exclusive member perks</p>
+        </div>
+
+        <div id="errorMsg" class="error-message"></div>
+
+        <form class="auth-form" id="signupForm">
+          <div class="form-group">
+            <label for="fullname">Full name</label>
+            <input
+              type="text"
+              id="fullname"
+              name="fullname"
+              placeholder="John Doe"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+            <div id="strengthMeter" class="password-strength"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="agreeTerms" name="agreeTerms" required />
+            <label for="agreeTerms">
+              I agree to the Terms of Service and Privacy Policy
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="newsletter" name="newsletter" />
+            <label for="newsletter">
+              Send me updates on new products and exclusive deals
+            </label>
+          </div>
+
+          <button type="submit" class="primary-btn">Create account</button>
+        </form>
+
+        <div class="auth-divider">or</div>
+
+        <div class="social-login">
+          <button type="button" class="social-btn" id="googleBtn">🔵 Google</button>
+          <button type="button" class="social-btn" id="appleBtn">⬛ Apple</button>
+        </div>
+
+        <div class="auth-footer">
+          Already have an account? <a href="login.html">Sign in</a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Support</a>
+        </div>
+      </footer>
+    </div>
+
+    <aside class="cart-drawer" id="cartDrawer">
+      <div class="cart-header">
+        <h3>Your cart</h3>
+        <button class="icon-btn" id="closeCart">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="cartShipping">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="primary-btn" id="checkoutBtn">Checkout</button>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="api.js"></script>
+    <script>
+      const signupForm = document.getElementById("signupForm");
+      const errorMsg = document.getElementById("errorMsg");
+      const passwordInput = document.getElementById("password");
+      const strengthMeter = document.getElementById("strengthMeter");
+
+      const showToast = (message) => {
+        const toast = document.getElementById("toast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2400);
+      };
+
+      const checkPasswordStrength = (password) => {
+        let strength = "weak";
+        if (password.length >= 8) {
+          if (/[A-Z]/.test(password) && /[0-9]/.test(password)) {
+            strength = "strong";
+          } else if (/[A-Z]|[0-9]/.test(password)) {
+            strength = "medium";
+          }
+        }
+        return strength;
+      };
+
+      passwordInput.addEventListener("input", (e) => {
+        const strength = checkPasswordStrength(e.target.value);
+        const messages = {
+          weak: "Weak password",
+          medium: "Medium password",
+          strong: "Strong password",
+        };
+        strengthMeter.textContent = messages[strength];
+        strengthMeter.className = `password-strength strength-${strength}`;
+      });
+
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fullname = document.getElementById("fullname").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const confirmPassword = document.getElementById("confirmPassword").value.trim();
+        const agreeTerms = document.getElementById("agreeTerms").checked;
+
+        if (!fullname || !email || !password || !confirmPassword) {
+          errorMsg.textContent = "Please fill in all required fields.";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        if (!email.includes("@")) {
+          errorMsg.textContent = "Please enter a valid email address.";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        if (password.length < 6) {
+          errorMsg.textContent = "Password must be at least 6 characters long.";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          errorMsg.textContent = "Passwords do not match.";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        if (!agreeTerms) {
+          errorMsg.textContent = "You must agree to the terms and conditions.";
+          errorMsg.classList.add("show");
+          return;
+        }
+
+        errorMsg.classList.remove("show");
+        
+        // Show loading state
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Creating account...";
+        submitBtn.disabled = true;
+
+        try {
+          // Use fullname as username
+          const response = await signupUser(fullname, email, password, confirmPassword);
+          
+          if (response.success) {
+            localStorage.setItem("user", JSON.stringify({ 
+              fullname, 
+              email, 
+              loggedIn: true,
+              id: response.data.userId 
+            }));
+            showToast("Account created successfully!");
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 1000);
+          } else {
+            errorMsg.textContent = response.data.message || "Sign up failed. Please try again.";
+            errorMsg.classList.add("show");
+          }
+        } catch (error) {
+          console.error('Signup error:', error);
+          errorMsg.textContent = "An error occurred. Please try again.";
+          errorMsg.classList.add("show");
+        } finally {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+
+      document.getElementById("googleBtn").addEventListener("click", () => {
+        showToast("Google signup coming soon");
+      });
+
+      document.getElementById("appleBtn").addEventListener("click", () => {
+        showToast("Apple signup coming soon");
+      });
+
+      // Cart functionality
+      const cartCount = document.getElementById("cartCount");
+      const cartBtn = document.getElementById("cartBtn");
+      const cartDrawer = document.getElementById("cartDrawer");
+      const closeCart = document.getElementById("closeCart");
+      const checkoutBtn = document.getElementById("checkoutBtn");
+      const cartItems = document.getElementById("cartItems");
+      const cartSubtotal = document.getElementById("cartSubtotal");
+      const cartShipping = document.getElementById("cartShipping");
+      const cartTotal = document.getElementById("cartTotal");
+
+      const cart = new Map(JSON.parse(localStorage.getItem("cart") || "[]"));
+
+      const updateCounts = () => {
+        if (cartCount) {
+          cartCount.textContent = [...cart.values()].reduce((sum, qty) => sum + qty, 0);
+        }
+      };
+
+      const renderCart = () => {
+        if (!cartItems) return;
+        const entries = [...cart.entries()];
+        if (entries.length === 0) {
+          cartItems.innerHTML = "<p>Your cart is empty.</p>";
+          if (cartSubtotal) cartSubtotal.textContent = "$0.00";
+          if (cartShipping) cartShipping.textContent = "$0.00";
+          if (cartTotal) cartTotal.textContent = "$0.00";
+          return;
+        }
+
+        let subtotal = 0;
+        cartItems.innerHTML = entries
+          .map(([id]) => `<div style="padding: 10px; border-bottom: 1px solid var(--border);">Item #${id}</div>`)
+          .join("");
+
+        if (cartSubtotal) cartSubtotal.textContent = "$" + subtotal.toFixed(2);
+        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "$0.00" : "$12.00";
+        if (cartTotal) cartTotal.textContent = "$" + (subtotal + (subtotal > 200 ? 0 : 12)).toFixed(2);
+      };
+
+      if (cartBtn) {
+        cartBtn.addEventListener("click", () => {
+          if (cartDrawer) cartDrawer.classList.toggle("open");
+        });
+      }
+
+      if (closeCart) {
+        closeCart.addEventListener("click", () => {
+          if (cartDrawer) cartDrawer.classList.remove("open");
+        });
+      }
+
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener("click", () => {
+          showToast("Checkout coming soon");
+        });
+      }
+
+      const themeToggle = document.getElementById("themeToggle");
+      const theme = localStorage.getItem("theme") || "light";
+      document.documentElement.dataset.theme = theme;
+      if (themeToggle) {
+        themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
+        themeToggle.addEventListener("click", () => {
+          const newTheme = theme === "light" ? "dark" : "light";
+          document.documentElement.dataset.theme = newTheme;
+          localStorage.setItem("theme", newTheme);
+          themeToggle.textContent = newTheme === "dark" ? "☀️" : "🌙";
+        });
+      }
+
+      updateCounts();
+      renderCart();
+    </script>
+  </body>
+</html>
