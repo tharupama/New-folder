@@ -121,11 +121,16 @@ const renderProducts = (items) => {
         <span class="rating">★ ${product.rating}</span>
         <span class="price">${currency.format(product.price)}</span>
       </div>
+      <div class="stock-status" style="font-size: 0.85rem; margin: 4px 0; font-weight: 500; color: ${product.is_available == 1 ? '#10b981' : '#ef4444'};">
+        ${product.is_available == 1 ? '✓ In Stock' : '✗ Out of Stock'}
+      </div>
       <div class="product-actions">
         <button class="ghost-btn" data-action="wishlist">${
           state.wishlist.has(product.id) ? "Saved" : "Wishlist"
         }</button>
-        <button class="primary-btn" data-action="cart">Add</button>
+        <button class="primary-btn" data-action="cart" ${product.is_available == 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+          ${product.is_available == 0 ? 'Unavailable' : 'Add'}
+        </button>
       </div>
     </article>`
     )
@@ -230,6 +235,12 @@ if (productGrid) {
     }
 
     if (event.target.dataset.action === "cart") {
+      // Check if product is available before adding to cart
+      const product = products.find(p => p.id === id);
+      if (product && product.is_available == 0) {
+        showToast("This item is currently out of stock");
+        return;
+      }
       state.cart.set(id, (state.cart.get(id) || 0) + 1);
       showToast("Added to cart");
       updateCounts();
