@@ -264,6 +264,8 @@ if (productGrid) {
     if (!card) return;
 
     const id = Number(card.dataset.id);
+    
+    // Handle wishlist button click
     if (event.target.dataset.action === "wishlist") {
       if (state.wishlist.has(id)) {
         state.wishlist.delete(id);
@@ -275,8 +277,10 @@ if (productGrid) {
       saveWishlist();
       applyFilters();
       updateCounts();
+      return;
     }
 
+    // Handle add to cart button click
     if (event.target.dataset.action === "cart") {
       // Check if product is available before adding to cart
       const product = products.find(p => p.id === id);
@@ -289,6 +293,14 @@ if (productGrid) {
       showToast("Added to cart");
       updateCounts();
       renderCart();
+      return;
+    }
+    
+    // If clicking anywhere else on the card, open product details modal
+    if (!event.target.dataset.action) {
+      if (typeof openProductModal === 'function') {
+        openProductModal(id);
+      }
     }
   });
 }

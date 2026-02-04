@@ -78,3 +78,28 @@ async function getProducts() {
 async function logoutUser() {
   return apiCall(API_ENDPOINTS.logout, 'POST');
 }
+
+// Get product reviews
+async function getProductReviews(productId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/reviews/get.php?product_id=${productId}`);
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return {
+      success: false,
+      message: 'Failed to load reviews'
+    };
+  }
+}
+
+// Add product review
+async function addProductReview(productId, userName, rating, comment) {
+  return apiCall(`${API_BASE_URL}/reviews/add.php`, 'POST', {
+    product_id: productId,
+    user_name: userName,
+    rating: rating,
+    comment: comment
+  });
+}

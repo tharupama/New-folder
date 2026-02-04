@@ -109,5 +109,76 @@
   </div>
 </div>
 
+<!-- Product Details Modal -->
+<div class="product-modal" id="productModal" style="display: none;">
+  <div class="product-modal-content">
+    <button class="modal-close" id="closeProductModal">✕</button>
+    
+    <div class="product-details-container">
+      <div class="product-details-left">
+        <img id="productModalImage" src="" alt="Product Image" class="product-modal-image">
+        <div class="product-modal-info">
+          <h2 id="productModalName"></h2>
+          <div class="product-modal-rating">
+            <span class="rating-stars" id="productModalStars"></span>
+            <span id="productModalRating"></span>
+            <span id="productModalReviewCount"></span>
+          </div>
+          <p class="product-modal-price" id="productModalPrice"></p>
+          <p class="product-modal-description" id="productModalDescription"></p>
+          <div class="product-modal-actions">
+            <button class="primary-btn" id="productModalAddCart">Add to Cart</button>
+            <button class="secondary-btn" id="productModalWishlist">❤️ Wishlist</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="product-details-right">
+        <div class="reviews-section">
+          <h3>Customer Reviews</h3>
+          
+          <div class="reviews-summary">
+            <div class="average-rating">
+              <span class="rating-number" id="averageRatingNumber">0.0</span>
+              <div class="rating-stars" id="averageRatingStars"></div>
+              <span class="review-count" id="totalReviewsCount">0 reviews</span>
+            </div>
+          </div>
+
+          <div class="review-form-container">
+            <h4>Write a Review</h4>
+            <form id="reviewForm" class="review-form">
+              <div class="form-group">
+                <label for="reviewRating">Rating</label>
+                <div class="star-rating-input" id="starRatingInput">
+                  <span class="star" data-rating="1">☆</span>
+                  <span class="star" data-rating="2">☆</span>
+                  <span class="star" data-rating="3">☆</span>
+                  <span class="star" data-rating="4">☆</span>
+                  <span class="star" data-rating="5">☆</span>
+                </div>
+                <input type="hidden" id="reviewRating" name="rating" required>
+              </div>
+              <div class="form-group">
+                <label for="reviewName">Name</label>
+                <input type="text" id="reviewName" name="name" placeholder="Your name" required>
+              </div>
+              <div class="form-group">
+                <label for="reviewComment">Your Review</label>
+                <textarea id="reviewComment" name="comment" rows="4" placeholder="Share your experience with this product..." required></textarea>
+              </div>
+              <button type="submit" class="primary-btn">Submit Review</button>
+            </form>
+          </div>
+
+          <div class="reviews-list" id="reviewsList">
+            <p class="no-reviews">No reviews yet. Be the first to review!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast Notification -->
 <div class="toast" id="toast"></div>

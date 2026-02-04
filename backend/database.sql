@@ -60,6 +60,19 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Product reviews table
+CREATE TABLE IF NOT EXISTS product_reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    user_name VARCHAR(100) NOT NULL,
+    user_id INT DEFAULT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 -- Sample products
 INSERT INTO products (name, category, price, rating, tag, image, description, stock) VALUES
 ('Aurora Smart Speaker', 'tech', 129.99, 4.7, 'Bestseller', 'https://images.unsplash.com/photo-1512446816042-444d641267d4?auto=format&fit=crop&w=800&q=80', 'Premium wireless speaker with superior sound quality', 72),
@@ -70,4 +83,12 @@ INSERT INTO products (name, category, price, rating, tag, image, description, st
 ('Vista Travel Backpack', 'fashion', 110.00, 4.3, 'Travel', 'https://images.unsplash.com/photo-1514474959185-1472d4e46f4e?auto=format&fit=crop&w=800&q=80', 'Perfect companion for your travels', 28),
 ('Halo Aroma Diffuser', 'home', 64.99, 4.8, 'Relax', 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80', 'Create a peaceful atmosphere at home', 50),
 ('Zen Smart Watch', 'tech', 219.00, 4.7, 'Editor pick', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', 'Advanced health and fitness tracking', 41);
+
+-- Sample reviews
+INSERT INTO product_reviews (product_id, user_name, rating, comment) VALUES
+(1, 'John Doe', 5, 'Excellent sound quality! Best speaker I have ever owned.'),
+(1, 'Sarah Smith', 4, 'Great product but a bit pricey. Worth it though!'),
+(2, 'Mike Johnson', 5, 'This air purifier changed my life. Highly recommend!'),
+(3, 'Emily Brown', 4, 'Good fitness band, accurate tracking and long battery life.'),
+(5, 'David Wilson', 5, 'Most comfortable sneakers ever! Love the eco-friendly design.');
 
