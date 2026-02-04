@@ -1,14 +1,45 @@
+console.log("script.js loaded");
+
 const products = [];
 
-const state = {
-  cart: new Map(),
-  wishlist: new Set(),
-  search: "",
-  category: "all",
-  sort: "featured",
-  theme: localStorage.getItem("theme") || "light",
-  stock: 72,
-  user: JSON.parse(localStorage.getItem("user") || "null"),
+// Initialize state with localStorage support
+const initializeState = () => {
+  // Load cart from localStorage
+  const savedCart = localStorage.getItem("buyLkCart");
+  const cartData = savedCart ? JSON.parse(savedCart) : {};
+  // Convert string keys back to numbers
+  const cartEntries = Object.entries(cartData).map(([key, value]) => [parseInt(key), value]);
+  const cart = new Map(cartEntries);
+  
+  // Load wishlist from localStorage
+  const savedWishlist = localStorage.getItem("buyLkWishlist");
+  const wishlistData = savedWishlist ? JSON.parse(savedWishlist) : [];
+  const wishlist = new Set(wishlistData);
+  
+  return {
+    cart: cart,
+    wishlist: wishlist,
+    search: "",
+    category: "all",
+    sort: "featured",
+    theme: localStorage.getItem("theme") || "light",
+    stock: 72,
+    user: JSON.parse(localStorage.getItem("user") || "null"),
+  };
+};
+
+const state = initializeState();
+
+// Save cart to localStorage
+const saveCart = () => {
+  const cartObj = Object.fromEntries(state.cart);
+  localStorage.setItem("buyLkCart", JSON.stringify(cartObj));
+};
+
+// Save wishlist to localStorage
+const saveWishlist = () => {
+  const wishlistArray = Array.from(state.wishlist);
+  localStorage.setItem("buyLkWishlist", JSON.stringify(wishlistArray));
 };
 
 // Load products from database
@@ -30,6 +61,7 @@ async function loadProducts() {
       products.push(...convertedProducts); // Add products from database
       console.log("Products array after push:", products);
       applyFilters(); // Render products
+      renderCart(); // Re-render cart with loaded products
       console.log("applyFilters called");
     } else {
       console.error("Failed to load products: Invalid response structure");
@@ -164,7 +196,16 @@ const renderCart = () => {
   let subtotal = 0;
   cartItems.innerHTML = entries
     .map(([id, qty]) => {
-      const product = products.find((item) => item.id === id);
+      const product = products.find((item) => {
+        // Handle both string and number comparisons
+        return item.id == id || item.id === parseInt(id);
+      });
+      
+      if (!product) {
+        console.warn("Product not found for cart item:", id, "Available products:", products.length);
+        return "";
+      }
+      
       const lineTotal = product.price * qty;
       subtotal += lineTotal;
       return `
@@ -181,6 +222,7 @@ const renderCart = () => {
       </div>
       `;
     })
+    .filter(html => html !== "") // Remove empty items
     .join("");
 
   const shipping = subtotal > 200 ? 0 : 12;
@@ -230,6 +272,7 @@ if (productGrid) {
         state.wishlist.add(id);
         showToast("Saved to wishlist");
       }
+      saveWishlist();
       applyFilters();
       updateCounts();
     }
@@ -242,6 +285,7 @@ if (productGrid) {
         return;
       }
       state.cart.set(id, (state.cart.get(id) || 0) + 1);
+      saveCart();
       showToast("Added to cart");
       updateCounts();
       renderCart();
@@ -267,6 +311,7 @@ if (cartItems) {
       }
     }
 
+    saveCart();
     updateCounts();
     renderCart();
   });
@@ -494,23 +539,143 @@ if (bundleDeal) {
   bundleDeal.addEventListener("click", () => {
     state.cart.set(1, (state.cart.get(1) || 0) + 1);
     state.cart.set(8, (state.cart.get(8) || 0) + 1);
+    saveCart();
     showToast("Bundle added to cart");
     updateCounts();
     renderCart();
   });
 }
 
-const checkoutBtn = document.getElementById("checkoutBtn");
-if (checkoutBtn) {
-  checkoutBtn.addEventListener("click", () => {
-    showToast("Checkout coming soon");
+// ===== PAYMENT MODAL SYSTEM =====
+function setupPaymentSystem() {
+  console.log("Setting up payment system...");
+  
+  const paymentModal = document.getElementById("paymentModal");
+  const closePaymentBtn = document.getElementById("closePayment");
+  const paymentForm = document.getElementById("paymentForm");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  
+  if (!paymentModal) {
+    console.error("Payment modal element not found");
+    return false;
+  }
+  
+  // Open payment modal
+  function openPayment() {
+    console.log("Opening payment modal");
+    if (state.cart.size === 0) {
+      showToast("Your cart is empty");
+      return;
+    }
+    
+    // Calculate totals
+    let subtotal = 0;
+    state.cart.forEach((qty, productId) => {
+      const product = products.find(p => p.id == productId);
+      if (product) {
+        subtotal += product.price * qty;
+      }
+    });
+    
+    const shipping = subtotal >= 200 ? 0 : 9.99;
+    const total = subtotal + shipping;
+    
+    // Update amounts
+    document.getElementById("paymentSubtotal").textContent = currency.format(subtotal);
+    document.getElementById("paymentShipping").textContent = currency.format(shipping);
+    document.getElementById("paymentTotal").textContent = currency.format(total);
+    
+    // Show modal
+    paymentModal.classList.add("show");
+    document.body.style.overflow = "hidden";
+    console.log("Payment modal is now visible");
+  }
+  
+  // Close payment modal
+  function closePayment() {
+    console.log("Closing payment modal");
+    paymentModal.classList.remove("show");
+    document.body.style.overflow = "auto";
+  }
+  
+  // Checkout button click
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", openPayment);
+    console.log("Checkout button listener added");
+  }
+  
+  // Close button click
+  if (closePaymentBtn) {
+    closePaymentBtn.addEventListener("click", closePayment);
+  }
+  
+  // Close on background click
+  paymentModal.addEventListener("click", (e) => {
+    if (e.target === paymentModal) {
+      closePayment();
+    }
   });
+  
+  // Payment method toggle
+  const cardDetails = document.getElementById("cardDetails");
+  const paymentMethodInputs = document.querySelectorAll('input[name="paymentMethod"]');
+  paymentMethodInputs.forEach(input => {
+    input.addEventListener("change", (e) => {
+      if (cardDetails) {
+        cardDetails.style.display = e.target.value === "card" ? "grid" : "none";
+      }
+    });
+  });
+  
+  // Form submission
+  if (paymentForm) {
+    paymentForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      console.log("Payment form submitted");
+      
+      const submitBtn = paymentForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
+      submitBtn.textContent = "Processing...";
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        
+        // Clear cart
+        state.cart.clear();
+        saveCart();
+        updateCounts();
+        renderCart();
+        closePayment();
+        
+        // Close cart drawer if open
+        const cartDrawerEl = document.getElementById("cartDrawer");
+        if (cartDrawerEl && cartDrawerEl.classList.contains("open")) {
+          cartDrawerEl.classList.remove("open");
+        }
+        
+        paymentForm.reset();
+        showToast("✓ Payment successful! Thank you for your purchase.");
+      }, 2000);
+    });
+  }
+  
+  console.log("Payment system setup complete");
+  return true;
+}
+
+// Setup on document ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", setupPaymentSystem);
+} else {
+  setupPaymentSystem();
 }
 
 setTheme(state.theme);
-loadProducts(); // Load products from database
+loadProducts(); // Load products from database (includes renderCart)
 updateCounts();
-renderCart();
 updateCountdown();
 updateStock();
 
