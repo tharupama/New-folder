@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BUY LK — Contact</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="wishlist.css" />
   </head>
   <body>
     <div class="app">
@@ -136,6 +137,93 @@
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
     </aside>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+      <div class="payment-container">
+        <button class="payment-close" id="closePayment">✕</button>
+        <div class="payment-content">
+          <h2>Payment</h2>
+          <div class="payment-summary">
+            <div class="payment-row">
+              <span>Subtotal</span>
+              <span id="paymentSubtotal">$0.00</span>
+            </div>
+            <div class="payment-row">
+              <span>Shipping</span>
+              <span id="paymentShipping">$0.00</span>
+            </div>
+            <div class="payment-row total">
+              <span>Total Amount</span>
+              <span id="paymentTotal">$0.00</span>
+            </div>
+          </div>
+
+          <form class="payment-form" id="paymentForm">
+            <div class="form-section">
+              <h3>Billing Information</h3>
+              <div class="form-row">
+                <input type="text" placeholder="First Name" required />
+                <input type="text" placeholder="Last Name" required />
+              </div>
+              <input type="email" placeholder="Email Address" required />
+              <input type="text" placeholder="Street Address" required />
+              <div class="form-row">
+                <input type="text" placeholder="City" required />
+                <input type="text" placeholder="Postal Code" required />
+              </div>
+              <input type="tel" placeholder="Phone Number" required />
+            </div>
+
+            <div class="form-section">
+              <h3>Payment Method</h3>
+              <div class="payment-methods">
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="card" checked />
+                  <span>Credit/Debit Card</span>
+                </label>
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="paypal" />
+                  <span>PayPal</span>
+                </label>
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="bank" />
+                  <span>Bank Transfer</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-section" id="cardDetails">
+              <h3>Card Details</h3>
+              <input type="text" placeholder="Cardholder Name" required />
+              <input type="text" placeholder="Card Number (16 digits)" maxlength="16" required />
+              <div class="form-row">
+                <input type="text" placeholder="MM/YY" maxlength="5" required />
+                <input type="text" placeholder="CVV" maxlength="3" required />
+              </div>
+            </div>
+
+            <label class="checkbox-label">
+              <input type="checkbox" required />
+              <span>I agree to the terms and conditions</span>
+            </label>
+
+            <button type="submit" class="primary-btn payment-btn">Complete Payment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div class="wishlist-modal" id="wishlistModal">
+      <div class="wishlist-container">
+        <div class="wishlist-header">
+          <h2>My Wishlist</h2>
+          <button class="wishlist-close" id="closeWishlist">✕</button>
+        </div>
+        <div class="wishlist-items" id="wishlistItems"></div>
+      </div>
+    </div>
 
     <div class="toast" id="toast"></div>
 
