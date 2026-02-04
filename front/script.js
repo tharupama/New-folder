@@ -546,6 +546,118 @@ if (bundleDeal) {
   });
 }
 
+// ===== WISHLIST MODAL SYSTEM =====
+function setupWishlistSystem() {
+  console.log("Setting up wishlist system...");
+  
+  const wishlistModal = document.getElementById("wishlistModal");
+  const closeWishlistBtn = document.getElementById("closeWishlist");
+  const wishlistItemsContainer = document.getElementById("wishlistItems");
+  const wishlistBtn = document.getElementById("wishlistBtn");
+  
+  if (!wishlistModal) {
+    console.error("Wishlist modal not found");
+    return false;
+  }
+  
+  // Open wishlist modal
+  function openWishlist() {
+    console.log("Opening wishlist");
+    renderWishlist();
+    wishlistModal.classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+  
+  // Close wishlist modal
+  function closeWishlist() {
+    console.log("Closing wishlist");
+    wishlistModal.classList.remove("show");
+    document.body.style.overflow = "auto";
+  }
+  
+  // Render wishlist items
+  function renderWishlist() {
+    if (!wishlistItemsContainer) return;
+    
+    const wishlistItems = Array.from(state.wishlist);
+    
+    if (wishlistItems.length === 0) {
+      wishlistItemsContainer.innerHTML = `
+        <div class="empty-wishlist">
+          <p>Your wishlist is empty. Start saving your favorites!</p>
+        </div>
+      `;
+      return;
+    }
+    
+    wishlistItemsContainer.innerHTML = wishlistItems
+      .map(id => {
+        const product = products.find(p => p.id == id);
+        if (!product) return "";
+        
+        return `
+          <div class="wishlist-item">
+            <img src="https://via.placeholder.com/100" alt="${product.name}" />
+            <div class="wishlist-item-info">
+              <h4>${product.name}</h4>
+              <p>${product.tag}</p>
+              <div class="wishlist-item-price">${currency.format(product.price)}</div>
+              <div class="wishlist-item-actions">
+                <button class="add-to-cart-btn" data-add-to-cart="${id}">Add to Cart</button>
+                <button class="remove-wishlist-btn" data-remove-wishlist="${id}">Remove</button>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+    
+    // Add event listeners for action buttons
+    wishlistItemsContainer.querySelectorAll("[data-add-to-cart]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = parseInt(e.target.dataset.addToCart);
+        state.cart.set(id, (state.cart.get(id) || 0) + 1);
+        saveCart();
+        updateCounts();
+        renderCart();
+        showToast("Added to cart");
+      });
+    });
+    
+    wishlistItemsContainer.querySelectorAll("[data-remove-wishlist]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = parseInt(e.target.dataset.removeWishlist);
+        state.wishlist.delete(id);
+        saveWishlist();
+        updateCounts();
+        renderWishlist();
+        showToast("Removed from wishlist");
+      });
+    });
+  }
+  
+  // Wishlist button click
+  if (wishlistBtn) {
+    wishlistBtn.addEventListener("click", openWishlist);
+    console.log("Wishlist button listener added");
+  }
+  
+  // Close button click
+  if (closeWishlistBtn) {
+    closeWishlistBtn.addEventListener("click", closeWishlist);
+  }
+  
+  // Close on background click
+  wishlistModal.addEventListener("click", (e) => {
+    if (e.target === wishlistModal) {
+      closeWishlist();
+    }
+  });
+  
+  console.log("Wishlist system setup complete");
+  return true;
+}
+
 // ===== PAYMENT MODAL SYSTEM =====
 function setupPaymentSystem() {
   console.log("Setting up payment system...");
@@ -668,9 +780,13 @@ function setupPaymentSystem() {
 
 // Setup on document ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", setupPaymentSystem);
+  document.addEventListener("DOMContentLoaded", () => {
+    setupPaymentSystem();
+    setupWishlistSystem();
+  });
 } else {
   setupPaymentSystem();
+  setupWishlistSystem();
 }
 
 setTheme(state.theme);
