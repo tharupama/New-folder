@@ -25,6 +25,8 @@ const API_ENDPOINTS = {
   }
 };
 
+const AUTH_REDIRECT_URL = new URL('confirm.html', window.location.href).href;
+
 // Helper function for PHP API calls (non-auth)
 async function phpApiCall(endpoint, method = 'POST', data = null) {
   try {
@@ -136,6 +138,7 @@ async function signupUser(username, email, password, confirmPassword) {
       email,
       password,
       options: {
+        emailRedirectTo: AUTH_REDIRECT_URL,
         data: {
           username: username
         }
@@ -143,8 +146,10 @@ async function signupUser(username, email, password, confirmPassword) {
     });
 
     if (error) {
+      const errorMessage = error.message || '';
+
       // Handle rate limit errors
-      if (error.message?.includes('rate') || error.message?.includes('too many')) {
+      if (errorMessage.includes('rate') || errorMessage.includes('too many')) {
         return {
           success: false,
           status: 429,
@@ -159,7 +164,7 @@ async function signupUser(username, email, password, confirmPassword) {
         success: false,
         status: 400,
         data: {
-          message: error.message || 'Signup failed. Please try again.'
+          message: errorMessage || 'Signup failed. Please try again.'
         }
       };
     }
@@ -314,3 +319,157 @@ window.submitContact = submitContact;
 window.getProducts = getProducts;
 window.getProductReviews = getProductReviews;
 window.addProductReview = addProductReview;
+
+// Floating social share widget (all non-admin pages)
+function shouldShowShareWidget() {
+  const path = window.location.pathname.toLowerCase();
+  return !path.includes('admin');
+}
+
+function injectShareWidgetStyles() {
+  if (document.getElementById('socialShareWidgetStyles')) return;
+
+  const style = document.createElement('style');
+  style.id = 'socialShareWidgetStyles';
+  style.textContent = `
+    .social-share-widget {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1500;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .social-share-list {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .social-share-widget.open .social-share-list {
+      display: flex;
+    }
+
+    .social-share-main,
+    .social-share-item {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .social-share-main {
+      min-height: 52px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      white-space: nowrap;
+    }
+
+    .social-share-item {
+      min-width: 118px;
+      padding: 10px 14px;
+      text-decoration: none;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.2s ease;
+    }
+
+    .social-share-item:hover,
+    .social-share-main:hover {
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 640px) {
+      .social-share-widget {
+        right: 12px;
+        bottom: 12px;
+      }
+
+      .social-share-item {
+        min-width: 104px;
+        padding: 9px 12px;
+        font-size: 0.9rem;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function initShareWidget() {
+  if (!shouldShowShareWidget()) return;
+  if (document.getElementById('socialShareWidget')) return;
+
+  injectShareWidgetStyles();
+
+  const shareUrl = encodeURIComponent(window.location.href);
+  const shareText = encodeURIComponent(`Check this out: ${document.title}`);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'social-share-widget';
+  wrapper.id = 'socialShareWidget';
+
+  wrapper.innerHTML = `
+    <div class="social-share-list" id="socialShareList">
+      <a class="social-share-item" href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener noreferrer">Facebook</a>
+      <a class="social-share-item" href="https://wa.me/?text=${shareText}%20${shareUrl}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a class="social-share-item" href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" rel="noopener noreferrer">X</a>
+      <button class="social-share-item" type="button" id="instagramShareBtn">Instagram</button>
+    </div>
+    <button class="social-share-main" id="socialShareMainBtn" aria-label="Share your experience">Share Experience</button>
+  `;
+
+  document.body.appendChild(wrapper);
+
+  const mainBtn = document.getElementById('socialShareMainBtn');
+  const instagramBtn = document.getElementById('instagramShareBtn');
+
+  if (mainBtn) {
+    mainBtn.addEventListener('click', () => {
+      wrapper.classList.toggle('open');
+    });
+  }
+
+  if (instagramBtn) {
+    instagramBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(window.location.href);
+        }
+      } catch (error) {
+        console.warn('Clipboard copy failed:', error);
+      }
+
+      window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      alert('Website link copied. Paste it in your Instagram post, story, or bio.');
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    if (!wrapper.contains(event.target)) {
+      wrapper.classList.remove('open');
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initShareWidget);
+} else {
+  initShareWidget();
+}

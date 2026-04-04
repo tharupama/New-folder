@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BUY LK — Modern E‑Commerce</title>
+    <title>BUY LK — Food Delivery</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="wishlist.css" />
   </head>
@@ -14,8 +14,8 @@
           <img src="assests/logo.png" alt="BUY LK" class="logo-img">
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
-          </div>fileOutputStream
+            <p>Fresh food delivered fast</p>
+          </div>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
           <span></span>
@@ -50,14 +50,14 @@
 
       <section class="hero">
         <div class="hero-content">
-          <p class="badge">New season drop</p>
-          <h2>Discover smart essentials that elevate your everyday.</h2>
+          <p class="badge">Hot meals, fast delivery</p>
+          <h2>Order comfort food, fresh meals, and quick bites in minutes.</h2>
           <p>
-            Curated collections, lightning-fast delivery, and exclusive member perks.
+            Browse food categories, discover bestsellers, and get your next meal delivered fast.
           </p>
           <div class="hero-actions">
-            <button class="primary-btn" id="shopNow">Shop now</button>
-            <button class="ghost-btn" id="viewCollections">View collections</button>
+            <button class="primary-btn" id="shopNow">Order now</button>
+            <button class="ghost-btn" id="viewCollections">Browse menu</button>
           </div>
           <div class="hero-stats">
             <div>
@@ -66,26 +66,26 @@
             </div>
             <div>
               <strong>120k+</strong>
-              <span>Happy customers</span>
+              <span>Food orders delivered</span>
             </div>
             <div>
-              <strong>2-day</strong>
-              <span>Delivery</span>
+              <strong>Fast</strong>
+              <span>Kitchen-to-door delivery</span>
             </div>
           </div>
         </div>
         <div class="hero-card">
           <div class="hero-card-header">
-            <span>Weekend flash sale</span>
+            <span>Today's delivery deal</span>
             <span class="timer" id="countdown">02:48:19</span>
           </div>
           <div class="hero-card-body">
-            <h3>SmartHome Starter Kit</h3>
-            <p>Save 40% when you bundle 3 devices.</p>
+            <h3>Meal bundle saver</h3>
+            <p>Save more when you order a combo meal with drinks and sides.</p>
             <button class="primary-btn" id="bundleDeal">Get bundle</button>
           </div>
           <div class="hero-card-footer">
-            <span>Limited stock · Ships today</span>
+            <span>Freshly prepared · Delivered today</span>
             <div class="progress">
               <div class="progress-fill" id="stockProgress"></div>
             </div>
@@ -95,16 +95,16 @@
 
       <section class="controls" id="featured">
         <div class="search">
-          <input type="text" id="searchInput" placeholder="Search products" />
+          <input type="text" id="searchInput" placeholder="Search meals or categories" />
           <button class="icon-btn" id="searchClear">✕</button>
         </div>
         <div class="filters">
           <select id="categoryFilter">
             <option value="all">All categories</option>
-            <option value="tech">Tech</option>
-            <option value="home">Home</option>
-            <option value="fashion">Fashion</option>
-            <option value="fitness">Fitness</option>
+            <option value="kottu">Kottu</option>
+            <option value="pizza">Pizza</option>
+            <option value="bakery">Bakery Products</option>
+            <option value="beverages">Beverages</option>
           </select>
           <select id="sortFilter">
             <option value="featured">Sort: Featured</option>
@@ -119,43 +119,43 @@
 
       <section class="split" id="deals">
         <div class="deal-card">
-          <h3>Member-only perks</h3>
-          <p>Unlock early access, hidden drops, and loyalty credits.</p>
-          <button class="ghost-btn">Join free</button>
+          <h3>Fast delivery zones</h3>
+          <p>See which areas qualify for quick drop-offs and low delivery fees.</p>
+          <button class="ghost-btn">Check area</button>
         </div>
         <div class="deal-card highlight">
-          <h3>Eco delivery</h3>
-          <p>Choose carbon-neutral shipping and earn bonus points.</p>
-          <button class="primary-btn">Learn more</button>
+          <h3>Meal deals</h3>
+          <p>Mix mains, sides, and drinks for better value on every order.</p>
+          <button class="primary-btn">View deals</button>
         </div>
         <div class="deal-card">
-          <h3>Gift studio</h3>
-          <p>Wrap it your way with custom notes and premium packaging.</p>
-          <button class="ghost-btn">Build a gift</button>
+          <h3>Fresh prep</h3>
+          <p>Made to order with clear ingredients and easy reorder options.</p>
+          <button class="ghost-btn">See kitchen menu</button>
         </div>
       </section>
 
       <section class="categories" id="categories">
-        <h3>Shop by category</h3>
+        <h3>Browse food categories</h3>
         <div class="category-grid">
-          <button data-category="tech">Smart Tech</button>
-          <button data-category="home">Home Living</button>
-          <button data-category="fashion">Style & Fashion</button>
-          <button data-category="fitness">Fitness & Wellness</button>
+          <button data-category="kottu">Kottu</button>
+          <button data-category="pizza">Pizza</button>
+          <button data-category="bakery">Bakery Products</button>
+          <button data-category="beverages">Beverages</button>
         </div>
       </section>
 
       <section class="about" id="about">
         <div>
-          <h3>Why BUY LK?</h3>
+          <h3>Why BUY LK Food Delivery?</h3>
           <p>
-            We blend design-forward products, dependable delivery, and customer-first support.
-            Every purchase fuels sustainability initiatives and local makers.
+            We focus on fast delivery, simple ordering, and meals that feel worth the wait.
+            Every category is easy to browse, so customers can find what they want quickly.
           </p>
         </div>
         <div class="newsletter">
           <h4>Stay in the loop</h4>
-          <p>Get weekly drops, price alerts, and curated inspiration.</p>
+          <p>Get menu drops, deal alerts, and delivery updates.</p>
           <form id="newsletterForm">
             <input type="email" id="newsletterEmail" placeholder="Email address" required />
             <button class="primary-btn" type="submit">Notify me</button>
@@ -165,7 +165,7 @@
       </section>
 
       <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers. (GROUP NO-10 E‑Commerce PROJECT)</p>
+        <p>© 2026 BUY LK. Crafted for fast food delivery. (GROUP NO-10 E‑Commerce PROJECT)</p>
         <div class="footer-links">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
@@ -176,22 +176,22 @@
 
     <aside class="cart-drawer" id="cartDrawer">
       <div class="cart-header">
-        <h3>Your cart</h3>
+          <h3>Your order</h3>
         <button class="icon-btn" id="closeCart">✕</button>
       </div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-summary">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotal">$0.00</span>
+          <span id="cartSubtotal">Rs 0.00</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span id="cartShipping">$0.00</span>
+          <span id="cartShipping">Rs 0.00</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span id="cartTotal">$0.00</span>
+          <span id="cartTotal">Rs 0.00</span>
         </div>
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
@@ -206,15 +206,15 @@
           <div class="payment-summary">
             <div class="payment-row">
               <span>Subtotal</span>
-              <span id="paymentSubtotal">$0.00</span>
+              <span id="paymentSubtotal">Rs 0.00</span>
             </div>
             <div class="payment-row">
               <span>Shipping</span>
-              <span id="paymentShipping">$0.00</span>
+              <span id="paymentShipping">Rs 0.00</span>
             </div>
             <div class="payment-row total">
               <span>Total Amount</span>
-              <span id="paymentTotal">$0.00</span>
+              <span id="paymentTotal">Rs 0.00</span>
             </div>
           </div>
 

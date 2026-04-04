@@ -49,10 +49,29 @@
         padding: 12px 14px;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: transparent;
+        background: var(--surface);
         color: var(--text);
         font-size: 1rem;
         transition: border 0.2s ease;
+      }
+
+      .form-group select option {
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      .form-group select option[value=""] {
+        color: var(--muted);
+      }
+
+      [data-theme="dark"] .form-group select {
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      [data-theme="dark"] .form-group select option {
+        background: var(--surface);
+        color: var(--text);
       }
 
       .form-group input:focus,
@@ -575,7 +594,7 @@
           <span class="logo">BL</span>
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
+            <p>Fresh food delivered fast</p>
           </div>
         </div>
         <nav class="nav">
@@ -583,6 +602,9 @@
           <a href="admin.html">Admin</a>
           <a href="#" id="logoutLink" style="color: #ef4444;">Logout</a>
         </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+        </div>
       </header>
 
       <div class="admin-container">
@@ -621,15 +643,15 @@
               <label for="category">Category *</label>
               <select id="category" name="category" required>
                 <option value="">Select category</option>
-                <option value="tech">Tech</option>
-                <option value="home">Home</option>
-                <option value="fitness">Fitness</option>
-                <option value="fashion">Fashion</option>
+                <option value="kottu">Kottu</option>
+                <option value="pizza">Pizza</option>
+                <option value="bakery">Bakery Products</option>
+                <option value="beverages">Beverages</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="price">Price ($) *</label>
+              <label for="price">Price (Rs) *</label>
               <input
                 type="number"
                 id="price"
@@ -643,20 +665,6 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group">
-              <label for="rating">Rating (0-5)</label>
-              <input
-                type="number"
-                id="rating"
-                name="rating"
-                placeholder="4.5"
-                min="0"
-                max="5"
-                step="0.1"
-                value="4.5"
-              />
-            </div>
-
             <div class="form-group">
               <label for="tag">Tag</label>
               <input
@@ -741,7 +749,7 @@
       </div>
 
       <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <p>© 2026 BUY LK. Crafted for fast food delivery.</p>
         <div class="footer-links">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
@@ -766,20 +774,16 @@
             <label for="editCategory">Category</label>
             <select id="editCategory" required>
               <option value="">Select category</option>
-              <option value="tech">Tech</option>
-              <option value="home">Home</option>
-              <option value="fashion">Fashion</option>
-              <option value="fitness">Fitness</option>
+              <option value="kottu">Kottu</option>
+              <option value="pizza">Pizza</option>
+              <option value="bakery">Bakery Products</option>
+              <option value="beverages">Beverages</option>
             </select>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="editPrice">Price</label>
               <input type="number" id="editPrice" step="0.01" min="0" required />
-            </div>
-            <div class="form-group">
-              <label for="editRating">Rating</label>
-              <input type="number" id="editRating" step="0.1" min="0" max="5" />
             </div>
           </div>
           <div class="form-group">
@@ -897,7 +901,7 @@
               ${product.image ? `<img src="${product.image}" alt="${product.name}" />` : '<div style="width: 100%; height: 150px; background: var(--border); border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; color: var(--muted);">No image</div>'}
               <h4>${product.name}</h4>
               <p><strong>Category:</strong> ${product.category}</p>
-              <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
+              <p class="product-price">Rs ${parseFloat(product.price).toFixed(2)}</p>
               <p><strong>Rating:</strong> ★ ${product.rating}</p>
               <p><strong>Stock:</strong> ${product.stock}</p>
               ${product.tag ? `<p><strong>Tag:</strong> ${product.tag}</p>` : ""}
@@ -1000,7 +1004,6 @@
         document.getElementById('editProductName').value = product.name;
         document.getElementById('editCategory').value = product.category;
         document.getElementById('editPrice').value = parseFloat(product.price);
-        document.getElementById('editRating').value = parseFloat(product.rating);
         document.getElementById('editDescription').value = product.description || '';
         document.getElementById('editTag').value = product.tag || '';
         document.getElementById('editStock').value = product.stock;
@@ -1070,7 +1073,6 @@
           name: document.getElementById('editProductName').value.trim(),
           category: document.getElementById('editCategory').value.trim(),
           price: parseFloat(document.getElementById('editPrice').value),
-          rating: parseFloat(document.getElementById('editRating').value) || 4.5,
           description: document.getElementById('editDescription').value.trim(),
           tag: document.getElementById('editTag').value.trim(),
           stock: parseInt(document.getElementById('editStock').value) || 50,
@@ -1122,7 +1124,6 @@
         const productName = document.getElementById("productName").value.trim();
         const category = document.getElementById("category").value.trim();
         const price = parseFloat(document.getElementById("price").value);
-        const rating = parseFloat(document.getElementById("rating").value) || 4.5;
         const tag = document.getElementById("tag").value.trim();
         const stock = parseInt(document.getElementById("stock").value) || 50;
         const description = document.getElementById("description").value.trim();
@@ -1159,7 +1160,6 @@
                 name: productName,
                 category,
                 price,
-                rating,
                 tag,
                 stock,
                 description,
@@ -1175,7 +1175,6 @@
             successMsg.classList.add("show");
             showToast("Product added!");
             productForm.reset();
-            document.getElementById("rating").value = "4.5";
             document.getElementById("stock").value = "50";
             loadProducts();
           } else {
@@ -1336,9 +1335,26 @@
         renderMessages(allMessages);
       });
 
-      // Set theme
-      const theme = localStorage.getItem("theme") || "light";
-      document.documentElement.dataset.theme = theme;
+      // Theme toggle for admin panel
+      const setTheme = (theme) => {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem("theme", theme);
+        const themeToggle = document.getElementById("themeToggle");
+        if (themeToggle) {
+          themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
+        }
+      };
+
+      const initialTheme = localStorage.getItem("theme") || "light";
+      setTheme(initialTheme);
+
+      const themeToggle = document.getElementById("themeToggle");
+      if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+          const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+          setTheme(nextTheme);
+        });
+      }
     </script>
   </body>
 </html>

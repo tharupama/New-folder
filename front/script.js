@@ -90,11 +90,11 @@ const countdown = document.getElementById("countdown");
 const stockProgress = document.getElementById("stockProgress");
 const newsletterForm = document.getElementById("newsletterForm");
 const newsletterMsg = document.getElementById("newsletterMsg");
+const WEB3FORMS_ACCESS_KEY = "986142cb-9e5c-4750-a459-2a2cfea13252";
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+const currency = {
+  format: (value) => `Rs ${Number(value).toFixed(2)}`,
+};
 
 const showToast = (message) => {
   if (!toast) return;
@@ -464,20 +464,45 @@ if (contactForm) {
     submitBtn.disabled = true;
 
     try {
-      if (typeof submitContact !== "undefined") {
-        const response = await submitContact(name, email, subject, message);
-        
-        if (response.success) {
-          if (contactMsg) {
-            contactMsg.textContent = "Thank you! Your message has been sent successfully.";
-            contactMsg.style.color = "#10b981";
+      const web3formsPayload = {
+        access_key: WEB3FORMS_ACCESS_KEY,
+        name,
+        email,
+        subject,
+        message,
+      };
+
+      const web3formsResponse = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(web3formsPayload),
+      });
+
+      const web3formsResult = await web3formsResponse.json();
+
+      if (web3formsResult.success) {
+        // Keep existing backend contact storage as a non-blocking secondary action.
+        if (typeof submitContact !== "undefined") {
+          try {
+            await submitContact(name, email, subject, message);
+          } catch (storeError) {
+            console.warn("Contact saved email sent, but backend save failed:", storeError);
           }
-          contactForm.reset();
-        } else {
-          if (contactMsg) {
-            contactMsg.textContent = response.data.message || "Failed to send message. Please try again.";
-            contactMsg.style.color = "#ef4444";
-          }
+        }
+
+        if (contactMsg) {
+          contactMsg.textContent = "Message sent successfully!";
+          contactMsg.style.color = "#10b981";
+        }
+        alert("Message sent successfully!");
+        contactForm.reset();
+      } else {
+        if (contactMsg) {
+          contactMsg.textContent = web3formsResult.message || "Failed to send message. Please try again.";
+          contactMsg.style.color = "#ef4444";
         }
       }
     } catch (error) {
