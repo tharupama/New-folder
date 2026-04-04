@@ -91,6 +91,11 @@ const stockProgress = document.getElementById("stockProgress");
 const newsletterForm = document.getElementById("newsletterForm");
 const newsletterMsg = document.getElementById("newsletterMsg");
 const WEB3FORMS_ACCESS_KEY = "986142cb-9e5c-4750-a459-2a2cfea13252";
+let advertisements = [];
+let currentAdvertisementIndex = 0;
+let advertisementIntervalId = null;
+const AD_ROTATION_MS = 5000;
+const AD_PROGRESS_TICK_MS = 120;
 
 const currency = {
   format: (value) => `Rs ${Number(value).toFixed(2)}`,
@@ -251,12 +256,116 @@ const updateCountdown = () => {
   }
 };
 
-const updateStock = () => {
-  state.stock = Math.max(12, state.stock - Math.floor(Math.random() * 6));
-  if (stockProgress) {
-    stockProgress.style.width = `${state.stock}%`;
+const getFallbackAdvertisements = () => ([
+  {
+    title: "Weekend Family Combo",
+    message: "Order 2 large pizzas and get a free drink combo.",
+    button_text: "Order Now",
+    button_link: "shop.html",
+    footer_text: "Limited-time offer"
+  },
+  {
+    title: "Bakery Fresh Hour",
+    message: "Fresh buns and pastries every evening from 5 PM to 7 PM.",
+    button_text: "Browse Bakery",
+    button_link: "shop.html",
+    footer_text: "Hot and fresh from the oven"
+  },
+  {
+    title: "Late Night Kottu Deal",
+    message: "Enjoy special prices on kottu after 9 PM.",
+    button_text: "View Deal",
+    button_link: "shop.html",
+    footer_text: "Available tonight only"
   }
+]);
+
+const renderAdvertisement = (index) => {
+  const adTitle = document.getElementById("heroAdTitle");
+  const adMessage = document.getElementById("heroAdMessage");
+  const adAction = document.getElementById("heroAdAction");
+  const adFooter = document.getElementById("heroAdFooter");
+  const adCounter = document.getElementById("heroAdCounter");
+
+  if (!adTitle || !adMessage || !adAction || !adFooter || !adCounter || advertisements.length === 0) {
+    return;
+  }
+
+  const currentAd = advertisements[index];
+  adTitle.textContent = currentAd.title || "Featured Advertisement";
+  adMessage.textContent = currentAd.message || "Check out the latest update.";
+  adAction.textContent = currentAd.button_text || "Explore";
+  adFooter.textContent = currentAd.footer_text || "More offers coming soon";
+  adCounter.textContent = `${index + 1}/${advertisements.length}`;
+  adAction.dataset.adLink = currentAd.button_link || "shop.html";
 };
+
+const startAdvertisementRotation = () => {
+  const adAction = document.getElementById("heroAdAction");
+  if (!adAction || advertisements.length === 0) return;
+
+  renderAdvertisement(currentAdvertisementIndex);
+
+  adAction.addEventListener("click", () => {
+    const adLink = adAction.dataset.adLink || "shop.html";
+    if (/^https?:\/\//i.test(adLink)) {
+      window.open(adLink, "_blank", "noopener,noreferrer");
+      return;
+    }
+    window.location.href = adLink;
+  });
+
+  if (advertisementIntervalId) {
+    clearInterval(advertisementIntervalId);
+  }
+
+  const cycleDuration = advertisements.length * AD_ROTATION_MS;
+  const cycleStartTime = Date.now() - currentAdvertisementIndex * AD_ROTATION_MS;
+
+  const syncAdvertisementAndProgress = () => {
+    const elapsed = Date.now() - cycleStartTime;
+    const cycleElapsed = elapsed % cycleDuration;
+
+    const nextIndex = Math.floor(cycleElapsed / AD_ROTATION_MS);
+    if (nextIndex !== currentAdvertisementIndex) {
+      currentAdvertisementIndex = nextIndex;
+      renderAdvertisement(currentAdvertisementIndex);
+    }
+
+    if (stockProgress) {
+      const progressPercent = (cycleElapsed / cycleDuration) * 100;
+      stockProgress.style.width = `${progressPercent.toFixed(2)}%`;
+    }
+  };
+
+  syncAdvertisementAndProgress();
+  advertisementIntervalId = setInterval(syncAdvertisementAndProgress, AD_PROGRESS_TICK_MS);
+};
+
+async function loadAdvertisementsForHero() {
+  const adTitle = document.getElementById("heroAdTitle");
+  if (!adTitle) return;
+
+  try {
+    if (typeof getAdvertisements === "undefined") {
+      advertisements = getFallbackAdvertisements();
+      startAdvertisementRotation();
+      return;
+    }
+
+    const response = await getAdvertisements();
+    if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+      advertisements = response.data;
+    } else {
+      advertisements = getFallbackAdvertisements();
+    }
+  } catch (error) {
+    console.error("Error loading advertisements:", error);
+    advertisements = getFallbackAdvertisements();
+  }
+
+  startAdvertisementRotation();
+}
 
 if (productGrid) {
   productGrid.addEventListener("click", (event) => {
@@ -571,18 +680,6 @@ if (viewCollections) {
   });
 }
 
-const bundleDeal = document.getElementById("bundleDeal");
-if (bundleDeal) {
-  bundleDeal.addEventListener("click", () => {
-    state.cart.set(1, (state.cart.get(1) || 0) + 1);
-    state.cart.set(8, (state.cart.get(8) || 0) + 1);
-    saveCart();
-    showToast("Bundle added to cart");
-    updateCounts();
-    renderCart();
-  });
-}
-
 // ===== WISHLIST MODAL SYSTEM =====
 function setupWishlistSystem() {
   console.log("Setting up wishlist system...");
@@ -828,12 +925,11 @@ if (document.readyState === "loading") {
 
 setTheme(state.theme);
 loadProducts(); // Load products from database (includes renderCart)
+loadAdvertisementsForHero();
 updateCounts();
 updateCountdown();
-updateStock();
 
 setInterval(updateCountdown, 1000);
-setInterval(updateStock, 4000);
 
 // Authentication UI update
 const updateAuthUI = () => {

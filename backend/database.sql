@@ -73,6 +73,20 @@ CREATE TABLE IF NOT EXISTS product_reviews (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- Advertisements table
+CREATE TABLE IF NOT EXISTS advertisements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    button_text VARCHAR(80) DEFAULT 'Learn More',
+    button_link VARCHAR(500) DEFAULT '',
+    footer_text VARCHAR(150) DEFAULT '',
+    sort_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Sample products
 INSERT INTO products (name, category, price, rating, tag, image, description, stock) VALUES
 ('Aurora Smart Speaker', 'tech', 129.99, 4.7, 'Bestseller', 'https://images.unsplash.com/photo-1512446816042-444d641267d4?auto=format&fit=crop&w=800&q=80', 'Premium wireless speaker with superior sound quality', 72),

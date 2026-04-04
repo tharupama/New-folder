@@ -284,6 +284,57 @@
         gap: 16px;
       }
 
+      .ads-list {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+      }
+
+      .ads-list h3 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+      }
+
+      .ads-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      }
+
+      .ad-card {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .ad-card h4 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .ad-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .ad-status {
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .ad-status.active {
+        color: #10b981;
+      }
+
+      .ad-status.inactive {
+        color: #ef4444;
+      }
+
       .message-card {
         padding: 20px;
         border: 1px solid var(--border);
@@ -618,6 +669,7 @@
         <!-- Tabs -->
         <div class="tabs">
           <button class="tab active" data-tab="products">Products</button>
+          <button class="tab" data-tab="ads">Advertisements</button>
           <button class="tab" data-tab="messages">Contact Messages</button>
         </div>
 
@@ -726,6 +778,64 @@
         </div>
         </div>
         <!-- End Products Tab -->
+
+        <!-- Advertisements Tab -->
+        <div class="tab-content" id="ads-tab">
+          <div id="adErrorMsg" class="error-message"></div>
+          <div id="adSuccessMsg" class="success-message"></div>
+
+          <form class="admin-form" id="adForm">
+            <input type="hidden" id="adId" value="" />
+
+            <div class="form-group">
+              <label for="adTitle">Advertisement Title *</label>
+              <input type="text" id="adTitle" placeholder="e.g., Family Dinner Offer" required />
+            </div>
+
+            <div class="form-group">
+              <label for="adMessage">Message *</label>
+              <textarea id="adMessage" placeholder="Describe the advertisement" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="adButtonText">Button Text</label>
+                <input type="text" id="adButtonText" placeholder="e.g., Order Now" value="Learn More" />
+              </div>
+              <div class="form-group">
+                <label for="adButtonLink">Button Link</label>
+                <input type="text" id="adButtonLink" placeholder="shop.html or https://..." value="shop.html" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="adFooterText">Footer Text</label>
+                <input type="text" id="adFooterText" placeholder="e.g., Limited-time offer" />
+              </div>
+              <div class="form-group">
+                <label for="adSortOrder">Sort Order</label>
+                <input type="number" id="adSortOrder" min="0" value="0" />
+              </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="adIsActive" checked style="width: 18px; height: 18px;" />
+              <label for="adIsActive" style="margin: 0;">Active</label>
+            </div>
+
+            <button type="submit" class="primary-btn" id="adSubmitBtn">Add Advertisement</button>
+            <button type="button" class="ghost-btn" id="adCancelEditBtn" style="display: none;">Cancel Edit</button>
+          </form>
+
+          <div class="ads-list">
+            <h3>Current Advertisements</h3>
+            <div class="ads-grid" id="adsGrid">
+              <p>Loading advertisements...</p>
+            </div>
+          </div>
+        </div>
+        <!-- End Advertisements Tab -->
 
         <!-- Messages Tab -->
         <div class="tab-content" id="messages-tab">
@@ -853,6 +963,10 @@
           if (tabName === 'messages') {
             loadMessages();
           }
+
+          if (tabName === 'ads') {
+            loadAdvertisementsAdmin();
+          }
         });
       });
 
@@ -865,8 +979,15 @@
       const messagesList = document.getElementById("messagesList");
       const searchMessagesInput = document.getElementById("searchMessages");
       const clearMessagesSearchBtn = document.getElementById("clearMessagesSearch");
+      const adForm = document.getElementById("adForm");
+      const adsGrid = document.getElementById("adsGrid");
+      const adErrorMsg = document.getElementById("adErrorMsg");
+      const adSuccessMsg = document.getElementById("adSuccessMsg");
+      const adSubmitBtn = document.getElementById("adSubmitBtn");
+      const adCancelEditBtn = document.getElementById("adCancelEditBtn");
       let allProducts = [];
       let allMessages = [];
+      let allAdvertisements = [];
 
       const showToast = (message) => {
         const toast = document.getElementById("toast");
@@ -1190,6 +1311,187 @@
           submitBtn.disabled = false;
         }
       });
+
+      const resetAdForm = () => {
+        document.getElementById("adId").value = "";
+        document.getElementById("adTitle").value = "";
+        document.getElementById("adMessage").value = "";
+        document.getElementById("adButtonText").value = "Learn More";
+        document.getElementById("adButtonLink").value = "shop.html";
+        document.getElementById("adFooterText").value = "";
+        document.getElementById("adSortOrder").value = "0";
+        document.getElementById("adIsActive").checked = true;
+        adSubmitBtn.textContent = "Add Advertisement";
+        adCancelEditBtn.style.display = "none";
+      };
+
+      const fillAdForm = (ad) => {
+        document.getElementById("adId").value = ad.id;
+        document.getElementById("adTitle").value = ad.title || "";
+        document.getElementById("adMessage").value = ad.message || "";
+        document.getElementById("adButtonText").value = ad.button_text || "Learn More";
+        document.getElementById("adButtonLink").value = ad.button_link || "shop.html";
+        document.getElementById("adFooterText").value = ad.footer_text || "";
+        document.getElementById("adSortOrder").value = Number(ad.sort_order || 0);
+        document.getElementById("adIsActive").checked = Number(ad.is_active) === 1;
+        adSubmitBtn.textContent = "Update Advertisement";
+        adCancelEditBtn.style.display = "inline-flex";
+      };
+
+      const renderAdvertisementsAdmin = (adsToRender) => {
+        if (!adsToRender || adsToRender.length === 0) {
+          adsGrid.innerHTML = '<p>No advertisements yet. Add your first one!</p>';
+          return;
+        }
+
+        adsGrid.innerHTML = adsToRender.map((ad) => `
+          <div class="ad-card">
+            <h4>${ad.title}</h4>
+            <p>${ad.message}</p>
+            <p><strong>Button:</strong> ${ad.button_text || 'Learn More'}</p>
+            <p><strong>Link:</strong> ${ad.button_link || 'shop.html'}</p>
+            <p><strong>Footer:</strong> ${ad.footer_text || 'N/A'}</p>
+            <p><strong>Sort Order:</strong> ${ad.sort_order || 0}</p>
+            <span class="ad-status ${Number(ad.is_active) === 1 ? 'active' : 'inactive'}">
+              ${Number(ad.is_active) === 1 ? 'Active' : 'Inactive'}
+            </span>
+            <div class="product-actions-admin">
+              <button class="edit-btn" data-edit-ad-id="${ad.id}">Edit</button>
+              <button class="delete-btn" data-delete-ad-id="${ad.id}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('[data-edit-ad-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const ad = allAdvertisements.find(item => Number(item.id) === Number(btn.dataset.editAdId));
+            if (ad) {
+              fillAdForm(ad);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        });
+
+        document.querySelectorAll('[data-delete-ad-id]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this advertisement?')) {
+              await deleteAdvertisementAdmin(Number(btn.dataset.deleteAdId));
+            }
+          });
+        });
+      };
+
+      const loadAdvertisementsAdmin = async () => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          if (typeof getAdvertisements === "undefined") {
+            adsGrid.innerHTML = '<p>Advertisements API unavailable.</p>';
+            return;
+          }
+
+          const response = await getAdvertisements(adminSession.token);
+          if (response.success && Array.isArray(response.data)) {
+            allAdvertisements = response.data;
+            renderAdvertisementsAdmin(allAdvertisements);
+          } else {
+            adsGrid.innerHTML = '<p>Failed to load advertisements.</p>';
+          }
+        } catch (error) {
+          console.error("Error loading advertisements:", error);
+          adsGrid.innerHTML = '<p>Error loading advertisements.</p>';
+        }
+      };
+
+      const deleteAdvertisementAdmin = async (advertisementId) => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          const response = await deleteAdvertisement(advertisementId, adminSession.token);
+          if (response.success) {
+            showToast("Advertisement deleted successfully");
+            loadAdvertisementsAdmin();
+          } else {
+            showToast(response.data.message || "Failed to delete advertisement");
+          }
+        } catch (error) {
+          console.error("Error deleting advertisement:", error);
+          showToast("Error deleting advertisement");
+        }
+      };
+
+      adForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const adminSession = getAdminSession();
+        if (!adminSession) {
+          adErrorMsg.textContent = "Admin session expired. Please login again.";
+          adErrorMsg.classList.add("show");
+          return;
+        }
+
+        const adId = Number(document.getElementById("adId").value || 0);
+        const payload = {
+          adminToken: adminSession.token,
+          title: document.getElementById("adTitle").value.trim(),
+          message: document.getElementById("adMessage").value.trim(),
+          button_text: document.getElementById("adButtonText").value.trim() || "Learn More",
+          button_link: document.getElementById("adButtonLink").value.trim() || "shop.html",
+          footer_text: document.getElementById("adFooterText").value.trim(),
+          sort_order: Number(document.getElementById("adSortOrder").value || 0),
+          is_active: document.getElementById("adIsActive").checked ? 1 : 0,
+        };
+
+        if (!payload.title || !payload.message) {
+          adErrorMsg.textContent = "Advertisement title and message are required";
+          adErrorMsg.classList.add("show");
+          return;
+        }
+
+        adErrorMsg.classList.remove("show");
+        adSuccessMsg.classList.remove("show");
+
+        const originalText = adSubmitBtn.textContent;
+        adSubmitBtn.textContent = adId ? "Updating..." : "Adding...";
+        adSubmitBtn.disabled = true;
+
+        try {
+          const response = adId
+            ? await updateAdvertisement({ ...payload, id: adId })
+            : await createAdvertisement(payload);
+
+          if (response.success) {
+            adSuccessMsg.textContent = adId ? "Advertisement updated successfully" : "Advertisement added successfully";
+            adSuccessMsg.classList.add("show");
+            showToast(adId ? "Advertisement updated" : "Advertisement added");
+            resetAdForm();
+            loadAdvertisementsAdmin();
+          } else {
+            adErrorMsg.textContent = response.data.message || "Failed to save advertisement";
+            adErrorMsg.classList.add("show");
+          }
+        } catch (error) {
+          console.error("Advertisement save error:", error);
+          adErrorMsg.textContent = "An error occurred. Please try again.";
+          adErrorMsg.classList.add("show");
+        } finally {
+          adSubmitBtn.textContent = originalText;
+          adSubmitBtn.disabled = false;
+        }
+      });
+
+      adCancelEditBtn.addEventListener('click', resetAdForm);
+      resetAdForm();
 
       // Load products on page load
       loadProducts();

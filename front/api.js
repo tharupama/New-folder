@@ -19,6 +19,7 @@ const API_BASE_URL = 'http://localhost/New%20folder%20(2)/New-folder/backend';
 const API_ENDPOINTS = {
   contact: `${API_BASE_URL}/contact/submit.php`,
   products: `${API_BASE_URL}/products/list.php`,
+  advertisements: `${API_BASE_URL}/advertisements/list.php`,
   reviews: {
     get: `${API_BASE_URL}/reviews/get.php`,
     add: `${API_BASE_URL}/reviews/add.php`
@@ -284,6 +285,49 @@ async function getProducts() {
   return phpApiCall(API_ENDPOINTS.products, 'GET');
 }
 
+async function getAdvertisements(adminToken = null) {
+  const endpoint = adminToken
+    ? `${API_ENDPOINTS.advertisements}?all=1&adminToken=${encodeURIComponent(adminToken)}`
+    : API_ENDPOINTS.advertisements;
+  const response = await phpApiCall(endpoint, 'GET');
+
+  if (!response.success) {
+    return response;
+  }
+
+  if (Array.isArray(response.data)) {
+    return response;
+  }
+
+  if (response.data && Array.isArray(response.data.data)) {
+    return {
+      ...response,
+      data: response.data.data
+    };
+  }
+
+  return {
+    ...response,
+    success: false,
+    data: []
+  };
+}
+
+async function createAdvertisement(advertisementData) {
+  return phpApiCall(API_ENDPOINTS.advertisements, 'POST', advertisementData);
+}
+
+async function updateAdvertisement(advertisementData) {
+  return phpApiCall(API_ENDPOINTS.advertisements, 'PUT', advertisementData);
+}
+
+async function deleteAdvertisement(advertisementId, adminToken) {
+  return phpApiCall(API_ENDPOINTS.advertisements, 'DELETE', {
+    id: advertisementId,
+    adminToken
+  });
+}
+
 // Get product reviews - unchanged (still uses PHP)
 async function getProductReviews(productId) {
   try {
@@ -317,6 +361,10 @@ window.getCurrentUser = getCurrentUser;
 window.onAuthStateChange = onAuthStateChange;
 window.submitContact = submitContact;
 window.getProducts = getProducts;
+window.getAdvertisements = getAdvertisements;
+window.createAdvertisement = createAdvertisement;
+window.updateAdvertisement = updateAdvertisement;
+window.deleteAdvertisement = deleteAdvertisement;
 window.getProductReviews = getProductReviews;
 window.addProductReview = addProductReview;
 
@@ -439,6 +487,20 @@ function initShareWidget() {
 
   const mainBtn = document.getElementById('socialShareMainBtn');
   const instagramBtn = document.getElementById('instagramShareBtn');
+  const socialShareLinks = wrapper.querySelectorAll('a.social-share-item');
+
+  const copyWebsiteLink = async (showAlert = false) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(window.location.href);
+      }
+      if (showAlert) {
+        alert('Website link copied. Paste it in your post, story, or message.');
+      }
+    } catch (error) {
+      console.warn('Clipboard copy failed:', error);
+    }
+  };
 
   if (mainBtn) {
     mainBtn.addEventListener('click', () => {
@@ -446,18 +508,16 @@ function initShareWidget() {
     });
   }
 
+  socialShareLinks.forEach((linkEl) => {
+    linkEl.addEventListener('click', () => {
+      copyWebsiteLink(true);
+    });
+  });
+
   if (instagramBtn) {
     instagramBtn.addEventListener('click', async () => {
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(window.location.href);
-        }
-      } catch (error) {
-        console.warn('Clipboard copy failed:', error);
-      }
-
+      await copyWebsiteLink(true);
       window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
-      alert('Website link copied. Paste it in your Instagram post, story, or bio.');
     });
   }
 
