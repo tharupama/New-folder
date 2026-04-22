@@ -20,6 +20,9 @@ const API_ENDPOINTS = {
   contact: `${API_BASE_URL}/contact/submit.php`,
   products: `${API_BASE_URL}/products/list.php`,
   advertisements: `${API_BASE_URL}/advertisements/list.php`,
+  payments: {
+    createCheckout: `${API_BASE_URL}/payments/create-checkout.php`
+  },
   reviews: {
     get: `${API_BASE_URL}/reviews/get.php`,
     add: `${API_BASE_URL}/reviews/add.php`

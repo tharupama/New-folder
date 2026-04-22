@@ -108,6 +108,26 @@ const showToast = (message) => {
   setTimeout(() => toast.classList.remove("show"), 2400);
 };
 
+const showStoredPaymentMessage = () => {
+  try {
+    const storedMessage = JSON.parse(localStorage.getItem("buyLkPaymentMessage") || "null");
+    if (!storedMessage || !storedMessage.text) {
+      return;
+    }
+
+    if (storedMessage.expiresAt && Date.now() > storedMessage.expiresAt) {
+      localStorage.removeItem("buyLkPaymentMessage");
+      return;
+    }
+
+    showToast(storedMessage.text);
+    localStorage.removeItem("buyLkPaymentMessage");
+  } catch (error) {
+    console.warn("Unable to show stored payment message:", error);
+    localStorage.removeItem("buyLkPaymentMessage");
+  }
+};
+
 const setTheme = (theme) => {
   document.documentElement.dataset.theme = theme;
   state.theme = theme;
@@ -805,6 +825,10 @@ function setupPaymentSystem() {
     console.error("Payment modal element not found");
     return false;
   }
+
+  if (paymentForm) {
+    paymentForm.setAttribute("novalidate", "novalidate");
+  }
   
   // Open payment modal
   function openPayment() {
@@ -862,49 +886,100 @@ function setupPaymentSystem() {
     }
   });
   
-  // Payment method toggle
-  const cardDetails = document.getElementById("cardDetails");
-  const paymentMethodInputs = document.querySelectorAll('input[name="paymentMethod"]');
-  paymentMethodInputs.forEach(input => {
-    input.addEventListener("change", (e) => {
-      if (cardDetails) {
-        cardDetails.style.display = e.target.value === "card" ? "grid" : "none";
-      }
-    });
-  });
-  
   // Form submission
   if (paymentForm) {
-    paymentForm.addEventListener("submit", (e) => {
+    paymentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       console.log("Payment form submitted");
       
       const submitBtn = paymentForm.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       
-      submitBtn.textContent = "Processing...";
+      submitBtn.textContent = "Redirecting...";
       submitBtn.disabled = true;
       
-      setTimeout(() => {
+      try {
+        const billingInputs = paymentForm.querySelectorAll(
+          'input:not([type="checkbox"]):not([type="submit"])'
+        );
+        const firstName = billingInputs[0]?.value.trim() || "";
+        const lastName = billingInputs[1]?.value.trim() || "";
+        const email = billingInputs[2]?.value.trim() || state.user?.email || "";
+        const streetAddress = billingInputs[3]?.value.trim() || "";
+        const city = billingInputs[4]?.value.trim() || "";
+        const postalCode = billingInputs[5]?.value.trim() || "";
+        const phone = billingInputs[6]?.value.trim() || "";
+
+        const cartItemsForCheckout = [];
+        state.cart.forEach((quantity, productId) => {
+          const product = products.find((item) => item.id == productId);
+          if (!product) {
+            return;
+          }
+
+          cartItemsForCheckout.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity,
+            image: product.image || "",
+          });
+        });
+
+        if (cartItemsForCheckout.length === 0) {
+          throw new Error("Your cart is empty.");
+        }
+
+        const subtotal = cartItemsForCheckout.reduce(
+          (sum, item) => sum + Number(item.price) * Number(item.quantity),
+          0
+        );
+        const shipping = subtotal >= 200 ? 0 : 9.99;
+
+        const checkoutPayload = {
+          cartItems: cartItemsForCheckout,
+          subtotal,
+          shipping,
+          total: subtotal + shipping,
+          email,
+          billingDetails: {
+            firstName,
+            lastName,
+            streetAddress,
+            city,
+            postalCode,
+            phone,
+          },
+        };
+
+        const checkoutEndpoint =
+          (typeof API_ENDPOINTS !== "undefined" &&
+            API_ENDPOINTS.payments &&
+            API_ENDPOINTS.payments.createCheckout) ||
+          "../backend/payments/create-checkout.php";
+
+        const response = await phpApiCall(
+          checkoutEndpoint,
+          "POST",
+          checkoutPayload
+        );
+
+        if (!response.success || !response.data?.success) {
+          throw new Error(response.data?.message || "Failed to start checkout.");
+        }
+
+        const checkoutUrl = response.data.sessionUrl;
+        if (!checkoutUrl) {
+          throw new Error("Stripe checkout URL was not returned.");
+        }
+
+        window.location.href = checkoutUrl;
+      } catch (error) {
+        console.error("Payment error:", error);
+        showToast(error.message || "Payment setup failed");
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
-        
-        // Clear cart
-        state.cart.clear();
-        saveCart();
-        updateCounts();
-        renderCart();
-        closePayment();
-        
-        // Close cart drawer if open
-        const cartDrawerEl = document.getElementById("cartDrawer");
-        if (cartDrawerEl && cartDrawerEl.classList.contains("open")) {
-          cartDrawerEl.classList.remove("open");
-        }
-        
-        paymentForm.reset();
-        showToast("✓ Payment successful! Thank you for your purchase.");
-      }, 2000);
+      }
     });
   }
   
@@ -928,6 +1003,7 @@ loadProducts(); // Load products from database (includes renderCart)
 loadAdvertisementsForHero();
 updateCounts();
 updateCountdown();
+showStoredPaymentMessage();
 
 setInterval(updateCountdown, 1000);
 

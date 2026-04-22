@@ -235,31 +235,10 @@
             </div>
 
             <div class="form-section">
-              <h3>Payment Method</h3>
-              <div class="payment-methods">
-                <label class="payment-method">
-                  <input type="radio" name="paymentMethod" value="card" checked />
-                  <span>Credit/Debit Card</span>
-                </label>
-                <label class="payment-method">
-                  <input type="radio" name="paymentMethod" value="paypal" />
-                  <span>PayPal</span>
-                </label>
-                <label class="payment-method">
-                  <input type="radio" name="paymentMethod" value="bank" />
-                  <span>Bank Transfer</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-section" id="cardDetails">
-              <h3>Card Details</h3>
-              <input type="text" placeholder="Cardholder Name" required />
-              <input type="text" placeholder="Card Number (16 digits)" maxlength="16" required />
-              <div class="form-row">
-                <input type="text" placeholder="MM/YY" maxlength="5" required />
-                <input type="text" placeholder="CVV" maxlength="3" required />
-              </div>
+              <h3>Secure Stripe Checkout</h3>
+              <p style="color: var(--muted); margin: 0; line-height: 1.6;">
+                Your card details and payment method are entered on Stripe's secure page after you continue.
+              </p>
             </div>
 
             <label class="checkbox-label">
