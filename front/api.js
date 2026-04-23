@@ -385,12 +385,12 @@ function injectShareWidgetStyles() {
   style.textContent = `
     .social-share-widget {
       position: fixed;
-      right: 18px;
+      left: 18px;
       bottom: 18px;
       z-index: 1500;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 10px;
     }
 
@@ -398,7 +398,7 @@ function injectShareWidgetStyles() {
       display: none;
       flex-direction: column;
       gap: 8px;
-      align-items: flex-end;
+      align-items: flex-start;
     }
 
     .social-share-widget.open .social-share-list {
@@ -449,7 +449,7 @@ function injectShareWidgetStyles() {
 
     @media (max-width: 640px) {
       .social-share-widget {
-        right: 12px;
+        left: 12px;
         bottom: 12px;
       }
 
