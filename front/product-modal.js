@@ -243,20 +243,25 @@ function initializeProductModal() {
   // Add to wishlist from modal
   if (wishlistBtn) {
     wishlistBtn.addEventListener("click", () => {
-      if (currentProductId) {
-        if (state.wishlist.has(currentProductId)) {
-          state.wishlist.delete(currentProductId);
+      const normalizedId = Number(currentProductId);
+
+      if (!Number.isInteger(normalizedId) || normalizedId <= 0) {
+        showToast("This product cannot be added to wishlist");
+        return;
+      }
+
+      if (state.wishlist.has(normalizedId)) {
+          state.wishlist.delete(normalizedId);
           showToast("Removed from wishlist");
           wishlistBtn.textContent = "❤️ Wishlist";
         } else {
-          state.wishlist.add(currentProductId);
+          state.wishlist.add(normalizedId);
           showToast("Added to wishlist");
           wishlistBtn.textContent = "❤️ In Wishlist";
         }
         saveWishlist();
         updateCounts();
         applyFilters();
-      }
     });
   }
   

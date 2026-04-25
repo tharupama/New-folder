@@ -274,6 +274,41 @@
         border-top: 1px solid var(--border);
       }
 
+      .orders-section {
+        margin-top: 32px;
+      }
+
+      .orders-list-admin {
+        display: grid;
+        gap: 12px;
+      }
+
+      .admin-order-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+        padding: 14px;
+      }
+
+      .admin-order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .admin-order-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .admin-order-actions select {
+        min-width: 140px;
+      }
+
       .messages-section h3 {
         font-size: 1.5rem;
         margin-bottom: 16px;
@@ -669,6 +704,7 @@
         <!-- Tabs -->
         <div class="tabs">
           <button class="tab active" data-tab="products">Products</button>
+          <button class="tab" data-tab="orders">Orders</button>
           <button class="tab" data-tab="ads">Advertisements</button>
           <button class="tab" data-tab="messages">Contact Messages</button>
         </div>
@@ -778,6 +814,17 @@
         </div>
         </div>
         <!-- End Products Tab -->
+
+        <!-- Orders Tab -->
+        <div class="tab-content" id="orders-tab">
+          <div class="orders-section">
+            <h3>Customer Orders</h3>
+            <div class="orders-list-admin" id="ordersListAdmin">
+              <p>Loading orders...</p>
+            </div>
+          </div>
+        </div>
+        <!-- End Orders Tab -->
 
         <!-- Advertisements Tab -->
         <div class="tab-content" id="ads-tab">
@@ -964,6 +1011,10 @@
             loadMessages();
           }
 
+          if (tabName === 'orders') {
+            loadAdminOrders();
+          }
+
           if (tabName === 'ads') {
             loadAdvertisementsAdmin();
           }
@@ -979,6 +1030,7 @@
       const messagesList = document.getElementById("messagesList");
       const searchMessagesInput = document.getElementById("searchMessages");
       const clearMessagesSearchBtn = document.getElementById("clearMessagesSearch");
+      const ordersListAdmin = document.getElementById("ordersListAdmin");
       const adForm = document.getElementById("adForm");
       const adsGrid = document.getElementById("adsGrid");
       const adErrorMsg = document.getElementById("adErrorMsg");
@@ -987,7 +1039,119 @@
       const adCancelEditBtn = document.getElementById("adCancelEditBtn");
       let allProducts = [];
       let allMessages = [];
+      let allOrders = [];
       let allAdvertisements = [];
+
+      const getStatusClass = (status) => {
+        const normalized = String(status || 'pending').toLowerCase();
+        if (normalized === 'delivered') return 'status-delivered';
+        if (normalized === 'cancelled') return 'status-cancelled';
+        if (normalized === 'shipped') return 'status-shipped';
+        if (normalized === 'processing') return 'status-processing';
+        return 'status-pending';
+      };
+
+      const renderAdminOrders = (ordersToRender) => {
+        if (!ordersListAdmin) return;
+
+        if (!ordersToRender || ordersToRender.length === 0) {
+          ordersListAdmin.innerHTML = '<p>No orders found.</p>';
+          return;
+        }
+
+        ordersListAdmin.innerHTML = ordersToRender.map((order) => {
+          const status = String(order.status || 'pending').toLowerCase();
+          const createdAt = order.created_at
+            ? new Date(order.created_at).toLocaleString()
+            : '-';
+
+          return `
+            <article class="admin-order-card">
+              <div class="admin-order-header">
+                <h4>Order #${order.id}</h4>
+                <span class="order-status-badge ${getStatusClass(status)}">${status}</span>
+              </div>
+              <p><strong>Customer:</strong> ${order.customer_name || order.user_email || 'Customer'}</p>
+              <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
+              <p><strong>Total:</strong> Rs ${Number(order.total_amount || 0).toFixed(2)}</p>
+              <p><strong>Created:</strong> ${createdAt}</p>
+              <div class="admin-order-actions">
+                <select data-order-status="${order.id}">
+                  <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
+                  <option value="processing" ${status === 'processing' ? 'selected' : ''}>Processing</option>
+                  <option value="shipped" ${status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                  <option value="delivered" ${status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                  <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                </select>
+                <button class="primary-btn" data-save-order-status="${order.id}">Update</button>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        document.querySelectorAll('[data-save-order-status]').forEach((button) => {
+          button.addEventListener('click', async () => {
+            const orderId = Number(button.dataset.saveOrderStatus);
+            const select = document.querySelector(`[data-order-status="${orderId}"]`);
+            if (!select) return;
+            await updateAdminOrderStatus(orderId, select.value);
+          });
+        });
+      };
+
+      const loadAdminOrders = async () => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          if (typeof getOrders === 'undefined') {
+            ordersListAdmin.innerHTML = '<p>Orders API unavailable.</p>';
+            return;
+          }
+
+          const response = await getOrders({}, adminSession.token);
+          if (response.success && Array.isArray(response.data)) {
+            allOrders = response.data;
+            renderAdminOrders(allOrders);
+          } else {
+            ordersListAdmin.innerHTML = `<p>${response.data?.message || 'Failed to load orders.'}</p>`;
+          }
+        } catch (error) {
+          console.error('Error loading orders:', error);
+          ordersListAdmin.innerHTML = '<p>Error loading orders.</p>';
+        }
+      };
+
+      const updateAdminOrderStatus = async (orderId, status) => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          if (typeof updateOrderStatus === 'undefined') {
+            showToast('Orders API unavailable');
+            return;
+          }
+
+          const response = await updateOrderStatus(orderId, status, adminSession.token);
+          if (response.success && response.data?.success) {
+            showToast(`Order #${orderId} status updated to ${status}`);
+            loadAdminOrders();
+          } else {
+            showToast(response.data?.message || 'Failed to update order status');
+          }
+        } catch (error) {
+          console.error('Error updating order status:', error);
+          showToast('Error updating order status');
+        }
+      };
 
       const showToast = (message) => {
         const toast = document.getElementById("toast");

@@ -20,6 +20,7 @@ const API_ENDPOINTS = {
   contact: `${API_BASE_URL}/contact/submit.php`,
   products: `${API_BASE_URL}/products/list.php`,
   advertisements: `${API_BASE_URL}/advertisements/list.php`,
+  orders: `${API_BASE_URL}/orders/list.php`,
   payments: {
     createCheckout: `${API_BASE_URL}/payments/create-checkout.php`
   },
@@ -331,6 +332,60 @@ async function deleteAdvertisement(advertisementId, adminToken) {
   });
 }
 
+async function getOrders(filters = {}, adminToken = null) {
+  const queryParams = new URLSearchParams();
+
+  if (adminToken) {
+    queryParams.set('all', '1');
+    queryParams.set('adminToken', adminToken);
+  } else {
+    if (filters.user_id) {
+      queryParams.set('user_id', String(filters.user_id));
+    }
+
+    if (filters.supabase_user_id) {
+      queryParams.set('supabase_user_id', filters.supabase_user_id);
+    }
+
+    if (filters.user_email) {
+      queryParams.set('user_email', filters.user_email);
+    }
+  }
+
+  const endpoint = queryParams.toString()
+    ? `${API_ENDPOINTS.orders}?${queryParams.toString()}`
+    : API_ENDPOINTS.orders;
+
+  const response = await phpApiCall(endpoint, 'GET');
+  if (response.success && response.data && Array.isArray(response.data.data)) {
+    return {
+      ...response,
+      data: response.data.data
+    };
+  }
+
+  if (response.success && Array.isArray(response.data)) {
+    return response;
+  }
+
+  return {
+    ...response,
+    data: []
+  };
+}
+
+async function createOrder(orderData) {
+  return phpApiCall(API_ENDPOINTS.orders, 'POST', orderData);
+}
+
+async function updateOrderStatus(orderId, status, adminToken) {
+  return phpApiCall(API_ENDPOINTS.orders, 'PUT', {
+    id: orderId,
+    status,
+    adminToken
+  });
+}
+
 // Get product reviews - unchanged (still uses PHP)
 async function getProductReviews(productId) {
   try {
@@ -368,6 +423,9 @@ window.getAdvertisements = getAdvertisements;
 window.createAdvertisement = createAdvertisement;
 window.updateAdvertisement = updateAdvertisement;
 window.deleteAdvertisement = deleteAdvertisement;
+window.getOrders = getOrders;
+window.createOrder = createOrder;
+window.updateOrderStatus = updateOrderStatus;
 window.getProductReviews = getProductReviews;
 window.addProductReview = addProductReview;
 

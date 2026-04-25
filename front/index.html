@@ -43,6 +43,7 @@
           </div>
           <div id="userMenu" class="user-menu" style="display: none;">
             <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="myOrdersBtn" class="ghost-btn">My Orders</button>
             <button id="logoutBtn" class="ghost-btn">Logout</button>
           </div>
         </div>
@@ -334,10 +335,22 @@
       </div>
     </div>
 
+    <div class="orders-modal" id="ordersModal">
+      <div class="orders-modal-content">
+        <div class="orders-modal-header">
+          <h3>My Orders</h3>
+          <button class="icon-btn" id="closeOrdersModal">✕</button>
+        </div>
+        <div class="orders-list" id="ordersList">
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
-    <script src="api.js"></script>
-    <script src="script.js"></script>
-    <script src="product-modal.js"></script>
+    <script src="api.js?v=20260425"></script>
+    <script src="script.js?v=20260425"></script>
+    <script src="product-modal.js?v=20260425"></script>
   </body>
 </html>

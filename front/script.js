@@ -2,6 +2,29 @@ console.log("script.js loaded");
 
 const products = [];
 
+const normalizeWishlistIds = (rawWishlist) => {
+  if (!Array.isArray(rawWishlist)) {
+    return [];
+  }
+
+  return rawWishlist
+    .map((item) => Number(item))
+    .filter((id) => Number.isInteger(id) && id > 0);
+};
+
+const isValidWishlistId = (id) => Number.isInteger(Number(id)) && Number(id) > 0;
+
+const sanitizeWishlistState = () => {
+  const sanitizedIds = Array.from(state.wishlist).filter((id) => isValidWishlistId(id));
+
+  if (sanitizedIds.length !== state.wishlist.size) {
+    state.wishlist = new Set(sanitizedIds.map((id) => Number(id)));
+    return true;
+  }
+
+  return false;
+};
+
 // Initialize state with localStorage support
 const initializeState = () => {
   // Load cart from localStorage
@@ -12,9 +35,23 @@ const initializeState = () => {
   const cart = new Map(cartEntries);
   
   // Load wishlist from localStorage
+  let wishlistData = [];
   const savedWishlist = localStorage.getItem("buyLkWishlist");
-  const wishlistData = savedWishlist ? JSON.parse(savedWishlist) : [];
-  const wishlist = new Set(wishlistData);
+
+  if (savedWishlist) {
+    try {
+      wishlistData = JSON.parse(savedWishlist);
+    } catch (error) {
+      console.warn("Invalid wishlist data in localStorage. Resetting wishlist.", error);
+    }
+  }
+
+  const normalizedWishlist = normalizeWishlistIds(wishlistData);
+  const wishlist = new Set(normalizedWishlist);
+
+  if (savedWishlist && JSON.stringify(normalizedWishlist) !== JSON.stringify(wishlistData)) {
+    localStorage.setItem("buyLkWishlist", JSON.stringify(normalizedWishlist));
+  }
   
   return {
     cart: cart,
@@ -38,8 +75,29 @@ const saveCart = () => {
 
 // Save wishlist to localStorage
 const saveWishlist = () => {
-  const wishlistArray = Array.from(state.wishlist);
+  sanitizeWishlistState();
+  const wishlistArray = Array.from(state.wishlist).map((id) => Number(id));
   localStorage.setItem("buyLkWishlist", JSON.stringify(wishlistArray));
+};
+
+const syncWishlistWithProducts = () => {
+  if (!Array.isArray(products) || products.length === 0) {
+    return;
+  }
+
+  const validProductIds = new Set(products.map((product) => Number(product.id)));
+  const originalSize = state.wishlist.size;
+
+  for (const id of Array.from(state.wishlist)) {
+    if (!validProductIds.has(Number(id))) {
+      state.wishlist.delete(id);
+    }
+  }
+
+  if (state.wishlist.size !== originalSize) {
+    sanitizeWishlistState();
+    saveWishlist();
+  }
 };
 
 // Load products from database
@@ -60,8 +118,10 @@ async function loadProducts() {
       console.log("Converted products:", convertedProducts);
       products.push(...convertedProducts); // Add products from database
       console.log("Products array after push:", products);
+      syncWishlistWithProducts();
       applyFilters(); // Render products
       renderCart(); // Re-render cart with loaded products
+      updateCounts();
       console.log("applyFilters called");
     } else {
       console.error("Failed to load products: Invalid response structure");
@@ -90,6 +150,10 @@ const countdown = document.getElementById("countdown");
 const stockProgress = document.getElementById("stockProgress");
 const newsletterForm = document.getElementById("newsletterForm");
 const newsletterMsg = document.getElementById("newsletterMsg");
+const ordersModal = document.getElementById("ordersModal");
+const ordersList = document.getElementById("ordersList");
+const myOrdersBtn = document.getElementById("myOrdersBtn");
+const closeOrdersModalBtn = document.getElementById("closeOrdersModal");
 const WEB3FORMS_ACCESS_KEY = "986142cb-9e5c-4750-a459-2a2cfea13252";
 let advertisements = [];
 let currentAdvertisementIndex = 0;
@@ -136,6 +200,90 @@ const setTheme = (theme) => {
   if (toggle) {
     toggle.textContent = theme === "dark" ? "☀️" : "🌙";
   }
+};
+
+const getOrderStatusClass = (status) => {
+  const normalizedStatus = String(status || "pending").toLowerCase();
+  if (normalizedStatus === "delivered") return "status-delivered";
+  if (normalizedStatus === "cancelled") return "status-cancelled";
+  if (normalizedStatus === "shipped") return "status-shipped";
+  if (normalizedStatus === "processing") return "status-processing";
+  return "status-pending";
+};
+
+const renderOrders = (orders) => {
+  if (!ordersList) return;
+
+  if (!Array.isArray(orders) || orders.length === 0) {
+    ordersList.innerHTML = "<p>You have no orders yet.</p>";
+    return;
+  }
+
+  ordersList.innerHTML = orders
+    .map((order) => {
+      const formattedDate = order.created_at
+        ? new Date(order.created_at).toLocaleString()
+        : "-";
+      const status = String(order.status || "pending").toLowerCase();
+      return `
+        <article class="order-card">
+          <div class="order-card-head">
+            <h4>Order #${order.id}</h4>
+            <span class="order-status-badge ${getOrderStatusClass(status)}">${status}</span>
+          </div>
+          <p><strong>Total:</strong> ${currency.format(order.total_amount || 0)}</p>
+          <p><strong>Placed:</strong> ${formattedDate}</p>
+        </article>
+      `;
+    })
+    .join("");
+};
+
+const loadCustomerOrders = async () => {
+  if (!ordersList) return;
+
+  if (!state.user || !state.user.email) {
+    ordersList.innerHTML = "<p>Please sign in to see your order status.</p>";
+    return;
+  }
+
+  if (typeof getOrders === "undefined") {
+    ordersList.innerHTML = "<p>Orders API unavailable.</p>";
+    return;
+  }
+
+  ordersList.innerHTML = "<p>Loading your orders...</p>";
+
+  try {
+    const response = await getOrders({
+      user_email: state.user.email,
+      supabase_user_id: state.user.id || ""
+    });
+
+    if (!response.success) {
+      ordersList.innerHTML = `<p>${response.data?.message || "Unable to load orders."}</p>`;
+      return;
+    }
+
+    renderOrders(response.data);
+  } catch (error) {
+    console.error("Failed to load customer orders:", error);
+    ordersList.innerHTML = "<p>Error loading orders. Please try again.</p>";
+  }
+};
+
+const openOrdersModal = async () => {
+  if (!ordersModal) return;
+
+  ordersModal.classList.add("show");
+  document.body.style.overflow = "hidden";
+  await loadCustomerOrders();
+};
+
+const closeOrdersModal = () => {
+  if (!ordersModal) return;
+  ordersModal.classList.remove("show");
+  document.body.style.overflow = "auto";
 };
 
 const applyFilters = () => {
@@ -195,6 +343,10 @@ const renderProducts = (items) => {
 };
 
 const updateCounts = () => {
+  if (sanitizeWishlistState()) {
+    saveWishlist();
+  }
+
   if (cartCount) {
     cartCount.textContent = [...state.cart.values()].reduce(
     (sum, qty) => sum + qty,
@@ -396,6 +548,11 @@ if (productGrid) {
     
     // Handle wishlist button click
     if (event.target.dataset.action === "wishlist") {
+      if (!isValidWishlistId(id)) {
+        showToast("This product cannot be added to wishlist");
+        return;
+      }
+
       if (state.wishlist.has(id)) {
         state.wishlist.delete(id);
         showToast("Removed from wishlist");
@@ -733,7 +890,15 @@ function setupWishlistSystem() {
   function renderWishlist() {
     if (!wishlistItemsContainer) return;
     
-    const wishlistItems = Array.from(state.wishlist);
+    const wishlistItems = Array.from(state.wishlist).filter((id) =>
+      isValidWishlistId(id) && products.some((product) => Number(product.id) === Number(id))
+    );
+
+    if (wishlistItems.length !== state.wishlist.size) {
+      state.wishlist = new Set(wishlistItems);
+      saveWishlist();
+      updateCounts();
+    }
     
     if (wishlistItems.length === 0) {
       wishlistItemsContainer.innerHTML = `
@@ -781,6 +946,9 @@ function setupWishlistSystem() {
     wishlistItemsContainer.querySelectorAll("[data-remove-wishlist]").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const id = parseInt(e.target.dataset.removeWishlist);
+        if (!isValidWishlistId(id)) {
+          return;
+        }
         state.wishlist.delete(id);
         saveWishlist();
         updateCounts();
@@ -952,6 +1120,21 @@ function setupPaymentSystem() {
           },
         };
 
+        const userIdNumeric = Number(state.user?.id);
+        const pendingOrderData = {
+          user_id: Number.isFinite(userIdNumeric) && userIdNumeric > 0 ? userIdNumeric : null,
+          supabase_user_id: state.user?.id && !Number.isFinite(userIdNumeric) ? String(state.user.id) : "",
+          user_email: email,
+          total_amount: subtotal + shipping,
+          items: cartItemsForCheckout.map((item) => ({
+            product_id: Number(item.id),
+            quantity: Number(item.quantity),
+            price: Number(item.price)
+          }))
+        };
+
+        localStorage.setItem("buyLkPendingOrder", JSON.stringify(pendingOrderData));
+
         const checkoutEndpoint =
           (typeof API_ENDPOINTS !== "undefined" &&
             API_ENDPOINTS.payments &&
@@ -1012,8 +1195,9 @@ const updateAuthUI = () => {
   const authLinks = document.getElementById("authLinks");
   const userMenu = document.getElementById("userMenu");
   const userBtn = document.getElementById("userBtn");
+  const showCustomerActions = state.user && state.user.loggedIn;
 
-  if (state.user && state.user.loggedIn) {
+  if (showCustomerActions) {
     if (authLinks) authLinks.style.display = "none";
     if (userMenu) userMenu.style.display = "flex";
     if (userBtn) {
@@ -1025,6 +1209,29 @@ const updateAuthUI = () => {
     if (userMenu) userMenu.style.display = "none";
   }
 };
+
+if (myOrdersBtn) {
+  myOrdersBtn.addEventListener("click", () => {
+    if (!state.user || !state.user.loggedIn) {
+      showToast("Please sign in to view your orders");
+      return;
+    }
+
+    openOrdersModal();
+  });
+}
+
+if (closeOrdersModalBtn) {
+  closeOrdersModalBtn.addEventListener("click", closeOrdersModal);
+}
+
+if (ordersModal) {
+  ordersModal.addEventListener("click", (event) => {
+    if (event.target === ordersModal) {
+      closeOrdersModal();
+    }
+  });
+}
 
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
