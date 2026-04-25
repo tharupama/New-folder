@@ -5,8 +5,7 @@ header('Content-Type: application/json');
 
 try {
     // Test database connection
-    $database = new Database();
-    $db = $database->getConnection();
+    $db = getDBConnection();
     
     // Check if product_reviews table exists
     $query = "SHOW TABLES LIKE 'product_reviews'";
