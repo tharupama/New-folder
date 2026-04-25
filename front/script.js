@@ -162,7 +162,7 @@ const AD_ROTATION_MS = 5000;
 const AD_PROGRESS_TICK_MS = 120;
 
 const currency = {
-  format: (value) => `Rs ${Number(value).toFixed(2)}`,
+  format: (value) => `USD ${Number(value).toFixed(2)}`,
 };
 
 const showToast = (message) => {

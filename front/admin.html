@@ -1073,7 +1073,7 @@
               </div>
               <p><strong>Customer:</strong> ${order.customer_name || order.user_email || 'Customer'}</p>
               <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
-              <p><strong>Total:</strong> Rs ${Number(order.total_amount || 0).toFixed(2)}</p>
+              <p><strong>Total:</strong> USD ${Number(order.total_amount || 0).toFixed(2)}</p>
               <p><strong>Created:</strong> ${createdAt}</p>
               <div class="admin-order-actions">
                 <select data-order-status="${order.id}">
@@ -1186,7 +1186,7 @@
               ${product.image ? `<img src="${product.image}" alt="${product.name}" />` : '<div style="width: 100%; height: 150px; background: var(--border); border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; color: var(--muted);">No image</div>'}
               <h4>${product.name}</h4>
               <p><strong>Category:</strong> ${product.category}</p>
-              <p class="product-price">Rs ${parseFloat(product.price).toFixed(2)}</p>
+              <p class="product-price">USD ${parseFloat(product.price).toFixed(2)}</p>
               <p><strong>Rating:</strong> ★ ${product.rating}</p>
               <p><strong>Stock:</strong> ${product.stock}</p>
               ${product.tag ? `<p><strong>Tag:</strong> ${product.tag}</p>` : ""}

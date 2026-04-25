@@ -44,6 +44,84 @@ function requireAdminToken($input = null) {
     return trim($_GET['adminToken'] ?? '');
 }
 
+function loadAdvertisementPayload($input) {
+    return [
+        'id' => intval($input['id'] ?? 0),
+        'title' => trim($input['title'] ?? ''),
+        'message' => trim($input['message'] ?? ''),
+        'button_text' => trim($input['button_text'] ?? 'Learn More'),
+        'button_link' => trim($input['button_link'] ?? ''),
+        'footer_text' => trim($input['footer_text'] ?? ''),
+        'sort_order' => intval($input['sort_order'] ?? 0),
+        'is_active' => isset($input['is_active']) ? (intval($input['is_active']) ? 1 : 0) : 1,
+    ];
+}
+
+function createAdvertisementRecord($pdo, $input) {
+    $payload = loadAdvertisementPayload($input);
+
+    if (empty($payload['title']) || empty($payload['message'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Title and message are required']);
+        return;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO advertisements (title, message, button_text, button_link, footer_text, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $payload['title'],
+        $payload['message'],
+        $payload['button_text'],
+        $payload['button_link'],
+        $payload['footer_text'],
+        $payload['sort_order'],
+        $payload['is_active']
+    ]);
+
+    http_response_code(201);
+    echo json_encode(['success' => true, 'message' => 'Advertisement created successfully']);
+}
+
+function updateAdvertisementRecord($pdo, $input) {
+    $payload = loadAdvertisementPayload($input);
+
+    if (!$payload['id'] || empty($payload['title']) || empty($payload['message'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'ID, title and message are required']);
+        return;
+    }
+
+    $stmt = $pdo->prepare("UPDATE advertisements SET title = ?, message = ?, button_text = ?, button_link = ?, footer_text = ?, sort_order = ?, is_active = ? WHERE id = ?");
+    $stmt->execute([
+        $payload['title'],
+        $payload['message'],
+        $payload['button_text'],
+        $payload['button_link'],
+        $payload['footer_text'],
+        $payload['sort_order'],
+        $payload['is_active'],
+        $payload['id']
+    ]);
+
+    http_response_code(200);
+    echo json_encode(['success' => true, 'message' => 'Advertisement updated successfully']);
+}
+
+function deleteAdvertisementRecord($pdo, $input) {
+    $payload = loadAdvertisementPayload($input);
+
+    if (!$payload['id']) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Advertisement ID is required']);
+        return;
+    }
+
+    $stmt = $pdo->prepare("DELETE FROM advertisements WHERE id = ?");
+    $stmt->execute([$payload['id']]);
+
+    http_response_code(200);
+    echo json_encode(['success' => true, 'message' => 'Advertisement deleted successfully']);
+}
+
 try {
     $pdo = getDBConnection();
     ensureAdvertisementsTable($pdo);
@@ -87,25 +165,25 @@ try {
             exit;
         }
 
-        $title = trim($input['title'] ?? '');
-        $message = trim($input['message'] ?? '');
-        $buttonText = trim($input['button_text'] ?? 'Learn More');
-        $buttonLink = trim($input['button_link'] ?? '');
-        $footerText = trim($input['footer_text'] ?? '');
-        $sortOrder = intval($input['sort_order'] ?? 0);
-        $isActive = isset($input['is_active']) ? (intval($input['is_active']) ? 1 : 0) : 1;
+        $action = trim(strtolower($input['action'] ?? 'create'));
 
-        if (empty($title) || empty($message)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Title and message are required']);
+        if ($action === 'create') {
+            createAdvertisementRecord($pdo, $input);
             exit;
         }
 
-        $stmt = $pdo->prepare("INSERT INTO advertisements (title, message, button_text, button_link, footer_text, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $message, $buttonText, $buttonLink, $footerText, $sortOrder, $isActive]);
+        if ($action === 'update') {
+            updateAdvertisementRecord($pdo, $input);
+            exit;
+        }
 
-        http_response_code(201);
-        echo json_encode(['success' => true, 'message' => 'Advertisement created successfully']);
+        if ($action === 'delete') {
+            deleteAdvertisementRecord($pdo, $input);
+            exit;
+        }
+
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid advertisement action']);
         exit;
     }
 
@@ -119,26 +197,7 @@ try {
             exit;
         }
 
-        $id = intval($input['id'] ?? 0);
-        $title = trim($input['title'] ?? '');
-        $message = trim($input['message'] ?? '');
-        $buttonText = trim($input['button_text'] ?? 'Learn More');
-        $buttonLink = trim($input['button_link'] ?? '');
-        $footerText = trim($input['footer_text'] ?? '');
-        $sortOrder = intval($input['sort_order'] ?? 0);
-        $isActive = isset($input['is_active']) ? (intval($input['is_active']) ? 1 : 0) : 1;
-
-        if (!$id || empty($title) || empty($message)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'ID, title and message are required']);
-            exit;
-        }
-
-        $stmt = $pdo->prepare("UPDATE advertisements SET title = ?, message = ?, button_text = ?, button_link = ?, footer_text = ?, sort_order = ?, is_active = ? WHERE id = ?");
-        $stmt->execute([$title, $message, $buttonText, $buttonLink, $footerText, $sortOrder, $isActive, $id]);
-
-        http_response_code(200);
-        echo json_encode(['success' => true, 'message' => 'Advertisement updated successfully']);
+        updateAdvertisementRecord($pdo, $input);
         exit;
     }
 
@@ -152,18 +211,7 @@ try {
             exit;
         }
 
-        $id = intval($input['id'] ?? 0);
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Advertisement ID is required']);
-            exit;
-        }
-
-        $stmt = $pdo->prepare("DELETE FROM advertisements WHERE id = ?");
-        $stmt->execute([$id]);
-
-        http_response_code(200);
-        echo json_encode(['success' => true, 'message' => 'Advertisement deleted successfully']);
+        deleteAdvertisementRecord($pdo, $input);
         exit;
     }
 

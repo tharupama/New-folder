@@ -318,17 +318,24 @@ async function getAdvertisements(adminToken = null) {
 }
 
 async function createAdvertisement(advertisementData) {
-  return phpApiCall(API_ENDPOINTS.advertisements, 'POST', advertisementData);
+  return phpApiCall(API_ENDPOINTS.advertisements, 'POST', {
+    ...advertisementData,
+    action: 'create'
+  });
 }
 
 async function updateAdvertisement(advertisementData) {
-  return phpApiCall(API_ENDPOINTS.advertisements, 'PUT', advertisementData);
+  return phpApiCall(API_ENDPOINTS.advertisements, 'POST', {
+    ...advertisementData,
+    action: 'update'
+  });
 }
 
 async function deleteAdvertisement(advertisementId, adminToken) {
-  return phpApiCall(API_ENDPOINTS.advertisements, 'DELETE', {
+  return phpApiCall(API_ENDPOINTS.advertisements, 'POST', {
     id: advertisementId,
-    adminToken
+    adminToken,
+    action: 'delete'
   });
 }
 

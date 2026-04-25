@@ -347,15 +347,15 @@
       <div class="cart-summary">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotal">Rs 0.00</span>
+          <span id=\"cartSubtotal\">USD 0.00</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span id="cartShipping">Rs 0.00</span>
+          <span id=\"cartShipping\">USD 0.00</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span id="cartTotal">Rs 0.00</span>
+          <span id=\"cartTotal\">USD 0.00</span>
         </div>
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
@@ -523,9 +523,9 @@
         const entries = [...cart.entries()];
         if (entries.length === 0) {
           cartItems.innerHTML = "<p>Your cart is empty.</p>";
-          if (cartSubtotal) cartSubtotal.textContent = "Rs 0.00";
-          if (cartShipping) cartShipping.textContent = "Rs 0.00";
-          if (cartTotal) cartTotal.textContent = "Rs 0.00";
+          if (cartSubtotal) cartSubtotal.textContent = "USD 0.00";
+          if (cartShipping) cartShipping.textContent = "USD 0.00";
+          if (cartTotal) cartTotal.textContent = "USD 0.00";
           return;
         }
 
@@ -535,7 +535,7 @@
           .join("");
 
         if (cartSubtotal) cartSubtotal.textContent = "$" + subtotal.toFixed(2);
-        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "Rs 0.00" : "Rs 12.00";
+        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "USD 0.00" : "USD 12.00";
         if (cartTotal) cartTotal.textContent = "$" + (subtotal + (subtotal > 200 ? 0 : 12)).toFixed(2);
       };
 
