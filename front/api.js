@@ -15,7 +15,7 @@ async function getSupabaseClient() {
 }
 
 // PHP backend configuration for non-auth endpoints
-const API_BASE_URL = 'http://localhost/New-folder/backend';
+const API_BASE_URL = 'http://localhost/New%20folder%20(2)/New-folder/backend';
 const API_ENDPOINTS = {
   contact: `${API_BASE_URL}/contact/submit.php`,
   products: `${API_BASE_URL}/products/list.php`,

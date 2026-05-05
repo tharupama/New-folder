@@ -904,15 +904,6 @@
         <!-- End Messages Tab -->
 
       </div>
-
-      <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for fast food delivery.</p>
-        <div class="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Support</a>
-        </div>
-      </footer>
     </div>
 
     <!-- Edit Product Modal -->
@@ -968,7 +959,71 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="../front/api.js"></script>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>BUY LK Admin</h3>
+          <p>Fast food delivery service management panel for administrators.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook" class="social-icon" title="Facebook">f</a>
+            <a href="#" aria-label="Twitter" class="social-icon" title="Twitter">X</a>
+            <a href="#" aria-label="Instagram" class="social-icon" title="Instagram">◉</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Admin Functions</h4>
+          <ul>
+            <li><a href="admin.html">Dashboard</a></li>
+            <li><a href="admin.html#products">Products</a></li>
+            <li><a href="admin.html#orders">Orders</a></li>
+            <li><a href="admin.html#messages">Messages</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <ul class="contact-info">
+            <li><span class="contact-icon">◆</span> Colombo, Sri Lanka</li>
+            <li><span class="contact-icon">☎</span> +94 11 234 5678</li>
+            <li><span class="contact-icon">✉</span> support@buylk.lk</li>
+            <li><span class="contact-icon">🕒</span> 9:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Support</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 12px;">Need help with the admin panel?</p>
+          <form class="footer-newsletter" id="footerNewsletterForm">
+            <input type="email" placeholder="Your email" required />
+            <button type="submit" class="primary-btn">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BUY LK. All rights reserved. | Admin Panel</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <span>•</span>
+          <a href="#">Terms of Service</a>
+          <span>•</span>
+          <a href="#">Admin Guidelines</a>
+        </div>
+      </div>
+    </footer>
     <script>
       let editingProductId = null;
       // Check admin session on page load
@@ -1073,7 +1128,7 @@
               </div>
               <p><strong>Customer:</strong> ${order.customer_name || order.user_email || 'Customer'}</p>
               <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
-              <p><strong>Total:</strong> USD ${Number(order.total_amount || 0).toFixed(2)}</p>
+              <p><strong>Total:</strong> LKR ${Number(order.total_amount || 0).toFixed(2)}</p>
               <p><strong>Created:</strong> ${createdAt}</p>
               <div class="admin-order-actions">
                 <select data-order-status="${order.id}">
@@ -1186,7 +1241,7 @@
               ${product.image ? `<img src="${product.image}" alt="${product.name}" />` : '<div style="width: 100%; height: 150px; background: var(--border); border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; color: var(--muted);">No image</div>'}
               <h4>${product.name}</h4>
               <p><strong>Category:</strong> ${product.category}</p>
-              <p class="product-price">USD ${parseFloat(product.price).toFixed(2)}</p>
+              <p class="product-price">LKR ${parseFloat(product.price).toFixed(2)}</p>
               <p><strong>Rating:</strong> ★ ${product.rating}</p>
               <p><strong>Stock:</strong> ${product.stock}</p>
               ${product.tag ? `<p><strong>Tag:</strong> ${product.tag}</p>` : ""}

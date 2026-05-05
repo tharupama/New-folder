@@ -6,6 +6,7 @@
     <title>BUY LK — About Delivery</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="wishlist.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
   </head>
   <body>
     <div class="app">
@@ -28,19 +29,19 @@
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
           <button class="nav-cart" id="cartBtn">
-            🛒 Cart <span id="cartCount">0</span>
+            <i class="ri-shopping-cart-line"></i> Cart <span id="cartCount">0</span>
           </button>
         </nav>
         <div class="actions">
-          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme"><i class="ri-moon-line"></i> Theme</button>
           <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
-            ❤️ <span id="wishlistCount">0</span>
+            <i class="ri-heart-line"></i> Wishlist <span id="wishlistCount">0</span>
           </button>
           <div id="authLinks" class="auth-links">
             <a href="login.html" class="primary-btn">Sign in</a>
           </div>
           <div id="userMenu" class="user-menu" style="display: none;">
-            <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="userBtn" class="primary-btn"><i class="ri-user-line"></i> Account</button>
             <button id="logoutBtn" class="ghost-btn">Logout</button>
           </div>
         </div>
@@ -122,16 +123,73 @@
           <p>Want to promote your business? Contact us for advertising options.</p>
         </div>
       </section>
-
-      <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for fast food delivery.</p>
-        <div class="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Support</a>
-        </div>
-      </footer>
     </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>BUY LK</h3>
+          <p>Fast food delivery service bringing fresh meals to your doorstep in 30 minutes or less.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook" class="social-icon" title="Facebook">f</a>
+            <a href="#" aria-label="Twitter" class="social-icon" title="Twitter">X</a>
+            <a href="#" aria-label="Instagram" class="social-icon" title="Instagram">◉</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Categories</h4>
+          <ul>
+            <li><a href="#">Kottu</a></li>
+            <li><a href="#">Pizza</a></li>
+            <li><a href="#">Bakery</a></li>
+            <li><a href="#">Beverages</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <ul class="contact-info">
+            <li><span class="contact-icon">◆</span> Colombo, Sri Lanka</li>
+            <li><span class="contact-icon">☎</span> +94 11 234 5678</li>
+            <li><span class="contact-icon">✉</span> support@buylk.lk</li>
+            <li><span class="contact-icon">🕒</span> 9:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Newsletter</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 12px;">Get delivery updates and exclusive offers</p>
+          <form class="footer-newsletter" id="footerNewsletterForm">
+            <input type="email" placeholder="Your email" required />
+            <button type="submit" class="primary-btn">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BUY LK. All rights reserved. | Crafted for fast food delivery</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <span>•</span>
+          <a href="#">Terms of Service</a>
+          <span>•</span>
+          <a href="#">Cookie Policy</a>
+        </div>
+      </div>
+    </footer>
 
     <aside class="cart-drawer" id="cartDrawer">
       <div class="cart-header">
@@ -159,7 +217,7 @@
     <!-- Payment Modal -->
     <div class="payment-modal" id="paymentModal">
       <div class="payment-container">
-        <button class="payment-close" id="closePayment">✕</button>
+        <button class="payment-close" id="closePayment"><i class="fas fa-times"></i></button>
         <div class="payment-content">
           <h2>Payment</h2>
           <div class="payment-summary">
@@ -237,7 +295,7 @@
       <div class="wishlist-container">
         <div class="wishlist-header">
           <h2>My Wishlist</h2>
-          <button class="wishlist-close" id="closeWishlist">✕</button>
+          <button class="wishlist-close" id="closeWishlist"><i class="fas fa-times"></i></button>
         </div>
         <div class="wishlist-items" id="wishlistItems"></div>
       </div>

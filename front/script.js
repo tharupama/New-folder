@@ -162,7 +162,7 @@ const AD_ROTATION_MS = 5000;
 const AD_PROGRESS_TICK_MS = 120;
 
 const currency = {
-  format: (value) => `USD ${Number(value).toFixed(2)}`,
+  format: (value) => `LKR ${Number(value).toFixed(2)}`,
 };
 
 const showToast = (message) => {
@@ -1181,12 +1181,68 @@ if (document.readyState === "loading") {
   setupWishlistSystem();
 }
 
+// Counter Animation Function
+const animateCounters = () => {
+  const heroStats = document.querySelectorAll('.hero-stats > div');
+  
+  if (heroStats.length === 0) return;
+  
+  const statsData = [
+    { target: 4.8, duration: 2000, format: (val) => val.toFixed(1) },
+    { target: 120000, duration: 2500, format: (val) => {
+      if (val >= 1000) {
+        return (val / 1000).toFixed(0) + 'k+';
+      }
+      return val.toLocaleString();
+    }},
+    { target: null, duration: 0, format: (val) => 'Fast' }
+  ];
+  
+  heroStats.forEach((stat, index) => {
+    const strong = stat.querySelector('strong');
+    if (!strong || !statsData[index]) return;
+    
+    const data = statsData[index];
+    
+    // For "Fast" text, just show it
+    if (data.target === null) {
+      strong.textContent = 'Fast';
+      return;
+    }
+    
+    const startValue = 0;
+    const targetValue = data.target;
+    const duration = data.duration;
+    const startTime = Date.now();
+    
+    const updateCounter = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      const currentValue = startValue + (targetValue - startValue) * easeOutQuad;
+      
+      strong.textContent = data.format(currentValue);
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      }
+    };
+    
+    updateCounter();
+  });
+};
+
 setTheme(state.theme);
 loadProducts(); // Load products from database (includes renderCart)
 loadAdvertisementsForHero();
 updateCounts();
 updateCountdown();
 showStoredPaymentMessage();
+
+// Start counter animation after a short delay
+setTimeout(animateCounters, 300);
 
 setInterval(updateCountdown, 1000);
 
