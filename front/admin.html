@@ -49,10 +49,29 @@
         padding: 12px 14px;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: transparent;
+        background: var(--surface);
         color: var(--text);
         font-size: 1rem;
         transition: border 0.2s ease;
+      }
+
+      .form-group select option {
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      .form-group select option[value=""] {
+        color: var(--muted);
+      }
+
+      [data-theme="dark"] .form-group select {
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      [data-theme="dark"] .form-group select option {
+        background: var(--surface);
+        color: var(--text);
       }
 
       .form-group input:focus,
@@ -255,6 +274,41 @@
         border-top: 1px solid var(--border);
       }
 
+      .orders-section {
+        margin-top: 32px;
+      }
+
+      .orders-list-admin {
+        display: grid;
+        gap: 12px;
+      }
+
+      .admin-order-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+        padding: 14px;
+      }
+
+      .admin-order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .admin-order-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .admin-order-actions select {
+        min-width: 140px;
+      }
+
       .messages-section h3 {
         font-size: 1.5rem;
         margin-bottom: 16px;
@@ -263,6 +317,57 @@
       .messages-list {
         display: grid;
         gap: 16px;
+      }
+
+      .ads-list {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+      }
+
+      .ads-list h3 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+      }
+
+      .ads-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      }
+
+      .ad-card {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .ad-card h4 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .ad-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .ad-status {
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .ad-status.active {
+        color: #10b981;
+      }
+
+      .ad-status.inactive {
+        color: #ef4444;
       }
 
       .message-card {
@@ -427,6 +532,145 @@
       .search-box button:hover {
         background: #1e40af;
       }
+
+      /* Mobile Responsive Styles */
+      @media (max-width: 768px) {
+        .admin-container {
+          margin: 20px auto;
+          padding: 24px 20px;
+          border-radius: 16px;
+        }
+
+        .admin-header h2 {
+          font-size: 1.5rem;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .products-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .tabs {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .tab {
+          padding: 10px 16px;
+          white-space: nowrap;
+          font-size: 0.9rem;
+        }
+
+        .modal-content {
+          padding: 24px;
+          width: 95%;
+          max-height: 90vh;
+        }
+
+        .modal-header h3 {
+          font-size: 1.25rem;
+        }
+
+        .message-header {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .message-actions {
+          flex-direction: column;
+        }
+
+        .message-actions button {
+          width: 100%;
+        }
+
+        .product-actions-admin {
+          flex-direction: column;
+        }
+
+        .product-actions-admin button {
+          width: 100%;
+        }
+
+        .search-box {
+          flex-direction: column;
+        }
+
+        .search-box button {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .admin-container {
+          margin: 10px;
+          padding: 20px 16px;
+          border-radius: 12px;
+        }
+
+        .admin-header {
+          margin-bottom: 24px;
+        }
+
+        .admin-header h2 {
+          font-size: 1.35rem;
+        }
+
+        .admin-header p {
+          font-size: 0.9rem;
+        }
+
+        .form-group label {
+          font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          padding: 10px 12px;
+          font-size: 0.95rem;
+        }
+
+        .admin-form button {
+          padding: 12px;
+          font-size: 0.95rem;
+        }
+
+        .product-list h3,
+        .messages-section h3 {
+          font-size: 1.25rem;
+        }
+
+        .product-card {
+          padding: 14px;
+        }
+
+        .product-card img {
+          height: 180px;
+        }
+
+        .message-card {
+          padding: 16px;
+        }
+
+        .tab {
+          padding: 10px 14px;
+          font-size: 0.85rem;
+        }
+
+        .modal-content {
+          padding: 20px;
+          border-radius: 12px;
+        }
+
+        .back-link {
+          font-size: 0.9rem;
+          margin-bottom: 16px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -436,7 +680,7 @@
           <span class="logo">BL</span>
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
+            <p>Fresh food delivered fast</p>
           </div>
         </div>
         <nav class="nav">
@@ -444,6 +688,9 @@
           <a href="admin.html">Admin</a>
           <a href="#" id="logoutLink" style="color: #ef4444;">Logout</a>
         </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+        </div>
       </header>
 
       <div class="admin-container">
@@ -457,6 +704,8 @@
         <!-- Tabs -->
         <div class="tabs">
           <button class="tab active" data-tab="products">Products</button>
+          <button class="tab" data-tab="orders">Orders</button>
+          <button class="tab" data-tab="ads">Advertisements</button>
           <button class="tab" data-tab="messages">Contact Messages</button>
         </div>
 
@@ -482,15 +731,15 @@
               <label for="category">Category *</label>
               <select id="category" name="category" required>
                 <option value="">Select category</option>
-                <option value="tech">Tech</option>
-                <option value="home">Home</option>
-                <option value="fitness">Fitness</option>
-                <option value="fashion">Fashion</option>
+                <option value="kottu">Kottu</option>
+                <option value="pizza">Pizza</option>
+                <option value="bakery">Bakery Products</option>
+                <option value="beverages">Beverages</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="price">Price ($) *</label>
+              <label for="price">Price (Rs) *</label>
               <input
                 type="number"
                 id="price"
@@ -504,20 +753,6 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group">
-              <label for="rating">Rating (0-5)</label>
-              <input
-                type="number"
-                id="rating"
-                name="rating"
-                placeholder="4.5"
-                min="0"
-                max="5"
-                step="0.1"
-                value="4.5"
-              />
-            </div>
-
             <div class="form-group">
               <label for="tag">Tag</label>
               <input
@@ -580,6 +815,75 @@
         </div>
         <!-- End Products Tab -->
 
+        <!-- Orders Tab -->
+        <div class="tab-content" id="orders-tab">
+          <div class="orders-section">
+            <h3>Customer Orders</h3>
+            <div class="orders-list-admin" id="ordersListAdmin">
+              <p>Loading orders...</p>
+            </div>
+          </div>
+        </div>
+        <!-- End Orders Tab -->
+
+        <!-- Advertisements Tab -->
+        <div class="tab-content" id="ads-tab">
+          <div id="adErrorMsg" class="error-message"></div>
+          <div id="adSuccessMsg" class="success-message"></div>
+
+          <form class="admin-form" id="adForm">
+            <input type="hidden" id="adId" value="" />
+
+            <div class="form-group">
+              <label for="adTitle">Advertisement Title *</label>
+              <input type="text" id="adTitle" placeholder="e.g., Family Dinner Offer" required />
+            </div>
+
+            <div class="form-group">
+              <label for="adMessage">Message *</label>
+              <textarea id="adMessage" placeholder="Describe the advertisement" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="adButtonText">Button Text</label>
+                <input type="text" id="adButtonText" placeholder="e.g., Order Now" value="Learn More" />
+              </div>
+              <div class="form-group">
+                <label for="adButtonLink">Button Link</label>
+                <input type="text" id="adButtonLink" placeholder="shop.html or https://..." value="shop.html" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="adFooterText">Footer Text</label>
+                <input type="text" id="adFooterText" placeholder="e.g., Limited-time offer" />
+              </div>
+              <div class="form-group">
+                <label for="adSortOrder">Sort Order</label>
+                <input type="number" id="adSortOrder" min="0" value="0" />
+              </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="adIsActive" checked style="width: 18px; height: 18px;" />
+              <label for="adIsActive" style="margin: 0;">Active</label>
+            </div>
+
+            <button type="submit" class="primary-btn" id="adSubmitBtn">Add Advertisement</button>
+            <button type="button" class="ghost-btn" id="adCancelEditBtn" style="display: none;">Cancel Edit</button>
+          </form>
+
+          <div class="ads-list">
+            <h3>Current Advertisements</h3>
+            <div class="ads-grid" id="adsGrid">
+              <p>Loading advertisements...</p>
+            </div>
+          </div>
+        </div>
+        <!-- End Advertisements Tab -->
+
         <!-- Messages Tab -->
         <div class="tab-content" id="messages-tab">
           <div class="messages-section">
@@ -600,15 +904,6 @@
         <!-- End Messages Tab -->
 
       </div>
-
-      <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
-        <div class="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Support</a>
-        </div>
-      </footer>
     </div>
 
     <!-- Edit Product Modal -->
@@ -627,20 +922,16 @@
             <label for="editCategory">Category</label>
             <select id="editCategory" required>
               <option value="">Select category</option>
-              <option value="tech">Tech</option>
-              <option value="home">Home</option>
-              <option value="fashion">Fashion</option>
-              <option value="fitness">Fitness</option>
+              <option value="kottu">Kottu</option>
+              <option value="pizza">Pizza</option>
+              <option value="bakery">Bakery Products</option>
+              <option value="beverages">Beverages</option>
             </select>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="editPrice">Price</label>
               <input type="number" id="editPrice" step="0.01" min="0" required />
-            </div>
-            <div class="form-group">
-              <label for="editRating">Rating</label>
-              <input type="number" id="editRating" step="0.1" min="0" max="5" />
             </div>
           </div>
           <div class="form-group">
@@ -668,7 +959,71 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="../front/api.js"></script>
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>BUY LK Admin</h3>
+          <p>Fast food delivery service management panel for administrators.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook" class="social-icon" title="Facebook">f</a>
+            <a href="#" aria-label="Twitter" class="social-icon" title="Twitter">X</a>
+            <a href="#" aria-label="Instagram" class="social-icon" title="Instagram">◉</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Admin Functions</h4>
+          <ul>
+            <li><a href="admin.html">Dashboard</a></li>
+            <li><a href="admin.html#products">Products</a></li>
+            <li><a href="admin.html#orders">Orders</a></li>
+            <li><a href="admin.html#messages">Messages</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <ul class="contact-info">
+            <li><span class="contact-icon">◆</span> Colombo, Sri Lanka</li>
+            <li><span class="contact-icon">☎</span> +94 11 234 5678</li>
+            <li><span class="contact-icon">✉</span> support@buylk.lk</li>
+            <li><span class="contact-icon">🕒</span> 9:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Support</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 12px;">Need help with the admin panel?</p>
+          <form class="footer-newsletter" id="footerNewsletterForm">
+            <input type="email" placeholder="Your email" required />
+            <button type="submit" class="primary-btn">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BUY LK. All rights reserved. | Admin Panel</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <span>•</span>
+          <a href="#">Terms of Service</a>
+          <span>•</span>
+          <a href="#">Admin Guidelines</a>
+        </div>
+      </div>
+    </footer>
     <script>
       let editingProductId = null;
       // Check admin session on page load
@@ -710,6 +1065,14 @@
           if (tabName === 'messages') {
             loadMessages();
           }
+
+          if (tabName === 'orders') {
+            loadAdminOrders();
+          }
+
+          if (tabName === 'ads') {
+            loadAdvertisementsAdmin();
+          }
         });
       });
 
@@ -722,8 +1085,128 @@
       const messagesList = document.getElementById("messagesList");
       const searchMessagesInput = document.getElementById("searchMessages");
       const clearMessagesSearchBtn = document.getElementById("clearMessagesSearch");
+      const ordersListAdmin = document.getElementById("ordersListAdmin");
+      const adForm = document.getElementById("adForm");
+      const adsGrid = document.getElementById("adsGrid");
+      const adErrorMsg = document.getElementById("adErrorMsg");
+      const adSuccessMsg = document.getElementById("adSuccessMsg");
+      const adSubmitBtn = document.getElementById("adSubmitBtn");
+      const adCancelEditBtn = document.getElementById("adCancelEditBtn");
       let allProducts = [];
       let allMessages = [];
+      let allOrders = [];
+      let allAdvertisements = [];
+
+      const getStatusClass = (status) => {
+        const normalized = String(status || 'pending').toLowerCase();
+        if (normalized === 'delivered') return 'status-delivered';
+        if (normalized === 'cancelled') return 'status-cancelled';
+        if (normalized === 'shipped') return 'status-shipped';
+        if (normalized === 'processing') return 'status-processing';
+        return 'status-pending';
+      };
+
+      const renderAdminOrders = (ordersToRender) => {
+        if (!ordersListAdmin) return;
+
+        if (!ordersToRender || ordersToRender.length === 0) {
+          ordersListAdmin.innerHTML = '<p>No orders found.</p>';
+          return;
+        }
+
+        ordersListAdmin.innerHTML = ordersToRender.map((order) => {
+          const status = String(order.status || 'pending').toLowerCase();
+          const createdAt = order.created_at
+            ? new Date(order.created_at).toLocaleString()
+            : '-';
+
+          return `
+            <article class="admin-order-card">
+              <div class="admin-order-header">
+                <h4>Order #${order.id}</h4>
+                <span class="order-status-badge ${getStatusClass(status)}">${status}</span>
+              </div>
+              <p><strong>Customer:</strong> ${order.customer_name || order.user_email || 'Customer'}</p>
+              <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
+              <p><strong>Total:</strong> LKR ${Number(order.total_amount || 0).toFixed(2)}</p>
+              <p><strong>Created:</strong> ${createdAt}</p>
+              <div class="admin-order-actions">
+                <select data-order-status="${order.id}">
+                  <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
+                  <option value="processing" ${status === 'processing' ? 'selected' : ''}>Processing</option>
+                  <option value="shipped" ${status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                  <option value="delivered" ${status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                  <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                </select>
+                <button class="primary-btn" data-save-order-status="${order.id}">Update</button>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        document.querySelectorAll('[data-save-order-status]').forEach((button) => {
+          button.addEventListener('click', async () => {
+            const orderId = Number(button.dataset.saveOrderStatus);
+            const select = document.querySelector(`[data-order-status="${orderId}"]`);
+            if (!select) return;
+            await updateAdminOrderStatus(orderId, select.value);
+          });
+        });
+      };
+
+      const loadAdminOrders = async () => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          if (typeof getOrders === 'undefined') {
+            ordersListAdmin.innerHTML = '<p>Orders API unavailable.</p>';
+            return;
+          }
+
+          const response = await getOrders({}, adminSession.token);
+          if (response.success && Array.isArray(response.data)) {
+            allOrders = response.data;
+            renderAdminOrders(allOrders);
+          } else {
+            ordersListAdmin.innerHTML = `<p>${response.data?.message || 'Failed to load orders.'}</p>`;
+          }
+        } catch (error) {
+          console.error('Error loading orders:', error);
+          ordersListAdmin.innerHTML = '<p>Error loading orders.</p>';
+        }
+      };
+
+      const updateAdminOrderStatus = async (orderId, status) => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          if (typeof updateOrderStatus === 'undefined') {
+            showToast('Orders API unavailable');
+            return;
+          }
+
+          const response = await updateOrderStatus(orderId, status, adminSession.token);
+          if (response.success && response.data?.success) {
+            showToast(`Order #${orderId} status updated to ${status}`);
+            loadAdminOrders();
+          } else {
+            showToast(response.data?.message || 'Failed to update order status');
+          }
+        } catch (error) {
+          console.error('Error updating order status:', error);
+          showToast('Error updating order status');
+        }
+      };
 
       const showToast = (message) => {
         const toast = document.getElementById("toast");
@@ -758,7 +1241,7 @@
               ${product.image ? `<img src="${product.image}" alt="${product.name}" />` : '<div style="width: 100%; height: 150px; background: var(--border); border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; color: var(--muted);">No image</div>'}
               <h4>${product.name}</h4>
               <p><strong>Category:</strong> ${product.category}</p>
-              <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
+              <p class="product-price">LKR ${parseFloat(product.price).toFixed(2)}</p>
               <p><strong>Rating:</strong> ★ ${product.rating}</p>
               <p><strong>Stock:</strong> ${product.stock}</p>
               ${product.tag ? `<p><strong>Tag:</strong> ${product.tag}</p>` : ""}
@@ -806,7 +1289,7 @@
       const loadProducts = async () => {
         try {
           const response = await fetch(
-            "http://localhost/New%20folder/backend/products/list.php"
+            "http://localhost/New-folder/backend/products/list.php"
           );
           const result = await response.json();
 
@@ -832,7 +1315,7 @@
           }
 
           const response = await fetch(
-            "http://localhost/New%20folder/backend/products/list.php",
+            "http://localhost/New-folder/backend/products/list.php",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -861,7 +1344,6 @@
         document.getElementById('editProductName').value = product.name;
         document.getElementById('editCategory').value = product.category;
         document.getElementById('editPrice').value = parseFloat(product.price);
-        document.getElementById('editRating').value = parseFloat(product.rating);
         document.getElementById('editDescription').value = product.description || '';
         document.getElementById('editTag').value = product.tag || '';
         document.getElementById('editStock').value = product.stock;
@@ -885,7 +1367,7 @@
           }
 
           const response = await fetch(
-            "http://localhost/New%20folder/backend/products/list.php",
+            "http://localhost/New-folder/backend/products/list.php",
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
@@ -931,7 +1413,6 @@
           name: document.getElementById('editProductName').value.trim(),
           category: document.getElementById('editCategory').value.trim(),
           price: parseFloat(document.getElementById('editPrice').value),
-          rating: parseFloat(document.getElementById('editRating').value) || 4.5,
           description: document.getElementById('editDescription').value.trim(),
           tag: document.getElementById('editTag').value.trim(),
           stock: parseInt(document.getElementById('editStock').value) || 50,
@@ -945,7 +1426,7 @@
 
         try {
           const response = await fetch(
-            "http://localhost/New%20folder/backend/products/list.php",
+            "http://localhost/New-folder/backend/products/list.php",
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
@@ -983,7 +1464,6 @@
         const productName = document.getElementById("productName").value.trim();
         const category = document.getElementById("category").value.trim();
         const price = parseFloat(document.getElementById("price").value);
-        const rating = parseFloat(document.getElementById("rating").value) || 4.5;
         const tag = document.getElementById("tag").value.trim();
         const stock = parseInt(document.getElementById("stock").value) || 50;
         const description = document.getElementById("description").value.trim();
@@ -1011,7 +1491,7 @@
 
         try {
           const response = await fetch(
-            "http://localhost/New%20folder/backend/products/list.php",
+            "http://localhost/New-folder/backend/products/list.php",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1020,7 +1500,6 @@
                 name: productName,
                 category,
                 price,
-                rating,
                 tag,
                 stock,
                 description,
@@ -1036,7 +1515,6 @@
             successMsg.classList.add("show");
             showToast("Product added!");
             productForm.reset();
-            document.getElementById("rating").value = "4.5";
             document.getElementById("stock").value = "50";
             loadProducts();
           } else {
@@ -1052,6 +1530,187 @@
           submitBtn.disabled = false;
         }
       });
+
+      const resetAdForm = () => {
+        document.getElementById("adId").value = "";
+        document.getElementById("adTitle").value = "";
+        document.getElementById("adMessage").value = "";
+        document.getElementById("adButtonText").value = "Learn More";
+        document.getElementById("adButtonLink").value = "shop.html";
+        document.getElementById("adFooterText").value = "";
+        document.getElementById("adSortOrder").value = "0";
+        document.getElementById("adIsActive").checked = true;
+        adSubmitBtn.textContent = "Add Advertisement";
+        adCancelEditBtn.style.display = "none";
+      };
+
+      const fillAdForm = (ad) => {
+        document.getElementById("adId").value = ad.id;
+        document.getElementById("adTitle").value = ad.title || "";
+        document.getElementById("adMessage").value = ad.message || "";
+        document.getElementById("adButtonText").value = ad.button_text || "Learn More";
+        document.getElementById("adButtonLink").value = ad.button_link || "shop.html";
+        document.getElementById("adFooterText").value = ad.footer_text || "";
+        document.getElementById("adSortOrder").value = Number(ad.sort_order || 0);
+        document.getElementById("adIsActive").checked = Number(ad.is_active) === 1;
+        adSubmitBtn.textContent = "Update Advertisement";
+        adCancelEditBtn.style.display = "inline-flex";
+      };
+
+      const renderAdvertisementsAdmin = (adsToRender) => {
+        if (!adsToRender || adsToRender.length === 0) {
+          adsGrid.innerHTML = '<p>No advertisements yet. Add your first one!</p>';
+          return;
+        }
+
+        adsGrid.innerHTML = adsToRender.map((ad) => `
+          <div class="ad-card">
+            <h4>${ad.title}</h4>
+            <p>${ad.message}</p>
+            <p><strong>Button:</strong> ${ad.button_text || 'Learn More'}</p>
+            <p><strong>Link:</strong> ${ad.button_link || 'shop.html'}</p>
+            <p><strong>Footer:</strong> ${ad.footer_text || 'N/A'}</p>
+            <p><strong>Sort Order:</strong> ${ad.sort_order || 0}</p>
+            <span class="ad-status ${Number(ad.is_active) === 1 ? 'active' : 'inactive'}">
+              ${Number(ad.is_active) === 1 ? 'Active' : 'Inactive'}
+            </span>
+            <div class="product-actions-admin">
+              <button class="edit-btn" data-edit-ad-id="${ad.id}">Edit</button>
+              <button class="delete-btn" data-delete-ad-id="${ad.id}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('[data-edit-ad-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const ad = allAdvertisements.find(item => Number(item.id) === Number(btn.dataset.editAdId));
+            if (ad) {
+              fillAdForm(ad);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        });
+
+        document.querySelectorAll('[data-delete-ad-id]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this advertisement?')) {
+              await deleteAdvertisementAdmin(Number(btn.dataset.deleteAdId));
+            }
+          });
+        });
+      };
+
+      const loadAdvertisementsAdmin = async () => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          if (typeof getAdvertisements === "undefined") {
+            adsGrid.innerHTML = '<p>Advertisements API unavailable.</p>';
+            return;
+          }
+
+          const response = await getAdvertisements(adminSession.token);
+          if (response.success && Array.isArray(response.data)) {
+            allAdvertisements = response.data;
+            renderAdvertisementsAdmin(allAdvertisements);
+          } else {
+            adsGrid.innerHTML = '<p>Failed to load advertisements.</p>';
+          }
+        } catch (error) {
+          console.error("Error loading advertisements:", error);
+          adsGrid.innerHTML = '<p>Error loading advertisements.</p>';
+        }
+      };
+
+      const deleteAdvertisementAdmin = async (advertisementId) => {
+        try {
+          const adminSession = getAdminSession();
+          if (!adminSession) {
+            showToast("Admin session expired. Please login again.");
+            window.location.href = 'admin-login.html';
+            return;
+          }
+
+          const response = await deleteAdvertisement(advertisementId, adminSession.token);
+          if (response.success) {
+            showToast("Advertisement deleted successfully");
+            loadAdvertisementsAdmin();
+          } else {
+            showToast(response.data.message || "Failed to delete advertisement");
+          }
+        } catch (error) {
+          console.error("Error deleting advertisement:", error);
+          showToast("Error deleting advertisement");
+        }
+      };
+
+      adForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const adminSession = getAdminSession();
+        if (!adminSession) {
+          adErrorMsg.textContent = "Admin session expired. Please login again.";
+          adErrorMsg.classList.add("show");
+          return;
+        }
+
+        const adId = Number(document.getElementById("adId").value || 0);
+        const payload = {
+          adminToken: adminSession.token,
+          title: document.getElementById("adTitle").value.trim(),
+          message: document.getElementById("adMessage").value.trim(),
+          button_text: document.getElementById("adButtonText").value.trim() || "Learn More",
+          button_link: document.getElementById("adButtonLink").value.trim() || "shop.html",
+          footer_text: document.getElementById("adFooterText").value.trim(),
+          sort_order: Number(document.getElementById("adSortOrder").value || 0),
+          is_active: document.getElementById("adIsActive").checked ? 1 : 0,
+        };
+
+        if (!payload.title || !payload.message) {
+          adErrorMsg.textContent = "Advertisement title and message are required";
+          adErrorMsg.classList.add("show");
+          return;
+        }
+
+        adErrorMsg.classList.remove("show");
+        adSuccessMsg.classList.remove("show");
+
+        const originalText = adSubmitBtn.textContent;
+        adSubmitBtn.textContent = adId ? "Updating..." : "Adding...";
+        adSubmitBtn.disabled = true;
+
+        try {
+          const response = adId
+            ? await updateAdvertisement({ ...payload, id: adId })
+            : await createAdvertisement(payload);
+
+          if (response.success) {
+            adSuccessMsg.textContent = adId ? "Advertisement updated successfully" : "Advertisement added successfully";
+            adSuccessMsg.classList.add("show");
+            showToast(adId ? "Advertisement updated" : "Advertisement added");
+            resetAdForm();
+            loadAdvertisementsAdmin();
+          } else {
+            adErrorMsg.textContent = response.data.message || "Failed to save advertisement";
+            adErrorMsg.classList.add("show");
+          }
+        } catch (error) {
+          console.error("Advertisement save error:", error);
+          adErrorMsg.textContent = "An error occurred. Please try again.";
+          adErrorMsg.classList.add("show");
+        } finally {
+          adSubmitBtn.textContent = originalText;
+          adSubmitBtn.disabled = false;
+        }
+      });
+
+      adCancelEditBtn.addEventListener('click', resetAdForm);
+      resetAdForm();
 
       // Load products on page load
       loadProducts();
@@ -1197,9 +1856,26 @@
         renderMessages(allMessages);
       });
 
-      // Set theme
-      const theme = localStorage.getItem("theme") || "light";
-      document.documentElement.dataset.theme = theme;
+      // Theme toggle for admin panel
+      const setTheme = (theme) => {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem("theme", theme);
+        const themeToggle = document.getElementById("themeToggle");
+        if (themeToggle) {
+          themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
+        }
+      };
+
+      const initialTheme = localStorage.getItem("theme") || "light";
+      setTheme(initialTheme);
+
+      const themeToggle = document.getElementById("themeToggle");
+      if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+          const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+          setTheme(nextTheme);
+        });
+      }
     </script>
   </body>
 </html>

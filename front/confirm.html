@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — Email Confirmed</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 42%),
+          linear-gradient(180deg, rgba(15, 23, 42, 0.04), rgba(15, 23, 42, 0.01));
+      }
+
+      .confirm-shell {
+        width: min(100%, 720px);
+        padding: 24px;
+      }
+
+      .confirm-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 44px;
+        text-align: center;
+      }
+
+      .confirm-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #fff;
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      .confirm-card h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin-bottom: 12px;
+      }
+
+      .confirm-card p {
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 56ch;
+        margin: 0 auto 14px;
+      }
+
+      .confirm-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+
+      .confirm-actions a {
+        text-decoration: none;
+      }
+
+      .secondary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 160px;
+        padding: 14px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: transparent;
+        font-weight: 600;
+      }
+
+      .hint {
+        margin-top: 18px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="confirm-shell">
+      <section class="confirm-card">
+        <div class="confirm-badge">✓</div>
+        <h1>Email confirmed</h1>
+        <p>
+          Your account has been verified successfully. You can now sign in and
+          continue shopping with your BUY LK account.
+        </p>
+        <p class="hint" id="statusLine">Redirecting to the sign-in page in 5 seconds.</p>
+        <div class="confirm-actions">
+          <a class="primary-btn" href="login.html">Sign in now</a>
+          <a class="secondary-btn" href="index.html">Go to home</a>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const statusLine = document.getElementById('statusLine');
+      let secondsRemaining = 5;
+
+      const tick = () => {
+        secondsRemaining -= 1;
+        if (secondsRemaining > 0) {
+          statusLine.textContent = `Redirecting to the sign-in page in ${secondsRemaining} seconds.`;
+          return;
+        }
+
+        window.location.href = 'login.html';
+      };
+
+      setInterval(tick, 1000);
+    </script>
+  </body>
+</html>

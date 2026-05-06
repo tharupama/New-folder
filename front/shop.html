@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BUY LK — Shop</title>
+    <title>BUY LK — Menu</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="wishlist.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
   </head>
   <body>
     <div class="app">
@@ -13,7 +15,7 @@
           <img src="assests/logo.png" alt="BUY LK" class="logo-img">
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
+            <p>Fresh food delivered fast</p>
           </div>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
@@ -27,19 +29,20 @@
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
           <button class="nav-cart" id="cartBtn">
-            🛒 Cart <span id="cartCount">0</span>
+            <i class="ri-shopping-cart-line"></i> Cart <span id="cartCount">0</span>
           </button>
         </nav>
         <div class="actions">
-          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme"><i class="ri-moon-line"></i> Theme</button>
           <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
-            ❤️ <span id="wishlistCount">0</span>
+            <i class="ri-heart-line"></i> Wishlist <span id="wishlistCount">0</span>
           </button>
           <div id="authLinks" class="auth-links">
             <a href="login.html" class="primary-btn">Sign in</a>
           </div>
           <div id="userMenu" class="user-menu" style="display: none;">
-            <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="userBtn" class="primary-btn"><i class="ri-user-line"></i> Account</button>
+            <button id="myOrdersBtn" class="ghost-btn">My Orders</button>
             <button id="logoutBtn" class="ghost-btn">Logout</button>
           </div>
         </div>
@@ -47,24 +50,24 @@
 
       <section class="hero">
         <div class="hero-content">
-          <p class="badge">Shop all</p>
-          <h2>Find the best picks, curated for your lifestyle.</h2>
+          <p class="badge">Full menu</p>
+          <h2>Choose meals, sides, and drinks made for quick delivery.</h2>
           <p>
-            Filter by category, compare ratings, and add favorites to your wishlist.
+            Filter by food category, compare ratings, and reorder your favourites quickly.
           </p>
         </div>
         <div class="hero-card">
           <div class="hero-card-header">
-            <span>Today’s highlight</span>
-            <span class="timer" id="countdown">02:48:19</span>
+            <span id="heroAdLabel">Sponsored Advertisement</span>
+            <span class="timer" id="heroAdCounter">1/1</span>
           </div>
           <div class="hero-card-body">
-            <h3>Member savings</h3>
-            <p>Spend $200 and unlock free shipping.</p>
-            <button class="primary-btn" id="bundleDeal">Unlock deal</button>
+            <h3 id="heroAdTitle">Today's Feature</h3>
+            <p id="heroAdMessage">Fresh offers rotate here automatically.</p>
+            <button class="primary-btn" id="heroAdAction">Explore</button>
           </div>
           <div class="hero-card-footer">
-            <span>Stock moving fast</span>
+            <span id="heroAdFooter">Stay tuned for more updates</span>
             <div class="progress">
               <div class="progress-fill" id="stockProgress"></div>
             </div>
@@ -74,16 +77,16 @@
 
       <section class="controls">
         <div class="search">
-          <input type="text" id="searchInput" placeholder="Search products" />
-          <button class="icon-btn" id="searchClear">✕</button>
+          <input type="text" id="searchInput" placeholder="Search meals or categories" />
+          <button class="icon-btn" id="searchClear"><i class="fas fa-times"></i></button>
         </div>
         <div class="filters">
           <select id="categoryFilter">
             <option value="all">All categories</option>
-            <option value="tech">Tech</option>
-            <option value="home">Home</option>
-            <option value="fashion">Fashion</option>
-            <option value="fitness">Fitness</option>
+            <option value="kottu">Kottu</option>
+            <option value="pizza">Pizza</option>
+            <option value="bakery">Bakery Products</option>
+            <option value="beverages">Beverages</option>
           </select>
           <select id="sortFilter">
             <option value="featured">Sort: Featured</option>
@@ -95,16 +98,73 @@
       </section>
 
       <section class="products" id="productGrid"></section>
-
-      <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers. (GROUP NO-10 E‑Commerce PROJECT)</p>
-        <div class="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Support</a>
-        </div>
-      </footer>
     </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>BUY LK</h3>
+          <p>Fast food delivery service bringing fresh meals to your doorstep in 30 minutes or less.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook" class="social-icon" title="Facebook">f</a>
+            <a href="#" aria-label="Twitter" class="social-icon" title="Twitter">X</a>
+            <a href="#" aria-label="Instagram" class="social-icon" title="Instagram">◉</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Categories</h4>
+          <ul>
+            <li><a href="#">Kottu</a></li>
+            <li><a href="#">Pizza</a></li>
+            <li><a href="#">Bakery</a></li>
+            <li><a href="#">Beverages</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <ul class="contact-info">
+            <li><span class="contact-icon">◆</span> Colombo, Sri Lanka</li>
+            <li><span class="contact-icon">☎</span> +94 11 234 5678</li>
+            <li><span class="contact-icon">✉</span> support@buylk.lk</li>
+            <li><span class="contact-icon">🕒</span> 9:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Newsletter</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 12px;">Get delivery updates and exclusive offers</p>
+          <form class="footer-newsletter" id="footerNewsletterForm">
+            <input type="email" placeholder="Your email" required />
+            <button type="submit" class="primary-btn">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BUY LK. All rights reserved. | Crafted for fast food delivery</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <span>•</span>
+          <a href="#">Terms of Service</a>
+          <span>•</span>
+          <a href="#">Cookie Policy</a>
+        </div>
+      </div>
+    </footer>
 
     <aside class="cart-drawer" id="cartDrawer">
       <div class="cart-header">
@@ -115,23 +175,194 @@
       <div class="cart-summary">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotal">$0.00</span>
+          <span id="cartSubtotal">USD 0.00</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span id="cartShipping">$0.00</span>
+          <span id="cartShipping">USD 0.00</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span id="cartTotal">$0.00</span>
+          <span id="cartTotal">USD 0.00</span>
         </div>
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
     </aside>
 
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+      <div class="payment-container">
+        <button class="payment-close" id="closePayment"><i class="fas fa-times"></i></button>
+        <div class="payment-content">
+          <h2>Payment</h2>
+          <div class="payment-summary">
+            <div class="payment-row">
+              <span>Subtotal</span>
+              <span id="paymentSubtotal">USD 0.00</span>
+            </div>
+            <div class="payment-row">
+              <span>Shipping</span>
+              <span id="paymentShipping">USD 0.00</span>
+            </div>
+            <div class="payment-row total">
+              <span>Total Amount</span>
+              <span id="paymentTotal">USD 0.00</span>
+            </div>
+          </div>
+
+          <form class="payment-form" id="paymentForm">
+            <div class="form-section">
+              <h3>Billing Information</h3>
+              <div class="form-row">
+                <input type="text" placeholder="First Name" required />
+                <input type="text" placeholder="Last Name" required />
+              </div>
+              <input type="email" placeholder="Email Address" required />
+              <input type="text" placeholder="Street Address" required />
+              <div class="form-row">
+                <input type="text" placeholder="City" required />
+                <input type="text" placeholder="Postal Code" required />
+              </div>
+              <input type="tel" placeholder="Phone Number" required />
+            </div>
+
+            <div class="form-section">
+              <h3>Payment Method</h3>
+              <div class="payment-methods">
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="card" checked />
+                  <span>Credit/Debit Card</span>
+                </label>
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="paypal" />
+                  <span>PayPal</span>
+                </label>
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="bank" />
+                  <span>Bank Transfer</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-section" id="cardDetails">
+              <h3>Card Details</h3>
+              <input type="text" placeholder="Cardholder Name" required />
+              <input type="text" placeholder="Card Number (16 digits)" maxlength="16" required />
+              <div class="form-row">
+                <input type="text" placeholder="MM/YY" maxlength="5" required />
+                <input type="text" placeholder="CVV" maxlength="3" required />
+              </div>
+            </div>
+
+            <label class="checkbox-label">
+              <input type="checkbox" required />
+              <span>I agree to the terms and conditions</span>
+            </label>
+
+            <button type="submit" class="primary-btn payment-btn">Complete Payment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div class="wishlist-modal" id="wishlistModal">
+      <div class="wishlist-container">
+        <div class="wishlist-header">
+          <h2>My Wishlist</h2>
+          <button class="wishlist-close" id="closeWishlist"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="wishlist-items" id="wishlistItems"></div>
+      </div>
+    </div>
+
+    <!-- Product Details Modal (from modals.html) -->
+    <div class="product-modal" id="productModal" style="display: none;">
+      <div class="product-modal-content">
+        <button class="modal-close" id="closeProductModal"><i class="fas fa-times"></i></button>
+        
+        <div class="product-details-container">
+          <div class="product-details-left">
+            <img id="productModalImage" src="" alt="Product Image" class="product-modal-image">
+            <div class="product-modal-info">
+              <h2 id="productModalName"></h2>
+              <div class="product-modal-rating">
+                <span class="rating-stars" id="productModalStars"></span>
+                <span id="productModalRating"></span>
+                <span id="productModalReviewCount"></span>
+              </div>
+              <p class="product-modal-price" id="productModalPrice"></p>
+              <p class="product-modal-description" id="productModalDescription"></p>
+              <div class="product-modal-actions">
+                <button class="primary-btn" id="productModalAddCart">Add to Cart</button>
+                <button class="secondary-btn" id="productModalWishlist"><i class="fas fa-heart"></i> Wishlist</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="product-details-right">
+            <div class="reviews-section">
+              <h3>Customer Reviews</h3>
+              
+              <div class="reviews-summary">
+                <div class="average-rating">
+                  <span class="rating-number" id="averageRatingNumber">0.0</span>
+                  <div class="rating-stars" id="averageRatingStars"></div>
+                  <span class="review-count" id="totalReviewsCount">0 reviews</span>
+                </div>
+              </div>
+
+              <div class="review-form-container">
+                <h4>Write a Review</h4>
+                <form id="reviewForm" class="review-form">
+                  <div class="form-group">
+                    <label for="reviewRating">Rating</label>
+                    <div class="star-rating-input" id="starRatingInput">
+                      <span class="star" data-rating="1">☆</span>
+                      <span class="star" data-rating="2">☆</span>
+                      <span class="star" data-rating="3">☆</span>
+                      <span class="star" data-rating="4">☆</span>
+                      <span class="star" data-rating="5">☆</span>
+                    </div>
+                    <input type="hidden" id="reviewRating" name="rating" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="reviewName">Name</label>
+                    <input type="text" id="reviewName" name="name" placeholder="Your name" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="reviewComment">Your Review</label>
+                    <textarea id="reviewComment" name="comment" rows="4" placeholder="Share your experience with this product..." required></textarea>
+                  </div>
+                  <button type="submit" class="primary-btn">Submit Review</button>
+                </form>
+              </div>
+
+              <div class="reviews-list" id="reviewsList">
+                <p class="no-reviews">No reviews yet. Be the first to review!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="orders-modal" id="ordersModal">
+      <div class="orders-modal-content">
+        <div class="orders-modal-header">
+          <h3>My Orders</h3>
+          <button class="icon-btn" id="closeOrdersModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="orders-list" id="ordersList">
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
-    <script src="api.js"></script>
-    <script src="script.js"></script>
+    <script src="api.js?v=20260425"></script>
+    <script src="script.js?v=20260425"></script>
+    <script src="product-modal.js?v=20260425"></script>
   </body>
 </html>

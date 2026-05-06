@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BUY LK — Modern E‑Commerce</title>
+    <title>BUY LK — Food Delivery</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="wishlist.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
   </head>
   <body>
     <div class="app">
@@ -13,7 +15,7 @@
           <img src="assests/logo.png" alt="BUY LK" class="logo-img">
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
+            <p>Fresh food delivered fast</p>
           </div>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
@@ -27,21 +29,22 @@
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
           <button class="nav-cart" id="cartBtn">
-            🛒 Cart <span id="cartCount">0</span>
+            <i class="ri-shopping-cart-line"></i> Cart <span id="cartCount">0</span>
           </button>
         </nav>
         <div class="actions">
           <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
-            🌙
+            <i class="ri-moon-line"></i> Theme
           </button>
           <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
-            ❤️ <span id="wishlistCount">0</span>
+            <i class="ri-heart-line"></i> Wishlist <span id="wishlistCount">0</span>
           </button>
           <div id="authLinks" class="auth-links">
             <a href="login.html" class="primary-btn">Sign in</a>
           </div>
           <div id="userMenu" class="user-menu" style="display: none;">
-            <button id="userBtn" class="primary-btn">👤 Account</button>
+            <button id="userBtn" class="primary-btn"><i class="ri-user-line"></i> Account</button>
+            <button id="myOrdersBtn" class="ghost-btn">My Orders</button>
             <button id="logoutBtn" class="ghost-btn">Logout</button>
           </div>
         </div>
@@ -49,14 +52,14 @@
 
       <section class="hero">
         <div class="hero-content">
-          <p class="badge">New season drop</p>
-          <h2>Discover smart essentials that elevate your everyday.</h2>
+          <p class="badge">Hot meals, fast delivery</p>
+          <h2>Order comfort food, fresh meals, and quick bites in minutes.</h2>
           <p>
-            Curated collections, lightning-fast delivery, and exclusive member perks.
+            Browse food categories, discover bestsellers, and get your next meal delivered fast.
           </p>
           <div class="hero-actions">
-            <button class="primary-btn" id="shopNow">Shop now</button>
-            <button class="ghost-btn" id="viewCollections">View collections</button>
+            <button class="primary-btn" id="shopNow">Order now</button>
+            <button class="ghost-btn" id="viewCollections">Browse menu</button>
           </div>
           <div class="hero-stats">
             <div>
@@ -65,26 +68,26 @@
             </div>
             <div>
               <strong>120k+</strong>
-              <span>Happy customers</span>
+              <span>Food orders delivered</span>
             </div>
             <div>
-              <strong>2-day</strong>
-              <span>Delivery</span>
+              <strong>Fast</strong>
+              <span>Kitchen-to-door delivery</span>
             </div>
           </div>
         </div>
         <div class="hero-card">
           <div class="hero-card-header">
-            <span>Weekend flash sale</span>
-            <span class="timer" id="countdown">02:48:19</span>
+            <span id="heroAdLabel">Sponsored Advertisement</span>
+            <span class="timer" id="heroAdCounter">1/1</span>
           </div>
           <div class="hero-card-body">
-            <h3>SmartHome Starter Kit</h3>
-            <p>Save 40% when you bundle 3 devices.</p>
-            <button class="primary-btn" id="bundleDeal">Get bundle</button>
+            <h3 id="heroAdTitle">Today's Feature</h3>
+            <p id="heroAdMessage">Fresh offers rotate here automatically.</p>
+            <button class="primary-btn" id="heroAdAction">Explore</button>
           </div>
           <div class="hero-card-footer">
-            <span>Limited stock · Ships today</span>
+            <span id="heroAdFooter">Stay tuned for more updates</span>
             <div class="progress">
               <div class="progress-fill" id="stockProgress"></div>
             </div>
@@ -94,16 +97,16 @@
 
       <section class="controls" id="featured">
         <div class="search">
-          <input type="text" id="searchInput" placeholder="Search products" />
-          <button class="icon-btn" id="searchClear">✕</button>
+          <input type="text" id="searchInput" placeholder="Search meals or categories" />
+          <button class="icon-btn" id="searchClear"><i class="ri-close-line"></i></button>
         </div>
         <div class="filters">
           <select id="categoryFilter">
             <option value="all">All categories</option>
-            <option value="tech">Tech</option>
-            <option value="home">Home</option>
-            <option value="fashion">Fashion</option>
-            <option value="fitness">Fitness</option>
+            <option value="kottu">Kottu</option>
+            <option value="pizza">Pizza</option>
+            <option value="bakery">Bakery Products</option>
+            <option value="beverages">Beverages</option>
           </select>
           <select id="sortFilter">
             <option value="featured">Sort: Featured</option>
@@ -118,43 +121,59 @@
 
       <section class="split" id="deals">
         <div class="deal-card">
-          <h3>Member-only perks</h3>
-          <p>Unlock early access, hidden drops, and loyalty credits.</p>
-          <button class="ghost-btn">Join free</button>
+          <h3>Fast delivery zones</h3>
+          <p>See which areas qualify for quick drop-offs and low delivery fees.</p>
+          <button class="ghost-btn">Check area</button>
         </div>
         <div class="deal-card highlight">
-          <h3>Eco delivery</h3>
-          <p>Choose carbon-neutral shipping and earn bonus points.</p>
-          <button class="primary-btn">Learn more</button>
+          <h3>Meal deals</h3>
+          <p>Mix mains, sides, and drinks for better value on every order.</p>
+          <button class="primary-btn">View deals</button>
         </div>
         <div class="deal-card">
-          <h3>Gift studio</h3>
-          <p>Wrap it your way with custom notes and premium packaging.</p>
-          <button class="ghost-btn">Build a gift</button>
+          <h3>Fresh prep</h3>
+          <p>Made to order with clear ingredients and easy reorder options.</p>
+          <button class="ghost-btn">See kitchen menu</button>
         </div>
       </section>
 
       <section class="categories" id="categories">
-        <h3>Shop by category</h3>
+        <h3>Our Services</h3>
         <div class="category-grid">
-          <button data-category="tech">Smart Tech</button>
-          <button data-category="home">Home Living</button>
-          <button data-category="fashion">Style & Fashion</button>
-          <button data-category="fitness">Fitness & Wellness</button>
+          <div class="service-card">
+            <div class="service-icon">🚚</div>
+            <h4>Fast Delivery</h4>
+            <p>Get your order delivered in 30 minutes or less</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">💳</div>
+            <h4>Secure Payments</h4>
+            <p>Multiple payment options with encrypted transactions</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">⭐</div>
+            <h4>Quality Assured</h4>
+            <p>Fresh food from trusted restaurants and vendors</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">📱</div>
+            <h4>Easy Ordering</h4>
+            <p>Simple app interface for quick and easy ordering</p>
+          </div>
         </div>
       </section>
 
       <section class="about" id="about">
         <div>
-          <h3>Why ShopVerse?</h3>
+          <h3>Why Choose BUY LK?</h3>
           <p>
-            We blend design-forward products, dependable delivery, and customer-first support.
-            Every purchase fuels sustainability initiatives and local makers.
+            We deliver excellence through fast service, secure payments, and quality assurance. 
+            Experience hassle-free ordering with our user-friendly platform and dedicated customer support.
           </p>
         </div>
         <div class="newsletter">
           <h4>Stay in the loop</h4>
-          <p>Get weekly drops, price alerts, and curated inspiration.</p>
+          <p>Get menu drops, deal alerts, and delivery updates.</p>
           <form id="newsletterForm">
             <input type="email" id="newsletterEmail" placeholder="Email address" required />
             <button class="primary-btn" type="submit">Notify me</button>
@@ -162,43 +181,250 @@
           <span id="newsletterMsg"></span>
         </div>
       </section>
-
-      <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers. (GROUP NO-10 E‑Commerce PROJECT)</p>
-        <div class="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Support</a>
-        </div>
-      </footer>
     </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>BUY LK</h3>
+          <p>Fast food delivery service bringing fresh meals to your doorstep in 30 minutes or less.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook" class="social-icon" title="Facebook">f</a>
+            <a href="#" aria-label="Twitter" class="social-icon" title="Twitter">X</a>
+            <a href="#" aria-label="Instagram" class="social-icon" title="Instagram">◉</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Categories</h4>
+          <ul>
+            <li><a href="#">Kottu</a></li>
+            <li><a href="#">Pizza</a></li>
+            <li><a href="#">Bakery</a></li>
+            <li><a href="#">Beverages</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <ul class="contact-info">
+            <li><span class="contact-icon">📍</span> Colombo, Sri Lanka</li>
+            <li><span class="contact-icon">☎</span> +94 11 234 5678</li>
+            <li><span class="contact-icon">✉</span> support@buylk.lk</li>
+            <li><span class="contact-icon">🕒</span> 9:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Newsletter</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 12px;">Get delivery updates and exclusive offers</p>
+          <form class="footer-newsletter" id="footerNewsletterForm">
+            <input type="email" placeholder="Your email" required />
+            <button type="submit" class="primary-btn">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BUY LK. All rights reserved. | Crafted for fast food delivery</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <span>•</span>
+          <a href="#">Terms of Service</a>
+          <span>•</span>
+          <a href="#">Cookie Policy</a>
+        </div>
+      </div>
+    </footer>
 
     <aside class="cart-drawer" id="cartDrawer">
       <div class="cart-header">
-        <h3>Your cart</h3>
-        <button class="icon-btn" id="closeCart">✕</button>
+          <h3>Your order</h3>
+        <button class="icon-btn" id="closeCart"><i class="ri-close-line"></i></button>
       </div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-summary">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotal">$0.00</span>
+          <span id="cartSubtotal">USD 0.00</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span id="cartShipping">$0.00</span>
+          <span id="cartShipping">USD 0.00</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span id="cartTotal">$0.00</span>
+          <span id="cartTotal">USD 0.00</span>
         </div>
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
     </aside>
 
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+      <div class="payment-container">
+        <button class="payment-close" id="closePayment"><i class="ri-close-line"></i></button>
+        <div class="payment-content">
+          <h2>Payment</h2>
+          <div class="payment-summary">
+            <div class="payment-row">
+              <span>Subtotal</span>
+              <span id="paymentSubtotal">USD 0.00</span>
+            </div>
+            <div class="payment-row">
+              <span>Shipping</span>
+              <span id="paymentShipping">USD 0.00</span>
+            </div>
+            <div class="payment-row total">
+              <span>Total Amount</span>
+              <span id="paymentTotal">USD 0.00</span>
+            </div>
+          </div>
+
+          <form class="payment-form" id="paymentForm">
+            <div class="form-section">
+              <h3>Billing Information</h3>
+              <div class="form-row">
+                <input type="text" placeholder="First Name" required />
+                <input type="text" placeholder="Last Name" required />
+              </div>
+              <input type="email" placeholder="Email Address" required />
+              <input type="text" placeholder="Street Address" required />
+              <div class="form-row">
+                <input type="text" placeholder="City" required />
+                <input type="text" placeholder="Postal Code" required />
+              </div>
+              <input type="tel" placeholder="Phone Number" required />
+            </div>
+
+            <div class="form-section">
+              <h3>Secure Stripe Checkout</h3>
+              <p style="color: var(--muted); margin: 0; line-height: 1.6;">
+                Your card details and payment method are entered on Stripe's secure page after you continue.
+              </p>
+            </div>
+
+            <label class="checkbox-label">
+              <input type="checkbox" required />
+              <span>I agree to the terms and conditions</span>
+            </label>
+
+            <button type="submit" class="primary-btn payment-btn">Complete Payment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div class="wishlist-modal" id="wishlistModal">
+      <div class="wishlist-container">
+        <div class="wishlist-header">
+          <h2>My Wishlist</h2>
+          <button class="wishlist-close" id="closeWishlist"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="wishlist-items" id="wishlistItems"></div>
+      </div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="product-modal" id="productModal" style="display: none;">
+      <div class="product-modal-content">
+        <button class="modal-close" id="closeProductModal"><i class="ri-close-line"></i></button>
+        
+        <div class="product-details-container">
+          <div class="product-details-left">
+            <img id="productModalImage" src="" alt="Product Image" class="product-modal-image">
+            <div class="product-modal-info">
+              <h2 id="productModalName"></h2>
+              <div class="product-modal-rating">
+                <span class="rating-stars" id="productModalStars"></span>
+                <span id="productModalRating"></span>
+                <span id="productModalReviewCount"></span>
+              </div>
+              <p class="product-modal-price" id="productModalPrice"></p>
+              <p class="product-modal-description" id="productModalDescription"></p>
+              <div class="product-modal-actions">
+                <button class="primary-btn" id="productModalAddCart">Add to Cart</button>
+                <button class="secondary-btn" id="productModalWishlist"><i class="ri-heart-line"></i> Wishlist</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="product-details-right">
+            <div class="reviews-section">
+              <h3>Customer Reviews</h3>
+              
+              <div class="reviews-summary">
+                <div class="average-rating">
+                  <span class="rating-number" id="averageRatingNumber">0.0</span>
+                  <div class="rating-stars" id="averageRatingStars"></div>
+                  <span class="review-count" id="totalReviewsCount">0 reviews</span>
+                </div>
+              </div>
+
+              <div class="review-form-container">
+                <h4>Write a Review</h4>
+                <form id="reviewForm" class="review-form">
+                  <div class="form-group">
+                    <label for="reviewRating">Rating</label>
+                    <div class="star-rating-input" id="starRatingInput">
+                      <span class="star" data-rating="1">☆</span>
+                      <span class="star" data-rating="2">☆</span>
+                      <span class="star" data-rating="3">☆</span>
+                      <span class="star" data-rating="4">☆</span>
+                      <span class="star" data-rating="5">☆</span>
+                    </div>
+                    <input type="hidden" id="reviewRating" name="rating" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="reviewName">Name</label>
+                    <input type="text" id="reviewName" name="name" placeholder="Your name" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="reviewComment">Your Review</label>
+                    <textarea id="reviewComment" name="comment" rows="4" placeholder="Share your experience with this product..." required></textarea>
+                  </div>
+                  <button type="submit" class="primary-btn">Submit Review</button>
+                </form>
+              </div>
+
+              <div class="reviews-list" id="reviewsList">
+                <p class="no-reviews">No reviews yet. Be the first to review!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="orders-modal" id="ordersModal">
+      <div class="orders-modal-content">
+        <div class="orders-modal-header">
+          <h3>My Orders</h3>
+          <button class="icon-btn" id="closeOrdersModal"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="orders-list" id="ordersList">
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
-    <script src="api.js"></script>
-    <script src="script.js"></script>
+    <script src="api.js?v=20260425"></script>
+    <script src="script.js?v=20260425"></script>
+    <script src="product-modal.js?v=20260425"></script>
   </body>
 </html>

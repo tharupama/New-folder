@@ -57,7 +57,6 @@ try {
         $name = trim($input['name'] ?? '');
         $category = trim($input['category'] ?? '');
         $price = floatval($input['price'] ?? 0);
-        $rating = floatval($input['rating'] ?? 4.5);
         $tag = trim($input['tag'] ?? '');
         $image = trim($input['image'] ?? '');
         $description = trim($input['description'] ?? '');
@@ -71,8 +70,9 @@ try {
         }
         
         // Insert product
+        // Rating is review-driven; start at 0 until customer reviews are submitted.
         $stmt = $pdo->prepare("INSERT INTO products (name, category, price, rating, tag, image, description, stock, is_available) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)");
-        $stmt->execute([$name, $category, $price, $rating, $tag, $image, $description, $stock]);
+        $stmt->execute([$name, $category, $price, 0, $tag, $image, $description, $stock]);
         
         http_response_code(201);
         echo json_encode([
@@ -105,7 +105,6 @@ try {
         $name = trim($input['name'] ?? '');
         $category = trim($input['category'] ?? '');
         $price = floatval($input['price'] ?? 0);
-        $rating = floatval($input['rating'] ?? 4.5);
         $tag = trim($input['tag'] ?? '');
         $image = trim($input['image'] ?? '');
         $description = trim($input['description'] ?? '');
@@ -119,8 +118,8 @@ try {
         }
         
         // Update product
-        $stmt = $pdo->prepare("UPDATE products SET name = ?, category = ?, price = ?, rating = ?, tag = ?, image = ?, description = ?, stock = ? WHERE id = ?");
-        $stmt->execute([$name, $category, $price, $rating, $tag, $image, $description, $stock, $productId]);
+        $stmt = $pdo->prepare("UPDATE products SET name = ?, category = ?, price = ?, tag = ?, image = ?, description = ?, stock = ? WHERE id = ?");
+        $stmt->execute([$name, $category, $price, $tag, $image, $description, $stock, $productId]);
         
         http_response_code(200);
         echo json_encode([

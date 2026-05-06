@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful - BUY LK</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at top, rgba(16, 185, 129, 0.16), transparent 42%),
+          linear-gradient(180deg, rgba(15, 23, 42, 0.04), rgba(15, 23, 42, 0.01));
+      }
+
+      .payment-shell {
+        width: min(100%, 760px);
+        padding: 24px;
+      }
+
+      .payment-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 44px;
+        text-align: center;
+      }
+
+      .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #fff;
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      .payment-card h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin-bottom: 12px;
+      }
+
+      .payment-card p {
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 58ch;
+        margin: 0 auto 14px;
+      }
+
+      .payment-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+
+      .payment-actions a {
+        text-decoration: none;
+      }
+
+      .secondary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 160px;
+        padding: 14px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: transparent;
+        font-weight: 600;
+      }
+
+      .hint {
+        margin-top: 18px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="payment-shell">
+      <section class="payment-card">
+        <div class="payment-badge">✓</div>
+        <h1>Payment completed</h1>
+        <p>
+          Your Stripe checkout session was created successfully. If Stripe confirms the payment, your cart will be cleared automatically on this page.
+        </p>
+        <p class="hint" id="sessionLine">Verifying checkout session...</p>
+        <div class="payment-actions">
+          <a class="primary-btn" href="index.html">Continue shopping</a>
+          <a class="secondary-btn" href="shop.html">Browse products</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script>
+      async function finalizeSuccessfulPayment() {
+        const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get('session_id');
+        const sessionLine = document.getElementById('sessionLine');
+        const successMessage = sessionId
+          ? `Payment successful. Stripe session ${sessionId} completed.`
+          : 'Payment successful. Stripe checkout completed.';
+
+        if (sessionId) {
+          sessionLine.textContent = `Checkout session ${sessionId} completed.`;
+        } else {
+          sessionLine.textContent = 'Checkout session completed.';
+        }
+
+        try {
+          const pendingOrder = JSON.parse(localStorage.getItem('buyLkPendingOrder') || 'null');
+
+          if (pendingOrder && typeof createOrder !== 'undefined') {
+            const createOrderResponse = await createOrder(pendingOrder);
+            if (createOrderResponse.success && createOrderResponse.data?.success) {
+              sessionLine.textContent = `Order #${createOrderResponse.data.order_id} placed successfully.`;
+            } else {
+              console.warn('Order creation failed after payment:', createOrderResponse);
+            }
+          }
+        } catch (error) {
+          console.warn('Unable to save order after payment:', error);
+        } finally {
+          localStorage.removeItem('buyLkPendingOrder');
+        }
+
+        localStorage.setItem(
+          'buyLkPaymentMessage',
+          JSON.stringify({
+            text: successMessage,
+            expiresAt: Date.now() + 60000,
+          })
+        );
+
+        localStorage.removeItem('buyLkCart');
+        window.dispatchEvent(new Event('storage'));
+
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 6000);
+      }
+
+      finalizeSuccessfulPayment();
+    </script>
+  </body>
+</html>

@@ -216,7 +216,7 @@
           <span class="logo">BL</span>
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
+            <p>Fresh food delivered fast</p>
           </div>
         </div>
         <nav class="nav">
@@ -236,7 +236,7 @@
       <div class="auth-container">
         <div class="auth-header">
           <h2>Welcome back</h2>
-          <p>Sign in to your account to continue shopping</p>
+          <p>Sign in to order faster and track deliveries</p>
         </div>
 
         <div id="errorMsg" class="error-message"></div>
@@ -275,7 +275,7 @@
         </form>
 
         <div class="forgot-link">
-          <a href="#">Forgot your password?</a>
+          <a href="forgot-password.html">Forgot your password?</a>
         </div>
 
         <div class="auth-divider">or</div>
@@ -291,7 +291,7 @@
       </div>
 
       <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <p>© 2026 BUY LK. Crafted for fast food delivery.</p>
         <div class="footer-links">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
@@ -309,15 +309,15 @@
       <div class="cart-summary">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotal">$0.00</span>
+          <span id="cartSubtotal">USD 0.00</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span id="cartShipping">$0.00</span>
+          <span id="cartShipping">USD 0.00</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span id="cartTotal">$0.00</span>
+          <span id="cartTotal">USD 0.00</span>
         </div>
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
@@ -421,9 +421,9 @@
         const entries = [...cart.entries()];
         if (entries.length === 0) {
           cartItems.innerHTML = "<p>Your cart is empty.</p>";
-          if (cartSubtotal) cartSubtotal.textContent = "$0.00";
-          if (cartShipping) cartShipping.textContent = "$0.00";
-          if (cartTotal) cartTotal.textContent = "$0.00";
+          if (cartSubtotal) cartSubtotal.textContent = "Rs 0.00";
+          if (cartShipping) cartShipping.textContent = "Rs 0.00";
+          if (cartTotal) cartTotal.textContent = "Rs 0.00";
           return;
         }
 
@@ -433,7 +433,7 @@
           .join("");
 
         if (cartSubtotal) cartSubtotal.textContent = "$" + subtotal.toFixed(2);
-        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "$0.00" : "$12.00";
+        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "Rs 0.00" : "Rs 12.00";
         if (cartTotal) cartTotal.textContent = "$" + (subtotal + (subtotal > 200 ? 0 : 12)).toFixed(2);
       };
 
