@@ -1,14 +1,103 @@
+console.log("script.js loaded");
+
 const products = [];
 
-const state = {
-  cart: new Map(),
-  wishlist: new Set(),
-  search: "",
-  category: "all",
-  sort: "featured",
-  theme: localStorage.getItem("theme") || "light",
-  stock: 72,
-  user: JSON.parse(localStorage.getItem("user") || "null"),
+const normalizeWishlistIds = (rawWishlist) => {
+  if (!Array.isArray(rawWishlist)) {
+    return [];
+  }
+
+  return rawWishlist
+    .map((item) => Number(item))
+    .filter((id) => Number.isInteger(id) && id > 0);
+};
+
+const isValidWishlistId = (id) => Number.isInteger(Number(id)) && Number(id) > 0;
+
+const sanitizeWishlistState = () => {
+  const sanitizedIds = Array.from(state.wishlist).filter((id) => isValidWishlistId(id));
+
+  if (sanitizedIds.length !== state.wishlist.size) {
+    state.wishlist = new Set(sanitizedIds.map((id) => Number(id)));
+    return true;
+  }
+
+  return false;
+};
+
+// Initialize state with localStorage support
+const initializeState = () => {
+  // Load cart from localStorage
+  const savedCart = localStorage.getItem("buyLkCart");
+  const cartData = savedCart ? JSON.parse(savedCart) : {};
+  // Convert string keys back to numbers
+  const cartEntries = Object.entries(cartData).map(([key, value]) => [parseInt(key), value]);
+  const cart = new Map(cartEntries);
+  
+  // Load wishlist from localStorage
+  let wishlistData = [];
+  const savedWishlist = localStorage.getItem("buyLkWishlist");
+
+  if (savedWishlist) {
+    try {
+      wishlistData = JSON.parse(savedWishlist);
+    } catch (error) {
+      console.warn("Invalid wishlist data in localStorage. Resetting wishlist.", error);
+    }
+  }
+
+  const normalizedWishlist = normalizeWishlistIds(wishlistData);
+  const wishlist = new Set(normalizedWishlist);
+
+  if (savedWishlist && JSON.stringify(normalizedWishlist) !== JSON.stringify(wishlistData)) {
+    localStorage.setItem("buyLkWishlist", JSON.stringify(normalizedWishlist));
+  }
+  
+  return {
+    cart: cart,
+    wishlist: wishlist,
+    search: "",
+    category: "all",
+    sort: "featured",
+    theme: localStorage.getItem("theme") || "light",
+    stock: 72,
+    user: JSON.parse(localStorage.getItem("user") || "null"),
+  };
+};
+
+const state = initializeState();
+
+// Save cart to localStorage
+const saveCart = () => {
+  const cartObj = Object.fromEntries(state.cart);
+  localStorage.setItem("buyLkCart", JSON.stringify(cartObj));
+};
+
+// Save wishlist to localStorage
+const saveWishlist = () => {
+  sanitizeWishlistState();
+  const wishlistArray = Array.from(state.wishlist).map((id) => Number(id));
+  localStorage.setItem("buyLkWishlist", JSON.stringify(wishlistArray));
+};
+
+const syncWishlistWithProducts = () => {
+  if (!Array.isArray(products) || products.length === 0) {
+    return;
+  }
+
+  const validProductIds = new Set(products.map((product) => Number(product.id)));
+  const originalSize = state.wishlist.size;
+
+  for (const id of Array.from(state.wishlist)) {
+    if (!validProductIds.has(Number(id))) {
+      state.wishlist.delete(id);
+    }
+  }
+
+  if (state.wishlist.size !== originalSize) {
+    sanitizeWishlistState();
+    saveWishlist();
+  }
 };
 
 // Load products from database
@@ -29,7 +118,10 @@ async function loadProducts() {
       console.log("Converted products:", convertedProducts);
       products.push(...convertedProducts); // Add products from database
       console.log("Products array after push:", products);
+      syncWishlistWithProducts();
       applyFilters(); // Render products
+      renderCart(); // Re-render cart with loaded products
+      updateCounts();
       console.log("applyFilters called");
     } else {
       console.error("Failed to load products: Invalid response structure");
@@ -58,17 +150,46 @@ const countdown = document.getElementById("countdown");
 const stockProgress = document.getElementById("stockProgress");
 const newsletterForm = document.getElementById("newsletterForm");
 const newsletterMsg = document.getElementById("newsletterMsg");
+const ordersModal = document.getElementById("ordersModal");
+const ordersList = document.getElementById("ordersList");
+const myOrdersBtn = document.getElementById("myOrdersBtn");
+const closeOrdersModalBtn = document.getElementById("closeOrdersModal");
+const WEB3FORMS_ACCESS_KEY = "986142cb-9e5c-4750-a459-2a2cfea13252";
+let advertisements = [];
+let currentAdvertisementIndex = 0;
+let advertisementIntervalId = null;
+const AD_ROTATION_MS = 5000;
+const AD_PROGRESS_TICK_MS = 120;
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+const currency = {
+  format: (value) => `LKR ${Number(value).toFixed(2)}`,
+};
 
 const showToast = (message) => {
   if (!toast) return;
   toast.textContent = message;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2400);
+};
+
+const showStoredPaymentMessage = () => {
+  try {
+    const storedMessage = JSON.parse(localStorage.getItem("buyLkPaymentMessage") || "null");
+    if (!storedMessage || !storedMessage.text) {
+      return;
+    }
+
+    if (storedMessage.expiresAt && Date.now() > storedMessage.expiresAt) {
+      localStorage.removeItem("buyLkPaymentMessage");
+      return;
+    }
+
+    showToast(storedMessage.text);
+    localStorage.removeItem("buyLkPaymentMessage");
+  } catch (error) {
+    console.warn("Unable to show stored payment message:", error);
+    localStorage.removeItem("buyLkPaymentMessage");
+  }
 };
 
 const setTheme = (theme) => {
@@ -79,6 +200,90 @@ const setTheme = (theme) => {
   if (toggle) {
     toggle.textContent = theme === "dark" ? "☀️" : "🌙";
   }
+};
+
+const getOrderStatusClass = (status) => {
+  const normalizedStatus = String(status || "pending").toLowerCase();
+  if (normalizedStatus === "delivered") return "status-delivered";
+  if (normalizedStatus === "cancelled") return "status-cancelled";
+  if (normalizedStatus === "shipped") return "status-shipped";
+  if (normalizedStatus === "processing") return "status-processing";
+  return "status-pending";
+};
+
+const renderOrders = (orders) => {
+  if (!ordersList) return;
+
+  if (!Array.isArray(orders) || orders.length === 0) {
+    ordersList.innerHTML = "<p>You have no orders yet.</p>";
+    return;
+  }
+
+  ordersList.innerHTML = orders
+    .map((order) => {
+      const formattedDate = order.created_at
+        ? new Date(order.created_at).toLocaleString()
+        : "-";
+      const status = String(order.status || "pending").toLowerCase();
+      return `
+        <article class="order-card">
+          <div class="order-card-head">
+            <h4>Order #${order.id}</h4>
+            <span class="order-status-badge ${getOrderStatusClass(status)}">${status}</span>
+          </div>
+          <p><strong>Total:</strong> ${currency.format(order.total_amount || 0)}</p>
+          <p><strong>Placed:</strong> ${formattedDate}</p>
+        </article>
+      `;
+    })
+    .join("");
+};
+
+const loadCustomerOrders = async () => {
+  if (!ordersList) return;
+
+  if (!state.user || !state.user.email) {
+    ordersList.innerHTML = "<p>Please sign in to see your order status.</p>";
+    return;
+  }
+
+  if (typeof getOrders === "undefined") {
+    ordersList.innerHTML = "<p>Orders API unavailable.</p>";
+    return;
+  }
+
+  ordersList.innerHTML = "<p>Loading your orders...</p>";
+
+  try {
+    const response = await getOrders({
+      user_email: state.user.email,
+      supabase_user_id: state.user.id || ""
+    });
+
+    if (!response.success) {
+      ordersList.innerHTML = `<p>${response.data?.message || "Unable to load orders."}</p>`;
+      return;
+    }
+
+    renderOrders(response.data);
+  } catch (error) {
+    console.error("Failed to load customer orders:", error);
+    ordersList.innerHTML = "<p>Error loading orders. Please try again.</p>";
+  }
+};
+
+const openOrdersModal = async () => {
+  if (!ordersModal) return;
+
+  ordersModal.classList.add("show");
+  document.body.style.overflow = "hidden";
+  await loadCustomerOrders();
+};
+
+const closeOrdersModal = () => {
+  if (!ordersModal) return;
+  ordersModal.classList.remove("show");
+  document.body.style.overflow = "auto";
 };
 
 const applyFilters = () => {
@@ -138,6 +343,10 @@ const renderProducts = (items) => {
 };
 
 const updateCounts = () => {
+  if (sanitizeWishlistState()) {
+    saveWishlist();
+  }
+
   if (cartCount) {
     cartCount.textContent = [...state.cart.values()].reduce(
     (sum, qty) => sum + qty,
@@ -164,7 +373,16 @@ const renderCart = () => {
   let subtotal = 0;
   cartItems.innerHTML = entries
     .map(([id, qty]) => {
-      const product = products.find((item) => item.id === id);
+      const product = products.find((item) => {
+        // Handle both string and number comparisons
+        return item.id == id || item.id === parseInt(id);
+      });
+      
+      if (!product) {
+        console.warn("Product not found for cart item:", id, "Available products:", products.length);
+        return "";
+      }
+      
       const lineTotal = product.price * qty;
       subtotal += lineTotal;
       return `
@@ -181,6 +399,7 @@ const renderCart = () => {
       </div>
       `;
     })
+    .filter(html => html !== "") // Remove empty items
     .join("");
 
   const shipping = subtotal > 200 ? 0 : 12;
@@ -209,12 +428,116 @@ const updateCountdown = () => {
   }
 };
 
-const updateStock = () => {
-  state.stock = Math.max(12, state.stock - Math.floor(Math.random() * 6));
-  if (stockProgress) {
-    stockProgress.style.width = `${state.stock}%`;
+const getFallbackAdvertisements = () => ([
+  {
+    title: "Weekend Family Combo",
+    message: "Order 2 large pizzas and get a free drink combo.",
+    button_text: "Order Now",
+    button_link: "shop.html",
+    footer_text: "Limited-time offer"
+  },
+  {
+    title: "Bakery Fresh Hour",
+    message: "Fresh buns and pastries every evening from 5 PM to 7 PM.",
+    button_text: "Browse Bakery",
+    button_link: "shop.html",
+    footer_text: "Hot and fresh from the oven"
+  },
+  {
+    title: "Late Night Kottu Deal",
+    message: "Enjoy special prices on kottu after 9 PM.",
+    button_text: "View Deal",
+    button_link: "shop.html",
+    footer_text: "Available tonight only"
   }
+]);
+
+const renderAdvertisement = (index) => {
+  const adTitle = document.getElementById("heroAdTitle");
+  const adMessage = document.getElementById("heroAdMessage");
+  const adAction = document.getElementById("heroAdAction");
+  const adFooter = document.getElementById("heroAdFooter");
+  const adCounter = document.getElementById("heroAdCounter");
+
+  if (!adTitle || !adMessage || !adAction || !adFooter || !adCounter || advertisements.length === 0) {
+    return;
+  }
+
+  const currentAd = advertisements[index];
+  adTitle.textContent = currentAd.title || "Featured Advertisement";
+  adMessage.textContent = currentAd.message || "Check out the latest update.";
+  adAction.textContent = currentAd.button_text || "Explore";
+  adFooter.textContent = currentAd.footer_text || "More offers coming soon";
+  adCounter.textContent = `${index + 1}/${advertisements.length}`;
+  adAction.dataset.adLink = currentAd.button_link || "shop.html";
 };
+
+const startAdvertisementRotation = () => {
+  const adAction = document.getElementById("heroAdAction");
+  if (!adAction || advertisements.length === 0) return;
+
+  renderAdvertisement(currentAdvertisementIndex);
+
+  adAction.addEventListener("click", () => {
+    const adLink = adAction.dataset.adLink || "shop.html";
+    if (/^https?:\/\//i.test(adLink)) {
+      window.open(adLink, "_blank", "noopener,noreferrer");
+      return;
+    }
+    window.location.href = adLink;
+  });
+
+  if (advertisementIntervalId) {
+    clearInterval(advertisementIntervalId);
+  }
+
+  const cycleDuration = advertisements.length * AD_ROTATION_MS;
+  const cycleStartTime = Date.now() - currentAdvertisementIndex * AD_ROTATION_MS;
+
+  const syncAdvertisementAndProgress = () => {
+    const elapsed = Date.now() - cycleStartTime;
+    const cycleElapsed = elapsed % cycleDuration;
+
+    const nextIndex = Math.floor(cycleElapsed / AD_ROTATION_MS);
+    if (nextIndex !== currentAdvertisementIndex) {
+      currentAdvertisementIndex = nextIndex;
+      renderAdvertisement(currentAdvertisementIndex);
+    }
+
+    if (stockProgress) {
+      const progressPercent = (cycleElapsed / cycleDuration) * 100;
+      stockProgress.style.width = `${progressPercent.toFixed(2)}%`;
+    }
+  };
+
+  syncAdvertisementAndProgress();
+  advertisementIntervalId = setInterval(syncAdvertisementAndProgress, AD_PROGRESS_TICK_MS);
+};
+
+async function loadAdvertisementsForHero() {
+  const adTitle = document.getElementById("heroAdTitle");
+  if (!adTitle) return;
+
+  try {
+    if (typeof getAdvertisements === "undefined") {
+      advertisements = getFallbackAdvertisements();
+      startAdvertisementRotation();
+      return;
+    }
+
+    const response = await getAdvertisements();
+    if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+      advertisements = response.data;
+    } else {
+      advertisements = getFallbackAdvertisements();
+    }
+  } catch (error) {
+    console.error("Error loading advertisements:", error);
+    advertisements = getFallbackAdvertisements();
+  }
+
+  startAdvertisementRotation();
+}
 
 if (productGrid) {
   productGrid.addEventListener("click", (event) => {
@@ -222,7 +545,14 @@ if (productGrid) {
     if (!card) return;
 
     const id = Number(card.dataset.id);
+    
+    // Handle wishlist button click
     if (event.target.dataset.action === "wishlist") {
+      if (!isValidWishlistId(id)) {
+        showToast("This product cannot be added to wishlist");
+        return;
+      }
+
       if (state.wishlist.has(id)) {
         state.wishlist.delete(id);
         showToast("Removed from wishlist");
@@ -230,10 +560,13 @@ if (productGrid) {
         state.wishlist.add(id);
         showToast("Saved to wishlist");
       }
+      saveWishlist();
       applyFilters();
       updateCounts();
+      return;
     }
 
+    // Handle add to cart button click
     if (event.target.dataset.action === "cart") {
       // Check if product is available before adding to cart
       const product = products.find(p => p.id === id);
@@ -242,9 +575,18 @@ if (productGrid) {
         return;
       }
       state.cart.set(id, (state.cart.get(id) || 0) + 1);
+      saveCart();
       showToast("Added to cart");
       updateCounts();
       renderCart();
+      return;
+    }
+    
+    // If clicking anywhere else on the card, open product details modal
+    if (!event.target.dataset.action) {
+      if (typeof openProductModal === 'function') {
+        openProductModal(id);
+      }
     }
   });
 }
@@ -267,6 +609,7 @@ if (cartItems) {
       }
     }
 
+    saveCart();
     updateCounts();
     renderCart();
   });
@@ -407,20 +750,45 @@ if (contactForm) {
     submitBtn.disabled = true;
 
     try {
-      if (typeof submitContact !== "undefined") {
-        const response = await submitContact(name, email, subject, message);
-        
-        if (response.success) {
-          if (contactMsg) {
-            contactMsg.textContent = "Thank you! Your message has been sent successfully.";
-            contactMsg.style.color = "#10b981";
+      const web3formsPayload = {
+        access_key: WEB3FORMS_ACCESS_KEY,
+        name,
+        email,
+        subject,
+        message,
+      };
+
+      const web3formsResponse = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(web3formsPayload),
+      });
+
+      const web3formsResult = await web3formsResponse.json();
+
+      if (web3formsResult.success) {
+        // Keep existing backend contact storage as a non-blocking secondary action.
+        if (typeof submitContact !== "undefined") {
+          try {
+            await submitContact(name, email, subject, message);
+          } catch (storeError) {
+            console.warn("Contact saved email sent, but backend save failed:", storeError);
           }
-          contactForm.reset();
-        } else {
-          if (contactMsg) {
-            contactMsg.textContent = response.data.message || "Failed to send message. Please try again.";
-            contactMsg.style.color = "#ef4444";
-          }
+        }
+
+        if (contactMsg) {
+          contactMsg.textContent = "Message sent successfully!";
+          contactMsg.style.color = "#10b981";
+        }
+        alert("Message sent successfully!");
+        contactForm.reset();
+      } else {
+        if (contactMsg) {
+          contactMsg.textContent = web3formsResult.message || "Failed to send message. Please try again.";
+          contactMsg.style.color = "#ef4444";
         }
       }
     } catch (error) {
@@ -489,41 +857,403 @@ if (viewCollections) {
   });
 }
 
-const bundleDeal = document.getElementById("bundleDeal");
-if (bundleDeal) {
-  bundleDeal.addEventListener("click", () => {
-    state.cart.set(1, (state.cart.get(1) || 0) + 1);
-    state.cart.set(8, (state.cart.get(8) || 0) + 1);
-    showToast("Bundle added to cart");
-    updateCounts();
-    renderCart();
+// ===== WISHLIST MODAL SYSTEM =====
+function setupWishlistSystem() {
+  console.log("Setting up wishlist system...");
+  
+  const wishlistModal = document.getElementById("wishlistModal");
+  const closeWishlistBtn = document.getElementById("closeWishlist");
+  const wishlistItemsContainer = document.getElementById("wishlistItems");
+  const wishlistBtn = document.getElementById("wishlistBtn");
+  
+  if (!wishlistModal) {
+    console.error("Wishlist modal not found");
+    return false;
+  }
+  
+  // Open wishlist modal
+  function openWishlist() {
+    console.log("Opening wishlist");
+    renderWishlist();
+    wishlistModal.classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+  
+  // Close wishlist modal
+  function closeWishlist() {
+    console.log("Closing wishlist");
+    wishlistModal.classList.remove("show");
+    document.body.style.overflow = "auto";
+  }
+  
+  // Render wishlist items
+  function renderWishlist() {
+    if (!wishlistItemsContainer) return;
+    
+    const wishlistItems = Array.from(state.wishlist).filter((id) =>
+      isValidWishlistId(id) && products.some((product) => Number(product.id) === Number(id))
+    );
+
+    if (wishlistItems.length !== state.wishlist.size) {
+      state.wishlist = new Set(wishlistItems);
+      saveWishlist();
+      updateCounts();
+    }
+    
+    if (wishlistItems.length === 0) {
+      wishlistItemsContainer.innerHTML = `
+        <div class="empty-wishlist">
+          <p>Your wishlist is empty. Start saving your favorites!</p>
+        </div>
+      `;
+      return;
+    }
+    
+    wishlistItemsContainer.innerHTML = wishlistItems
+      .map(id => {
+        const product = products.find(p => p.id == id);
+        if (!product) return "";
+        
+        return `
+          <div class="wishlist-item">
+            <img src="https://via.placeholder.com/100" alt="${product.name}" />
+            <div class="wishlist-item-info">
+              <h4>${product.name}</h4>
+              <p>${product.tag}</p>
+              <div class="wishlist-item-price">${currency.format(product.price)}</div>
+              <div class="wishlist-item-actions">
+                <button class="add-to-cart-btn" data-add-to-cart="${id}">Add to Cart</button>
+                <button class="remove-wishlist-btn" data-remove-wishlist="${id}">Remove</button>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+    
+    // Add event listeners for action buttons
+    wishlistItemsContainer.querySelectorAll("[data-add-to-cart]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = parseInt(e.target.dataset.addToCart);
+        state.cart.set(id, (state.cart.get(id) || 0) + 1);
+        saveCart();
+        updateCounts();
+        renderCart();
+        showToast("Added to cart");
+      });
+    });
+    
+    wishlistItemsContainer.querySelectorAll("[data-remove-wishlist]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = parseInt(e.target.dataset.removeWishlist);
+        if (!isValidWishlistId(id)) {
+          return;
+        }
+        state.wishlist.delete(id);
+        saveWishlist();
+        updateCounts();
+        renderWishlist();
+        showToast("Removed from wishlist");
+      });
+    });
+  }
+  
+  // Wishlist button click
+  if (wishlistBtn) {
+    wishlistBtn.addEventListener("click", openWishlist);
+    console.log("Wishlist button listener added");
+  }
+  
+  // Close button click
+  if (closeWishlistBtn) {
+    closeWishlistBtn.addEventListener("click", closeWishlist);
+  }
+  
+  // Close on background click
+  wishlistModal.addEventListener("click", (e) => {
+    if (e.target === wishlistModal) {
+      closeWishlist();
+    }
   });
+  
+  console.log("Wishlist system setup complete");
+  return true;
 }
 
-const checkoutBtn = document.getElementById("checkoutBtn");
-if (checkoutBtn) {
-  checkoutBtn.addEventListener("click", () => {
-    showToast("Checkout coming soon");
+// ===== PAYMENT MODAL SYSTEM =====
+function setupPaymentSystem() {
+  console.log("Setting up payment system...");
+  
+  const paymentModal = document.getElementById("paymentModal");
+  const closePaymentBtn = document.getElementById("closePayment");
+  const paymentForm = document.getElementById("paymentForm");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  
+  if (!paymentModal) {
+    console.error("Payment modal element not found");
+    return false;
+  }
+
+  if (paymentForm) {
+    paymentForm.setAttribute("novalidate", "novalidate");
+  }
+  
+  // Open payment modal
+  function openPayment() {
+    console.log("Opening payment modal");
+    if (state.cart.size === 0) {
+      showToast("Your cart is empty");
+      return;
+    }
+    
+    // Calculate totals
+    let subtotal = 0;
+    state.cart.forEach((qty, productId) => {
+      const product = products.find(p => p.id == productId);
+      if (product) {
+        subtotal += product.price * qty;
+      }
+    });
+    
+    const shipping = subtotal >= 200 ? 0 : 9.99;
+    const total = subtotal + shipping;
+    
+    // Update amounts
+    document.getElementById("paymentSubtotal").textContent = currency.format(subtotal);
+    document.getElementById("paymentShipping").textContent = currency.format(shipping);
+    document.getElementById("paymentTotal").textContent = currency.format(total);
+    
+    // Show modal
+    paymentModal.classList.add("show");
+    document.body.style.overflow = "hidden";
+    console.log("Payment modal is now visible");
+  }
+  
+  // Close payment modal
+  function closePayment() {
+    console.log("Closing payment modal");
+    paymentModal.classList.remove("show");
+    document.body.style.overflow = "auto";
+  }
+  
+  // Checkout button click
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", openPayment);
+    console.log("Checkout button listener added");
+  }
+  
+  // Close button click
+  if (closePaymentBtn) {
+    closePaymentBtn.addEventListener("click", closePayment);
+  }
+  
+  // Close on background click
+  paymentModal.addEventListener("click", (e) => {
+    if (e.target === paymentModal) {
+      closePayment();
+    }
   });
+  
+  // Form submission
+  if (paymentForm) {
+    paymentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      console.log("Payment form submitted");
+      
+      const submitBtn = paymentForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
+      submitBtn.textContent = "Redirecting...";
+      submitBtn.disabled = true;
+      
+      try {
+        const billingInputs = paymentForm.querySelectorAll(
+          'input:not([type="checkbox"]):not([type="submit"])'
+        );
+        const firstName = billingInputs[0]?.value.trim() || "";
+        const lastName = billingInputs[1]?.value.trim() || "";
+        const email = billingInputs[2]?.value.trim() || state.user?.email || "";
+        const streetAddress = billingInputs[3]?.value.trim() || "";
+        const city = billingInputs[4]?.value.trim() || "";
+        const postalCode = billingInputs[5]?.value.trim() || "";
+        const phone = billingInputs[6]?.value.trim() || "";
+
+        const cartItemsForCheckout = [];
+        state.cart.forEach((quantity, productId) => {
+          const product = products.find((item) => item.id == productId);
+          if (!product) {
+            return;
+          }
+
+          cartItemsForCheckout.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity,
+            image: product.image || "",
+          });
+        });
+
+        if (cartItemsForCheckout.length === 0) {
+          throw new Error("Your cart is empty.");
+        }
+
+        const subtotal = cartItemsForCheckout.reduce(
+          (sum, item) => sum + Number(item.price) * Number(item.quantity),
+          0
+        );
+        const shipping = subtotal >= 200 ? 0 : 9.99;
+
+        const checkoutPayload = {
+          cartItems: cartItemsForCheckout,
+          subtotal,
+          shipping,
+          total: subtotal + shipping,
+          email,
+          billingDetails: {
+            firstName,
+            lastName,
+            streetAddress,
+            city,
+            postalCode,
+            phone,
+          },
+        };
+
+        const userIdNumeric = Number(state.user?.id);
+        const pendingOrderData = {
+          user_id: Number.isFinite(userIdNumeric) && userIdNumeric > 0 ? userIdNumeric : null,
+          supabase_user_id: state.user?.id && !Number.isFinite(userIdNumeric) ? String(state.user.id) : "",
+          user_email: email,
+          total_amount: subtotal + shipping,
+          items: cartItemsForCheckout.map((item) => ({
+            product_id: Number(item.id),
+            quantity: Number(item.quantity),
+            price: Number(item.price)
+          }))
+        };
+
+        localStorage.setItem("buyLkPendingOrder", JSON.stringify(pendingOrderData));
+
+        const checkoutEndpoint =
+          (typeof API_ENDPOINTS !== "undefined" &&
+            API_ENDPOINTS.payments &&
+            API_ENDPOINTS.payments.createCheckout) ||
+          "../backend/payments/create-checkout.php";
+
+        const response = await phpApiCall(
+          checkoutEndpoint,
+          "POST",
+          checkoutPayload
+        );
+
+        if (!response.success || !response.data?.success) {
+          throw new Error(response.data?.message || "Failed to start checkout.");
+        }
+
+        const checkoutUrl = response.data.sessionUrl;
+        if (!checkoutUrl) {
+          throw new Error("Stripe checkout URL was not returned.");
+        }
+
+        window.location.href = checkoutUrl;
+      } catch (error) {
+        console.error("Payment error:", error);
+        showToast(error.message || "Payment setup failed");
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+  
+  console.log("Payment system setup complete");
+  return true;
 }
+
+// Setup on document ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    setupPaymentSystem();
+    setupWishlistSystem();
+  });
+} else {
+  setupPaymentSystem();
+  setupWishlistSystem();
+}
+
+// Counter Animation Function
+const animateCounters = () => {
+  const heroStats = document.querySelectorAll('.hero-stats > div');
+  
+  if (heroStats.length === 0) return;
+  
+  const statsData = [
+    { target: 4.8, duration: 2000, format: (val) => val.toFixed(1) },
+    { target: 120000, duration: 2500, format: (val) => {
+      if (val >= 1000) {
+        return (val / 1000).toFixed(0) + 'k+';
+      }
+      return val.toLocaleString();
+    }},
+    { target: null, duration: 0, format: (val) => 'Fast' }
+  ];
+  
+  heroStats.forEach((stat, index) => {
+    const strong = stat.querySelector('strong');
+    if (!strong || !statsData[index]) return;
+    
+    const data = statsData[index];
+    
+    // For "Fast" text, just show it
+    if (data.target === null) {
+      strong.textContent = 'Fast';
+      return;
+    }
+    
+    const startValue = 0;
+    const targetValue = data.target;
+    const duration = data.duration;
+    const startTime = Date.now();
+    
+    const updateCounter = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      const currentValue = startValue + (targetValue - startValue) * easeOutQuad;
+      
+      strong.textContent = data.format(currentValue);
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      }
+    };
+    
+    updateCounter();
+  });
+};
 
 setTheme(state.theme);
-loadProducts(); // Load products from database
+loadProducts(); // Load products from database (includes renderCart)
+loadAdvertisementsForHero();
 updateCounts();
-renderCart();
 updateCountdown();
-updateStock();
+showStoredPaymentMessage();
+
+// Start counter animation after a short delay
+setTimeout(animateCounters, 300);
 
 setInterval(updateCountdown, 1000);
-setInterval(updateStock, 4000);
 
 // Authentication UI update
 const updateAuthUI = () => {
   const authLinks = document.getElementById("authLinks");
   const userMenu = document.getElementById("userMenu");
   const userBtn = document.getElementById("userBtn");
+  const showCustomerActions = state.user && state.user.loggedIn;
 
-  if (state.user && state.user.loggedIn) {
+  if (showCustomerActions) {
     if (authLinks) authLinks.style.display = "none";
     if (userMenu) userMenu.style.display = "flex";
     if (userBtn) {
@@ -535,6 +1265,29 @@ const updateAuthUI = () => {
     if (userMenu) userMenu.style.display = "none";
   }
 };
+
+if (myOrdersBtn) {
+  myOrdersBtn.addEventListener("click", () => {
+    if (!state.user || !state.user.loggedIn) {
+      showToast("Please sign in to view your orders");
+      return;
+    }
+
+    openOrdersModal();
+  });
+}
+
+if (closeOrdersModalBtn) {
+  closeOrdersModalBtn.addEventListener("click", closeOrdersModal);
+}
+
+if (ordersModal) {
+  ordersModal.addEventListener("click", (event) => {
+    if (event.target === ordersModal) {
+      closeOrdersModal();
+    }
+  });
+}
 
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {

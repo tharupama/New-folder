@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review API Test</title>
+</head>
+<body>
+    <h1>Review API Test</h1>
+    <div id="result"></div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost/New%20folder/backend';
+        
+        // Test getting reviews
+        async function testGetReviews() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reviews/get.php?product_id=1`);
+                const data = await response.json();
+                console.log('Get Reviews Response:', data);
+                document.getElementById('result').innerHTML += '<h3>Get Reviews:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                console.error('Get Reviews Error:', error);
+                document.getElementById('result').innerHTML += '<h3>Get Reviews Error:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+        
+        // Test adding a review
+        async function testAddReview() {
+            try {
+                const reviewData = {
+                    product_id: 1,
+                    user_name: 'Test User',
+                    rating: 5,
+                    comment: 'This is a test review to check if the API works correctly.'
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/reviews/add.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reviewData)
+                });
+                
+                const data = await response.json();
+                console.log('Add Review Response:', data);
+                document.getElementById('result').innerHTML += '<h3>Add Review:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // After adding, get reviews again
+                setTimeout(testGetReviews, 1000);
+            } catch (error) {
+                console.error('Add Review Error:', error);
+                document.getElementById('result').innerHTML += '<h3>Add Review Error:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+        
+        // Run tests
+        testGetReviews();
+        setTimeout(testAddReview, 2000);
+    </script>
+</body>
+</html>

@@ -226,7 +226,7 @@
           <span class="logo">BL</span>
           <div>
             <h1>BUY LK</h1>
-            <p>Premium picks for everyday life</p>
+            <p>Fresh food delivered fast</p>
           </div>
         </div>
         <nav class="nav">
@@ -246,7 +246,7 @@
       <div class="auth-container">
         <div class="auth-header">
           <h2>Join BUY LK</h2>
-          <p>Create an account to get started with exclusive member perks</p>
+          <p>Create an account for quick ordering and delivery updates</p>
         </div>
 
         <div id="errorMsg" class="error-message"></div>
@@ -329,7 +329,7 @@
       </div>
 
       <footer class="footer">
-        <p>© 2026 BUY LK. Crafted for modern shoppers.</p>
+        <p>© 2026 BUY LK. Crafted for fast food delivery.</p>
         <div class="footer-links">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
@@ -347,15 +347,15 @@
       <div class="cart-summary">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotal">$0.00</span>
+          <span id=\"cartSubtotal\">USD 0.00</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span id="cartShipping">$0.00</span>
+          <span id=\"cartShipping\">USD 0.00</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span id="cartTotal">$0.00</span>
+          <span id=\"cartTotal\">USD 0.00</span>
         </div>
         <button class="primary-btn" id="checkoutBtn">Checkout</button>
       </div>
@@ -447,32 +447,47 @@
         submitBtn.textContent = "Creating account...";
         submitBtn.disabled = true;
 
+        let response; // Declare outside try block
         try {
           // Use fullname as username
-          const response = await signupUser(fullname, email, password, confirmPassword);
+          response = await signupUser(fullname, email, password, confirmPassword);
           
           if (response.success) {
-            localStorage.setItem("user", JSON.stringify({ 
-              fullname, 
-              email, 
-              loggedIn: true,
-              id: response.data.userId 
-            }));
-            showToast("Account created successfully!");
+            // Don't auto-login - only show confirmation message
+            showToast("Check your email to confirm your account before logging in!");
+            
+            // Redirect to login page after 2 seconds
             setTimeout(() => {
-              window.location.href = "index.html";
-            }, 1000);
+              window.location.href = "login.html";
+            }, 2000);
           } else {
             errorMsg.textContent = response.data.message || "Sign up failed. Please try again.";
             errorMsg.classList.add("show");
+            
+            // If rate limit error, disable button for 60 seconds
+            if (response.status === 429) {
+              submitBtn.disabled = true;
+              let countdown = 60;
+              const countdownInterval = setInterval(() => {
+                submitBtn.textContent = `Try again in ${countdown}s`;
+                countdown--;
+                if (countdown < 0) {
+                  clearInterval(countdownInterval);
+                  submitBtn.textContent = originalText;
+                  submitBtn.disabled = false;
+                }
+              }, 1000);
+            }
           }
         } catch (error) {
           console.error('Signup error:', error);
           errorMsg.textContent = "An error occurred. Please try again.";
           errorMsg.classList.add("show");
         } finally {
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
+          if (response?.status !== 429) {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }
         }
       });
 
@@ -508,9 +523,9 @@
         const entries = [...cart.entries()];
         if (entries.length === 0) {
           cartItems.innerHTML = "<p>Your cart is empty.</p>";
-          if (cartSubtotal) cartSubtotal.textContent = "$0.00";
-          if (cartShipping) cartShipping.textContent = "$0.00";
-          if (cartTotal) cartTotal.textContent = "$0.00";
+          if (cartSubtotal) cartSubtotal.textContent = "USD 0.00";
+          if (cartShipping) cartShipping.textContent = "USD 0.00";
+          if (cartTotal) cartTotal.textContent = "USD 0.00";
           return;
         }
 
@@ -520,7 +535,7 @@
           .join("");
 
         if (cartSubtotal) cartSubtotal.textContent = "$" + subtotal.toFixed(2);
-        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "$0.00" : "$12.00";
+        if (cartShipping) cartShipping.textContent = subtotal > 200 ? "USD 0.00" : "USD 12.00";
         if (cartTotal) cartTotal.textContent = "$" + (subtotal + (subtotal > 200 ? 0 : 12)).toFixed(2);
       };
 
