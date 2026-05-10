@@ -95,6 +95,17 @@ try {
             $stmt->execute();
             $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Fetch items for each order
+            foreach ($orders as &$order) {
+                $itemStmt = $pdo->prepare("SELECT oi.id, oi.product_id, oi.quantity, oi.price, p.name as product_name
+                                           FROM order_items oi
+                                           LEFT JOIN products p ON oi.product_id = p.id
+                                           WHERE oi.order_id = ?
+                                           ORDER BY oi.id");
+                $itemStmt->execute([$order['id']]);
+                $order['items'] = $itemStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
             respond(200, ['success' => true, 'data' => $orders]);
         }
 
@@ -132,6 +143,17 @@ try {
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Fetch items for each order
+        foreach ($orders as &$order) {
+            $itemStmt = $pdo->prepare("SELECT oi.id, oi.product_id, oi.quantity, oi.price, p.name as product_name
+                                       FROM order_items oi
+                                       LEFT JOIN products p ON oi.product_id = p.id
+                                       WHERE oi.order_id = ?
+                                       ORDER BY oi.id");
+            $itemStmt->execute([$order['id']]);
+            $order['items'] = $itemStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
 
         respond(200, ['success' => true, 'data' => $orders]);
     }

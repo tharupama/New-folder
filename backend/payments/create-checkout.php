@@ -6,7 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once __DIR__ . '/../config/stripe.php';
 
-const APP_PUBLIC_BASE_PATH = '/New%20folder%20(2)/New-folder';
+const APP_PUBLIC_BASE_PATH = '/E%20commerce/New-folder';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);

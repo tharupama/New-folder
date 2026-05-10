@@ -219,12 +219,29 @@ const renderOrders = (orders) => {
     return;
   }
 
+  console.log("Rendering orders:", orders);
+
   ordersList.innerHTML = orders
     .map((order) => {
       const formattedDate = order.created_at
         ? new Date(order.created_at).toLocaleString()
         : "-";
       const status = String(order.status || "pending").toLowerCase();
+
+      // Generate items HTML
+      const itemsHTML = (order.items && Array.isArray(order.items) && order.items.length > 0)
+        ? `<div class="order-items-list">
+             <h5 style="margin: 8px 0 6px 0; font-size: 0.9rem; font-weight: 600;">Items Ordered:</h5>
+             ${order.items.map(item => `
+               <div class="order-item-row" style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; color: var(--text);">
+                 <span style="flex: 1;">${item.product_name || 'Unknown Product'}</span>
+                 <span style="color: var(--muted); margin: 0 8px;">×${item.quantity}</span>
+                 <span style="color: var(--primary); font-weight: 600; min-width: 70px; text-align: right;">${currency.format(item.price || 0)}</span>
+               </div>
+             `).join('')}
+           </div>`
+        : `<div style="margin-top: 8px; color: var(--muted); font-size: 0.85rem;">No items found for this order.</div>`;
+
       return `
         <article class="order-card">
           <div class="order-card-head">
@@ -233,6 +250,7 @@ const renderOrders = (orders) => {
           </div>
           <p><strong>Total:</strong> ${currency.format(order.total_amount || 0)}</p>
           <p><strong>Placed:</strong> ${formattedDate}</p>
+          ${itemsHTML}
         </article>
       `;
     })
@@ -255,13 +273,25 @@ const loadCustomerOrders = async () => {
   ordersList.innerHTML = "<p>Loading your orders...</p>";
 
   try {
+    console.log("Fetching orders for user:", {
+      email: state.user.email,
+      id: state.user.id
+    });
+
     const response = await getOrders({
       user_email: state.user.email,
       supabase_user_id: state.user.id || ""
     });
 
+    console.log("Orders response:", response);
+
     if (!response.success) {
       ordersList.innerHTML = `<p>${response.data?.message || "Unable to load orders."}</p>`;
+      return;
+    }
+
+    if (!response.data || response.data.length === 0) {
+      ordersList.innerHTML = "<p>You have no orders yet. Start shopping!</p>";
       return;
     }
 

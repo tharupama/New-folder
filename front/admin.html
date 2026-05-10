@@ -309,6 +309,44 @@
         min-width: 140px;
       }
 
+      .order-items-list {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      .order-items-list h5 {
+        margin: 0 0 8px 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        font-size: 0.85rem;
+        color: var(--text);
+      }
+
+      .order-item-name {
+        flex: 1;
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      .order-item-qty {
+        color: var(--muted);
+        margin: 0 8px;
+      }
+
+      .order-item-price {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
       .messages-section h3 {
         font-size: 1.5rem;
         margin-bottom: 16px;
@@ -959,6 +997,8 @@
 
     <div class="toast" id="toast"></div>
 
+    <script src="api.js"></script>
+
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-section">
@@ -1120,6 +1160,20 @@
             ? new Date(order.created_at).toLocaleString()
             : '-';
 
+          // Generate items HTML
+          const itemsHTML = (order.items && Array.isArray(order.items) && order.items.length > 0)
+            ? `<div class="order-items-list">
+                 <h5>Items Ordered:</h5>
+                 ${order.items.map(item => `
+                   <div class="order-item">
+                     <span class="order-item-name">${item.product_name || 'Unknown Product'}</span>
+                     <span class="order-item-qty">×${item.quantity}</span>
+                     <span class="order-item-price">LKR ${Number(item.price || 0).toFixed(2)}</span>
+                   </div>
+                 `).join('')}
+               </div>`
+            : '';
+
           return `
             <article class="admin-order-card">
               <div class="admin-order-header">
@@ -1130,6 +1184,7 @@
               <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
               <p><strong>Total:</strong> LKR ${Number(order.total_amount || 0).toFixed(2)}</p>
               <p><strong>Created:</strong> ${createdAt}</p>
+              ${itemsHTML}
               <div class="admin-order-actions">
                 <select data-order-status="${order.id}">
                   <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
@@ -1289,7 +1344,7 @@
       const loadProducts = async () => {
         try {
           const response = await fetch(
-            "http://localhost/New-folder/backend/products/list.php"
+            "http://localhost/E%20commerce/New-folder/backend/products/list.php"
           );
           const result = await response.json();
 
@@ -1315,7 +1370,7 @@
           }
 
           const response = await fetch(
-            "http://localhost/New-folder/backend/products/list.php",
+            "http://localhost/E%20commerce/New-folder/backend/products/list.php",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1367,7 +1422,7 @@
           }
 
           const response = await fetch(
-            "http://localhost/New-folder/backend/products/list.php",
+            "http://localhost/E%20commerce/New-folder/backend/products/list.php",
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
@@ -1426,7 +1481,7 @@
 
         try {
           const response = await fetch(
-            "http://localhost/New-folder/backend/products/list.php",
+            "http://localhost/E%20commerce/New-folder/backend/products/list.php",
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
@@ -1491,7 +1546,7 @@
 
         try {
           const response = await fetch(
-            "http://localhost/New-folder/backend/products/list.php",
+            "http://localhost/E%20commerce/New-folder/backend/products/list.php",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1719,7 +1774,7 @@
       const loadMessages = async () => {
         try {
           const response = await fetch(
-            "http://localhost/New%20folder/backend/contact/messages.php"
+            "http://localhost/E%20commerce/New-folder/backend/contact/messages.php"
           );
           const result = await response.json();
 
@@ -1802,7 +1857,7 @@
           }
 
           const response = await fetch(
-            "http://localhost/New%20folder/backend/contact/messages.php",
+            "http://localhost/E%20commerce/New-folder/backend/contact/messages.php",
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },

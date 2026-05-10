@@ -119,19 +119,37 @@
           sessionLine.textContent = 'Checkout session completed.';
         }
 
+        let orderCreated = false;
+        let orderIdCreated = null;
+
         try {
           const pendingOrder = JSON.parse(localStorage.getItem('buyLkPendingOrder') || 'null');
+          console.log('Pending order data:', pendingOrder);
 
           if (pendingOrder && typeof createOrder !== 'undefined') {
             const createOrderResponse = await createOrder(pendingOrder);
+            console.log('Order creation response:', createOrderResponse);
+            
             if (createOrderResponse.success && createOrderResponse.data?.success) {
-              sessionLine.textContent = `Order #${createOrderResponse.data.order_id} placed successfully.`;
+              orderIdCreated = createOrderResponse.data?.order_id;
+              orderCreated = true;
+              sessionLine.textContent = `✓ Order #${orderIdCreated} placed successfully. Your payment has been confirmed.`;
+            } else if (createOrderResponse.data?.order_id) {
+              // Order was created even if success flag is different
+              orderIdCreated = createOrderResponse.data.order_id;
+              orderCreated = true;
+              sessionLine.textContent = `✓ Order #${orderIdCreated} placed successfully. Your payment has been confirmed.`;
             } else {
               console.warn('Order creation failed after payment:', createOrderResponse);
+              sessionLine.textContent = 'Payment confirmed. Your order will appear in "My Orders" shortly.';
             }
+          } else {
+            console.warn('No pending order data found');
+            sessionLine.textContent = 'Payment completed. Check your email for confirmation.';
           }
         } catch (error) {
-          console.warn('Unable to save order after payment:', error);
+          console.error('Error finalizing payment:', error);
+          sessionLine.textContent = 'Payment completed. Your order will appear in "My Orders" shortly.';
         } finally {
           localStorage.removeItem('buyLkPendingOrder');
         }
@@ -139,7 +157,9 @@
         localStorage.setItem(
           'buyLkPaymentMessage',
           JSON.stringify({
-            text: successMessage,
+            text: orderCreated 
+              ? `Order #${orderIdCreated} confirmed! Check your order history.`
+              : successMessage,
             expiresAt: Date.now() + 60000,
           })
         );
