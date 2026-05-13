@@ -61,6 +61,9 @@ try {
     $rating = intval($data['rating'] ?? 0);
     $comment = trim($data['comment'] ?? '');
     $user_name = trim($data['user_name'] ?? '');
+    $user_email = trim($data['user_email'] ?? '');
+    $user_id_raw = $data['user_id'] ?? null;
+    $user_id = is_numeric($user_id_raw) ? intval($user_id_raw) : null;
     
     error_log("Validated input - PID: $product_id, Rating: $rating, Comment length: " . strlen($comment) . ", Name: $user_name");
     
@@ -77,6 +80,24 @@ try {
     if (empty($user_name)) {
         throw new Exception('Name is required');
     }
+
+    if ($user_email === '' && $user_id !== null) {
+        $emailLookup = $db->prepare("SELECT email FROM users WHERE id = ? LIMIT 1");
+        $emailLookup->execute([$user_id]);
+        $matchedEmail = trim((string)$emailLookup->fetchColumn());
+        if ($matchedEmail !== '') {
+            $user_email = $matchedEmail;
+        }
+    }
+
+    if ($user_id === null && $user_email !== '') {
+        $userLookup = $db->prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1");
+        $userLookup->execute([$user_email]);
+        $matchedUserId = $userLookup->fetchColumn();
+        if ($matchedUserId) {
+            $user_id = intval($matchedUserId);
+        }
+    }
     
     // Check product exists
     $check = $db->prepare("SELECT id FROM products WHERE id = ?");
@@ -88,10 +109,10 @@ try {
     
     // Insert review
     $insert = $db->prepare(
-        "INSERT INTO product_reviews (product_id, user_name, rating, comment) 
-         VALUES (?, ?, ?, ?)"
+           "INSERT INTO product_reviews (product_id, user_name, user_email, user_id, rating, comment) 
+            VALUES (?, ?, ?, ?, ?, ?)"
     );
-    $result = $insert->execute([$product_id, $user_name, $rating, $comment]);
+        $result = $insert->execute([$product_id, $user_name, $user_email !== '' ? $user_email : null, $user_id ?: null, $rating, $comment]);
     error_log("Insert result: " . ($result ? 'success' : 'failed'));
     
     if (!$result) {

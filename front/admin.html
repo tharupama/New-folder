@@ -347,6 +347,42 @@
         font-weight: 600;
       }
 
+      .payment-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 8px 0;
+      }
+
+      .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .payment-badge.method-card {
+        background: rgba(59, 130, 246, 0.12);
+        color: #2563eb;
+      }
+
+      .payment-badge.method-cod {
+        background: rgba(245, 158, 11, 0.14);
+        color: #d97706;
+      }
+
+      .payment-badge.status-paid {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+      }
+
+      .payment-badge.status-pending {
+        background: rgba(245, 158, 11, 0.14);
+        color: #d97706;
+      }
+
       .messages-section h3 {
         font-size: 1.5rem;
         margin-bottom: 16px;
@@ -715,11 +751,8 @@
     <div class="app">
       <header class="topbar">
         <div class="brand">
-          <span class="logo">BL</span>
-          <div>
-            <h1>BUY LK</h1>
-            <p>Fresh food delivered fast</p>
-          </div>
+          <img src="assests/logo.png" alt="BUY LK" class="logo-img">
+          <span class="brand-name">BUYLK</span>
         </div>
         <nav class="nav">
           <a href="../front/index.html">Home</a>
@@ -771,6 +804,7 @@
                 <option value="">Select category</option>
                 <option value="kottu">Kottu</option>
                 <option value="pizza">Pizza</option>
+                <option value="rice">Rice</option>
                 <option value="bakery">Bakery Products</option>
                 <option value="beverages">Beverages</option>
               </select>
@@ -803,7 +837,7 @@
           </div>
 
           <div class="form-group">
-            <label for="stock">Stock Count</label>
+            <label for="stock">Available Count</label>
             <input
               type="number"
               id="stock"
@@ -857,6 +891,14 @@
         <div class="tab-content" id="orders-tab">
           <div class="orders-section">
             <h3>Customer Orders</h3>
+            <div class="search-box">
+              <input
+                type="text"
+                id="searchOrders"
+                placeholder="Search orders by customer name or email..."
+              />
+              <button id="clearOrdersSearch" type="button">Clear</button>
+            </div>
             <div class="orders-list-admin" id="ordersListAdmin">
               <p>Loading orders...</p>
             </div>
@@ -962,6 +1004,7 @@
               <option value="">Select category</option>
               <option value="kottu">Kottu</option>
               <option value="pizza">Pizza</option>
+              <option value="rice">Rice</option>
               <option value="bakery">Bakery Products</option>
               <option value="beverages">Beverages</option>
             </select>
@@ -982,7 +1025,7 @@
               <input type="text" id="editTag" />
             </div>
             <div class="form-group">
-              <label for="editStock">Stock</label>
+              <label for="editStock">Available</label>
               <input type="number" id="editStock" min="0" />
             </div>
           </div>
@@ -1125,6 +1168,8 @@
       const messagesList = document.getElementById("messagesList");
       const searchMessagesInput = document.getElementById("searchMessages");
       const clearMessagesSearchBtn = document.getElementById("clearMessagesSearch");
+      const searchOrdersInput = document.getElementById("searchOrders");
+      const clearOrdersSearchBtn = document.getElementById("clearOrdersSearch");
       const ordersListAdmin = document.getElementById("ordersListAdmin");
       const adForm = document.getElementById("adForm");
       const adsGrid = document.getElementById("adsGrid");
@@ -1144,6 +1189,22 @@
         if (normalized === 'shipped') return 'status-shipped';
         if (normalized === 'processing') return 'status-processing';
         return 'status-pending';
+      };
+
+      const getPaymentMethodLabel = (method) => {
+        const normalized = String(method || 'credit_card').toLowerCase();
+        if (normalized === 'cash_on_delivery') return 'Cash on Delivery';
+        return 'Credit Card';
+      };
+
+      const getPaymentMethodClass = (method) => {
+        const normalized = String(method || 'credit_card').toLowerCase();
+        return normalized === 'cash_on_delivery' ? 'method-cod' : 'method-card';
+      };
+
+      const getPaymentStatusClass = (status) => {
+        const normalized = String(status || 'pending').toLowerCase();
+        return normalized === 'paid' ? 'status-paid' : 'status-pending';
       };
 
       const renderAdminOrders = (ordersToRender) => {
@@ -1182,6 +1243,12 @@
               </div>
               <p><strong>Customer:</strong> ${order.customer_name || order.user_email || 'Customer'}</p>
               <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${order.customer_phone || 'N/A'}</p>
+              <p><strong>Address:</strong> ${order.customer_address || 'N/A'}</p>
+              <div class="payment-badges">
+                <span class="payment-badge ${getPaymentMethodClass(order.payment_method)}">${getPaymentMethodLabel(order.payment_method)}</span>
+                <span class="payment-badge ${getPaymentStatusClass(order.payment_status)}">${String(order.payment_status || 'pending').toUpperCase()}</span>
+              </div>
               <p><strong>Total:</strong> LKR ${Number(order.total_amount || 0).toFixed(2)}</p>
               <p><strong>Created:</strong> ${createdAt}</p>
               ${itemsHTML}
@@ -1236,6 +1303,23 @@
         }
       };
 
+      const searchOrders = (query) => {
+        const searchTerm = query.toLowerCase();
+
+        if (!searchTerm) {
+          renderAdminOrders(allOrders);
+          return;
+        }
+
+        const filtered = allOrders.filter((order) => {
+          const customerName = String(order.customer_name || '').toLowerCase();
+          const customerEmail = String(order.user_email || '').toLowerCase();
+          return customerName.includes(searchTerm) || customerEmail.includes(searchTerm);
+        });
+
+        renderAdminOrders(filtered);
+      };
+
       const updateAdminOrderStatus = async (orderId, status) => {
         try {
           const adminSession = getAdminSession();
@@ -1283,6 +1367,21 @@
         renderProducts(filtered);
       };
 
+      if (searchOrdersInput) {
+        searchOrdersInput.addEventListener("input", (event) => {
+          searchOrders(event.target.value);
+        });
+      }
+
+      if (clearOrdersSearchBtn) {
+        clearOrdersSearchBtn.addEventListener("click", () => {
+          if (searchOrdersInput) {
+            searchOrdersInput.value = "";
+          }
+          renderAdminOrders(allOrders);
+        });
+      }
+
       const renderProducts = (productsToRender) => {
         if (productsToRender.length === 0) {
           productsGrid.innerHTML = '<p>No products found.</p>';
@@ -1298,11 +1397,11 @@
               <p><strong>Category:</strong> ${product.category}</p>
               <p class="product-price">LKR ${parseFloat(product.price).toFixed(2)}</p>
               <p><strong>Rating:</strong> ★ ${product.rating}</p>
-              <p><strong>Stock:</strong> ${product.stock}</p>
+              ${product.category === 'beverages' ? `<p><strong>Available:</strong> ${product.stock}</p>` : ''}
               ${product.tag ? `<p><strong>Tag:</strong> ${product.tag}</p>` : ""}
               <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="available-${product.id}" ${product.is_available == 1 ? 'checked' : ''} class="availability-toggle" data-product-id="${product.id}" />
-                <label for="available-${product.id}" style="margin: 0; cursor: pointer;">In Stock</label>
+                <label for="available-${product.id}" style="margin: 0; cursor: pointer;">Available</label>
               </div>
               <div class="product-actions-admin">
                 <button class="edit-btn" data-edit-id="${product.id}">Edit</button>
@@ -1384,7 +1483,7 @@
 
           const result = await response.json();
           if (result.success) {
-            showToast(isAvailable ? "Product marked as In Stock" : "Product marked as Out of Stock");
+            showToast(isAvailable ? "Product marked as Available" : "Product marked as Unavailable");
           } else {
             showToast("Error updating availability: " + result.message);
           }
@@ -1402,6 +1501,16 @@
         document.getElementById('editDescription').value = product.description || '';
         document.getElementById('editTag').value = product.tag || '';
         document.getElementById('editStock').value = product.stock;
+        // Show/hide editStock field depending on category
+        const editStockEl = document.getElementById('editStock');
+        const editStockGroup = editStockEl ? editStockEl.parentElement : null;
+        if (editStockGroup) {
+          if (product.category === 'beverages') {
+            editStockGroup.style.display = '';
+          } else {
+            editStockGroup.style.display = 'none';
+          }
+        }
         document.getElementById('editImage').value = product.image || '';
         
         document.getElementById('editModal').classList.add('show');
@@ -1462,15 +1571,17 @@
           return;
         }
 
+        const editCategoryVal = document.getElementById('editCategory').value.trim();
+        const editStockInput = parseInt(document.getElementById('editStock').value);
         const productData = {
           adminToken: adminSession.token,
           id: editingProductId,
           name: document.getElementById('editProductName').value.trim(),
-          category: document.getElementById('editCategory').value.trim(),
+          category: editCategoryVal,
           price: parseFloat(document.getElementById('editPrice').value),
           description: document.getElementById('editDescription').value.trim(),
           tag: document.getElementById('editTag').value.trim(),
-          stock: parseInt(document.getElementById('editStock').value) || 50,
+          stock: editCategoryVal === 'beverages' ? (Number.isFinite(editStockInput) ? editStockInput : 50) : 0,
           image: document.getElementById('editImage').value.trim()
         };
 
@@ -1503,6 +1614,24 @@
         }
       });
 
+      // Toggle visibility for stock field depending on category (only for beverages)
+      const categoryEl = document.getElementById('category');
+      const stockEl = document.getElementById('stock');
+      const stockGroup = stockEl ? stockEl.parentElement : null;
+      const toggleStockVisibility = () => {
+        if (!stockGroup) return;
+        if (categoryEl.value === 'beverages') {
+          stockGroup.style.display = '';
+        } else {
+          stockGroup.style.display = 'none';
+          if (stockEl) stockEl.value = '0';
+        }
+      };
+      if (categoryEl) {
+        categoryEl.addEventListener('change', toggleStockVisibility);
+        toggleStockVisibility();
+      }
+
       productForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -1520,7 +1649,8 @@
         const category = document.getElementById("category").value.trim();
         const price = parseFloat(document.getElementById("price").value);
         const tag = document.getElementById("tag").value.trim();
-        const stock = parseInt(document.getElementById("stock").value) || 50;
+        const stockRaw = parseInt(document.getElementById("stock").value);
+        const stock = category === 'beverages' ? (Number.isFinite(stockRaw) ? stockRaw : 50) : 0;
         const description = document.getElementById("description").value.trim();
         const image = document.getElementById("image").value.trim();
 

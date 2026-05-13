@@ -13,10 +13,7 @@
       <header class="topbar">
         <div class="brand">
           <img src="assests/logo.png" alt="BUY LK" class="logo-img">
-          <div>
-            <h1>BUY LK</h1>
-            <p>Fresh food delivered fast</p>
-          </div>
+          <span class="brand-name">BUYLK</span>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
           <span></span>
@@ -51,8 +48,17 @@
       <section class="hero">
         <div class="hero-content">
           <p class="badge">Full menu</p>
-          <h2>Choose meals, sides, and drinks made for quick delivery.</h2>
-          <p>
+          <h2 class="hero-headline" aria-label="Choose meals and drinks made for quick delivery.">
+            <span style="--i: 1">Choose</span>
+            <span style="--i: 2">meals,</span>
+            <span style="--i: 3">and</span>
+            <span style="--i: 4">drinks</span>
+            <span style="--i: 5">made</span>
+            <span style="--i: 6">for</span>
+            <span style="--i: 7">quick</span>
+            <span style="--i: 8">delivery.</span>
+          </h2>
+          <p class="hero-description">
             Filter by food category, compare ratings, and reorder your favourites quickly.
           </p>
         </div>
@@ -85,6 +91,7 @@
             <option value="all">All categories</option>
             <option value="kottu">Kottu</option>
             <option value="pizza">Pizza</option>
+            <option value="rice">Rice</option>
             <option value="bakery">Bakery Products</option>
             <option value="beverages">Beverages</option>
           </select>
@@ -270,7 +277,7 @@
       <div class="wishlist-container">
         <div class="wishlist-header">
           <h2>My Wishlist</h2>
-          <button class="wishlist-close" id="closeWishlist"><i class="fas fa-times"></i></button>
+          <button class="wishlist-close" id="closeWishlist" aria-label="Close wishlist"><i class="ri-close-line"></i></button>
         </div>
         <div class="wishlist-items" id="wishlistItems"></div>
       </div>
@@ -279,7 +286,7 @@
     <!-- Product Details Modal (from modals.html) -->
     <div class="product-modal" id="productModal" style="display: none;">
       <div class="product-modal-content">
-        <button class="modal-close" id="closeProductModal"><i class="fas fa-times"></i></button>
+        <button class="modal-close" id="closeProductModal" aria-label="Close product"><i class="ri-close-line"></i></button>
         
         <div class="product-details-container">
           <div class="product-details-left">
@@ -295,7 +302,7 @@
               <p class="product-modal-description" id="productModalDescription"></p>
               <div class="product-modal-actions">
                 <button class="primary-btn" id="productModalAddCart">Add to Cart</button>
-                <button class="secondary-btn" id="productModalWishlist"><i class="fas fa-heart"></i> Wishlist</button>
+                <button class="secondary-btn" id="productModalWishlist"><i class="ri-heart-line"></i> Wishlist</button>
               </div>
             </div>
           </div>
@@ -351,7 +358,7 @@
       <div class="orders-modal-content">
         <div class="orders-modal-header">
           <h3>My Orders</h3>
-          <button class="icon-btn" id="closeOrdersModal"><i class="fas fa-times"></i></button>
+          <button class="icon-btn" id="closeOrdersModal" aria-label="Close orders"><i class="ri-close-line"></i></button>
         </div>
         <div class="orders-list" id="ordersList">
           <p>Loading your orders...</p>
@@ -361,6 +368,7 @@
 
     <div class="toast" id="toast"></div>
 
+    <script src="https://js.puter.com/v2/"></script>
     <script src="api.js?v=20260425"></script>
     <script src="script.js?v=20260425"></script>
     <script src="product-modal.js?v=20260425"></script>

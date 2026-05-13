@@ -13,10 +13,7 @@
       <header class="topbar">
         <div class="brand">
           <img src="assests/logo.png" alt="BUY LK" class="logo-img">
-          <div>
-            <h1>BUY LK</h1>
-            <p>Fresh food delivered fast</p>
-          </div>
+          <span class="brand-name">BUYLK</span>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
           <span></span>
@@ -42,6 +39,7 @@
           </div>
           <div id="userMenu" class="user-menu" style="display: none;">
             <button id="userBtn" class="primary-btn"><i class="ri-user-line"></i> Account</button>
+            <button id="myOrdersBtn" class="ghost-btn">My Orders</button>
             <button id="logoutBtn" class="ghost-btn">Logout</button>
           </div>
         </div>
@@ -283,14 +281,27 @@
       <div class="wishlist-container">
         <div class="wishlist-header">
           <h2>My Wishlist</h2>
-          <button class="wishlist-close" id="closeWishlist"><i class="fas fa-times"></i></button>
+          <button class="wishlist-close" id="closeWishlist" aria-label="Close wishlist"><i class="ri-close-line"></i></button>
         </div>
         <div class="wishlist-items" id="wishlistItems"></div>
       </div>
     </div>
 
+    <div class="orders-modal" id="ordersModal">
+      <div class="orders-modal-content">
+        <div class="orders-modal-header">
+          <h3>My Orders</h3>
+          <button class="icon-btn" id="closeOrdersModal"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="orders-list" id="ordersList">
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
+    <script src="https://js.puter.com/v2/"></script>
     <script src="api.js?v=20260425"></script>
     <script src="script.js?v=20260425"></script>
   </body>

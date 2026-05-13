@@ -36,7 +36,7 @@ try {
     $pdo = getDBConnection();
     
     // Check if user exists by username or email
-    $stmt = $pdo->prepare("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?");
+    $stmt = $pdo->prepare("SELECT id, username, email, password, phone, address FROM users WHERE username = ? OR email = ?");
     $stmt->execute([$usernameOrEmail, $usernameOrEmail]);
     $user = $stmt->fetch();
     
@@ -65,7 +65,9 @@ try {
         'user' => [
             'id' => $user['id'],
             'username' => $user['username'],
-            'email' => $user['email']
+            'email' => $user['email'],
+            'phone' => $user['phone'] ?? null,
+            'address' => $user['address'] ?? null
         ]
     ]);
     

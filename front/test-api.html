@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; }
+        .box { background: #f0f0f0; padding: 20px; border-radius: 8px; }
+        pre { background: #333; color: #0f0; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🔧 Direct Subscription API Test</h1>
+        <p>This tests the API using different URLs to find which one works:</p>
+        
+        <button onclick="testAPI()">Test API Paths</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing...</p>';
+            
+            const paths = [
+                '../backend/products/subscription.php',
+                './backend/products/subscription.php',
+                '/xampp/htdocs/E%20commerce/New-folder/backend/products/subscription.php',
+                'http://localhost/xampp/htdocs/E%20commerce/New-folder/backend/products/subscription.php'
+            ];
+            
+            let html = '<h2>Test Results:</h2>';
+            
+            for (const path of paths) {
+                try {
+                    const response = await fetch(path, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: 'test@example.com' })
+                    });
+                    
+                    html += `<div style="margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <strong>${path}</strong><br>
+                        Status: <span class="${response.ok ? 'success' : 'error'}">${response.status} ${response.statusText}</span>
+                    </div>`;
+                } catch (e) {
+                    html += `<div style="margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <strong>${path}</strong><br>
+                        Error: <span class="error">${e.message}</span>
+                    </div>`;
+                }
+            }
+            
+            results.innerHTML = html + `<p style="margin-top: 20px; padding: 15px; background: #ffffcc; border-radius: 4px;">
+                <strong>Note:</strong> 200 or 201 = Success, 400/422 = Validation error, 405 = File not found or path wrong, 500 = Server error
+            </p>`;
+        }
+    </script>
+</body>
+</html>

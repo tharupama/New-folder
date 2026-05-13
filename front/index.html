@@ -13,10 +13,7 @@
       <header class="topbar">
         <div class="brand">
           <img src="assests/logo.png" alt="BUY LK" class="logo-img">
-          <div>
-            <h1>BUY LK</h1>
-            <p>Fresh food delivered fast</p>
-          </div>
+          <span class="brand-name">BUYLK</span>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
           <span></span>
@@ -53,7 +50,13 @@
       <section class="hero">
         <div class="hero-content">
           <p class="badge">Hot meals, fast delivery</p>
-          <h2>Order comfort food, fresh meals, and quick bites in minutes.</h2>
+          <h2 class="hero-headline" aria-label="Order comfort food in minutes.">
+            <span style="--i: 1">Order</span>
+            <span style="--i: 2">comfort</span>
+            <span style="--i: 3">food</span>
+            <span style="--i: 4">in</span>
+            <span style="--i: 5">minutes.</span>
+          </h2>
           <p>
             Browse food categories, discover bestsellers, and get your next meal delivered fast.
           </p>
@@ -76,21 +79,34 @@
             </div>
           </div>
         </div>
-        <div class="hero-card">
-          <div class="hero-card-header">
-            <span id="heroAdLabel">Sponsored Advertisement</span>
-            <span class="timer" id="heroAdCounter">1/1</span>
-          </div>
-          <div class="hero-card-body">
-            <h3 id="heroAdTitle">Today's Feature</h3>
-            <p id="heroAdMessage">Fresh offers rotate here automatically.</p>
-            <button class="primary-btn" id="heroAdAction">Explore</button>
-          </div>
-          <div class="hero-card-footer">
-            <span id="heroAdFooter">Stay tuned for more updates</span>
-            <div class="progress">
-              <div class="progress-fill" id="stockProgress"></div>
+        <div class="hero-side">
+          <div class="hero-card hero-card-animated">
+            <div class="hero-card-header">
+              <span id="heroAdLabel">Sponsored Advertising</span>
+              <span class="timer" id="heroAdCounter">1/1</span>
             </div>
+            <div class="hero-card-body">
+              <h3 id="heroAdTitle">Today's Feature</h3>
+              <p id="heroAdMessage">Fresh offers rotate here automatically.</p>
+              <button class="primary-btn" id="heroAdAction">Explore</button>
+            </div>
+            <div class="hero-card-footer">
+              <span id="heroAdFooter">Stay tuned for more updates</span>
+              <div class="progress">
+                <div class="progress-fill" id="stockProgress"></div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-deals-strip hero-deals-animated" aria-label="Today’s deals">
+            <div>
+              <h4>Today’s deals</h4>
+              <p>Limited-time picks updated throughout the day.</p>
+            </div>
+            <ul>
+              <li><span>Spicy Kottu Box</span><strong>LKR 1,290</strong></li>
+              <li><span>Margherita Pizza</span><strong>LKR 1,650</strong></li>
+              <li><span>Iced Lemon Tea</span><strong>LKR 390</strong></li>
+            </ul>
           </div>
         </div>
       </section>
@@ -105,6 +121,7 @@
             <option value="all">All categories</option>
             <option value="kottu">Kottu</option>
             <option value="pizza">Pizza</option>
+            <option value="rice">Rice</option>
             <option value="bakery">Bakery Products</option>
             <option value="beverages">Beverages</option>
           </select>
@@ -179,6 +196,61 @@
             <button class="primary-btn" type="submit">Notify me</button>
           </form>
           <span id="newsletterMsg"></span>
+        </div>
+      </section>
+
+      <section class="site-reviews" id="siteReviewsSection">
+        <div class="site-reviews-intro">
+          <p class="badge">Community feedback</p>
+          <h3>What customers say about BUY LK</h3>
+          <p>
+            Read real feedback about the overall shopping experience, delivery speed, and service quality.
+            Share your own review so others can learn from it.
+          </p>
+          <div class="site-reviews-summary">
+            <div class="site-rating-number" id="siteReviewAverage">0.0</div>
+            <div>
+              <div class="rating-stars" id="siteReviewAverageStars"></div>
+              <span class="review-count" id="siteReviewTotal">0 site reviews</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="site-reviews-panel">
+          <div class="review-form-container">
+            <h4>Write a site review</h4>
+            <form id="siteReviewForm" class="review-form">
+              <div class="form-group">
+                <label for="siteReviewName">Name</label>
+                <input type="text" id="siteReviewName" name="name" placeholder="Your name" required />
+              </div>
+              <div class="form-group" id="siteReviewEmailGroup">
+                <label for="siteReviewEmail">Email</label>
+                <input type="email" id="siteReviewEmail" name="email" placeholder="you@example.com" />
+                <small class="hint" id="siteReviewEmailHint">Your email is attached automatically when you are signed in.</small>
+              </div>
+              <div class="form-group">
+                <label for="siteReviewRating">Rating</label>
+                <div class="star-rating-input" id="siteReviewStarInput">
+                  <span class="star" data-rating="1">☆</span>
+                  <span class="star" data-rating="2">☆</span>
+                  <span class="star" data-rating="3">☆</span>
+                  <span class="star" data-rating="4">☆</span>
+                  <span class="star" data-rating="5">☆</span>
+                </div>
+                <input type="hidden" id="siteReviewRating" name="rating" required />
+              </div>
+              <div class="form-group">
+                <label for="siteReviewComment">Your Review</label>
+                <textarea id="siteReviewComment" name="comment" rows="4" placeholder="Tell us how BUY LK performed overall..." required></textarea>
+              </div>
+              <button type="submit" class="primary-btn">Submit Site Review</button>
+            </form>
+          </div>
+
+          <div class="reviews-list" id="siteReviewsList">
+            <p class="no-reviews">No site reviews yet. Be the first to share feedback!</p>
+          </div>
         </div>
       </section>
     </div>
@@ -310,9 +382,25 @@
             </div>
 
             <div class="form-section">
-              <h3>Secure Stripe Checkout</h3>
+              <h3>Payment Method</h3>
+              <div class="payment-methods">
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="credit_card" checked />
+                  <span>
+                    <strong>Credit Card</strong>
+                    <small>Pay online and continue to Stripe checkout.</small>
+                  </span>
+                </label>
+                <label class="payment-method">
+                  <input type="radio" name="paymentMethod" value="cash_on_delivery" />
+                  <span>
+                    <strong>Cash on Delivery</strong>
+                    <small>Complete the order now and pay when it arrives.</small>
+                  </span>
+                </label>
+              </div>
               <p style="color: var(--muted); margin: 0; line-height: 1.6;">
-                Your card details and payment method are entered on Stripe's secure page after you continue.
+                Choose credit card to continue to Stripe, or cash on delivery to place the order immediately.
               </p>
             </div>
 
@@ -423,6 +511,7 @@
 
     <div class="toast" id="toast"></div>
 
+    <script src="https://js.puter.com/v2/"></script>
     <script src="api.js?v=20260425"></script>
     <script src="script.js?v=20260425"></script>
     <script src="product-modal.js?v=20260425"></script>

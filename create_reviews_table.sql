@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS product_reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     user_name VARCHAR(100) NOT NULL,
+    user_email VARCHAR(100) DEFAULT NULL,
     user_id INT DEFAULT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment TEXT NOT NULL,
@@ -17,12 +18,12 @@ CREATE TABLE IF NOT EXISTS product_reviews (
 );
 
 -- Add sample reviews for testing
-INSERT INTO product_reviews (product_id, user_name, rating, comment) VALUES
-(1, 'John Doe', 5, 'Excellent sound quality! Best speaker I have ever owned.'),
-(1, 'Sarah Smith', 4, 'Great product but a bit pricey. Worth it though!'),
-(2, 'Mike Johnson', 5, 'This air purifier changed my life. Highly recommend!'),
-(3, 'Emily Brown', 4, 'Good fitness band, accurate tracking and long battery life.'),
-(5, 'David Wilson', 5, 'Most comfortable sneakers ever! Love the eco-friendly design.');
+INSERT INTO product_reviews (product_id, user_name, user_email, rating, comment) VALUES
+(1, 'John Doe', 'john@example.com', 5, 'Excellent sound quality! Best speaker I have ever owned.'),
+(1, 'Sarah Smith', 'sarah@example.com', 4, 'Great product but a bit pricey. Worth it though!'),
+(2, 'Mike Johnson', 'mike@example.com', 5, 'This air purifier changed my life. Highly recommend!'),
+(3, 'Emily Brown', 'emily@example.com', 4, 'Good fitness band, accurate tracking and long battery life.'),
+(5, 'David Wilson', 'david@example.com', 5, 'Most comfortable sneakers ever! Love the eco-friendly design.');
 
 -- Verify the table was created
 SELECT 'Table created successfully!' as Status;
