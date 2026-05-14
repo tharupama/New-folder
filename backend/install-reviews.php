@@ -4,6 +4,12 @@ header('Content-Type: text/html; charset=utf-8');
 
 require_once 'config/database.php';
 
+function columnExists($db, $tableName, $columnName) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    $stmt->execute([$tableName, $columnName]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
 echo "<!DOCTYPE html>
 <html>
 <head>
@@ -32,6 +38,11 @@ try {
     
     if ($tableExists) {
         echo "<div class='info'>ℹ️ Table 'product_reviews' already exists</div>";
+
+        if (!columnExists($db, 'product_reviews', 'user_email')) {
+            $db->exec("ALTER TABLE product_reviews ADD COLUMN user_email VARCHAR(100) DEFAULT NULL AFTER user_name");
+            echo "<div class='success'>✓ Added user_email column to product_reviews</div>";
+        }
         
         // Count reviews
         $countStmt = $db->query("SELECT COUNT(*) as count FROM product_reviews");
@@ -56,6 +67,7 @@ try {
             id INT AUTO_INCREMENT PRIMARY KEY,
             product_id INT NOT NULL,
             user_name VARCHAR(100) NOT NULL,
+            user_email VARCHAR(100) DEFAULT NULL,
             user_id INT DEFAULT NULL,
             rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
             comment TEXT NOT NULL,
@@ -69,12 +81,12 @@ try {
         
         // Add sample data
         echo "<div class='info'>Adding sample reviews...</div>";
-        $insertSQL = "INSERT INTO product_reviews (product_id, user_name, rating, comment) VALUES
-            (1, 'John Doe', 5, 'Excellent sound quality! Best speaker I have ever owned.'),
-            (1, 'Sarah Smith', 4, 'Great product but a bit pricey. Worth it though!'),
-            (2, 'Mike Johnson', 5, 'This air purifier changed my life. Highly recommend!'),
-            (3, 'Emily Brown', 4, 'Good fitness band, accurate tracking and long battery life.'),
-            (5, 'David Wilson', 5, 'Most comfortable sneakers ever! Love the eco-friendly design.')";
+        $insertSQL = "INSERT INTO product_reviews (product_id, user_name, user_email, rating, comment) VALUES
+            (1, 'John Doe', 'john@example.com', 5, 'Excellent sound quality! Best speaker I have ever owned.'),
+            (1, 'Sarah Smith', 'sarah@example.com', 4, 'Great product but a bit pricey. Worth it though!'),
+            (2, 'Mike Johnson', 'mike@example.com', 5, 'This air purifier changed my life. Highly recommend!'),
+            (3, 'Emily Brown', 'emily@example.com', 4, 'Good fitness band, accurate tracking and long battery life.'),
+            (5, 'David Wilson', 'david@example.com', 5, 'Most comfortable sneakers ever! Love the eco-friendly design.')";
         
         $db->exec($insertSQL);
         echo "<div class='success'>✓ Sample reviews added!</div>";

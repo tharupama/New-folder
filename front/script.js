@@ -100,6 +100,201 @@ const syncWishlistWithProducts = () => {
   }
 };
 
+const formatRatingStars = (rating) => {
+  const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
+  const fullStars = Math.round(safeRating);
+  return "★".repeat(fullStars) + "☆".repeat(5 - fullStars);
+};
+
+function setupSiteReviewsSection() {
+  const section = document.getElementById("siteReviewsSection");
+  const form = document.getElementById("siteReviewForm");
+  const reviewsList = document.getElementById("siteReviewsList");
+  const averageRating = document.getElementById("siteReviewAverage");
+  const averageStars = document.getElementById("siteReviewAverageStars");
+  const totalReviews = document.getElementById("siteReviewTotal");
+  const starInput = document.getElementById("siteReviewStarInput");
+  const ratingInput = document.getElementById("siteReviewRating");
+  const nameInput = document.getElementById("siteReviewName");
+  const emailInput = document.getElementById("siteReviewEmail");
+  const emailGroup = document.getElementById("siteReviewEmailGroup");
+  const commentInput = document.getElementById("siteReviewComment");
+
+  if (!section || !form || !reviewsList || !starInput || !ratingInput || !nameInput || !commentInput) {
+    return false;
+  }
+
+  let selectedRating = 0;
+
+  const setRating = (rating) => {
+    selectedRating = Number(rating) || 0;
+    ratingInput.value = selectedRating ? String(selectedRating) : "";
+    starInput.querySelectorAll(".star").forEach((star) => {
+      const value = Number(star.dataset.rating || 0);
+      star.classList.toggle("active", value <= selectedRating);
+      star.textContent = value <= selectedRating ? "★" : "☆";
+    });
+  };
+
+  const renderAverage = (average) => {
+    const safeAverage = Number(average) || 0;
+    if (averageRating) {
+      averageRating.textContent = safeAverage.toFixed(1);
+    }
+    if (averageStars) {
+      averageStars.textContent = formatRatingStars(safeAverage);
+    }
+  };
+
+  const renderSiteReviews = (reviews) => {
+    if (!Array.isArray(reviews) || reviews.length === 0) {
+      reviewsList.innerHTML = "<p class=\"no-reviews\">No site reviews yet. Be the first to share feedback!</p>";
+      if (totalReviews) totalReviews.textContent = "0 site reviews";
+      renderAverage(0);
+      return;
+    }
+
+    if (totalReviews) totalReviews.textContent = `${reviews.length} site review${reviews.length === 1 ? "" : "s"}`;
+
+    reviewsList.innerHTML = reviews
+      .map((review) => {
+        const date = review.created_at ? new Date(review.created_at).toLocaleDateString() : "-";
+        const displayName = review.display_name || review.user_name || "Customer";
+        return `
+          <div class="review-item">
+            <div class="review-header">
+              <div>
+                <div class="review-author">${displayName}</div>
+                <div class="review-date">${date}</div>
+              </div>
+              <div class="review-rating">${formatRatingStars(review.rating || 0)}</div>
+            </div>
+            <p class="review-comment">${review.comment || ""}</p>
+          </div>
+        `;
+      })
+      .join("");
+  };
+
+  const loadSiteReviews = async () => {
+    reviewsList.innerHTML = "<p class=\"no-reviews\">Loading site reviews...</p>";
+
+    if (typeof getSiteReviews !== "function") {
+      reviewsList.innerHTML = "<p class=\"no-reviews\">Site reviews API unavailable.</p>";
+      return;
+    }
+
+    try {
+      const response = await getSiteReviews();
+      if (!response.success) {
+        reviewsList.innerHTML = `<p class=\"no-reviews\">${response.data?.message || "Unable to load site reviews."}</p>`;
+        return;
+      }
+
+      renderAverage(response.data.average_rating || 0);
+      renderSiteReviews(response.data.reviews || []);
+    } catch (error) {
+      console.error("Failed to load site reviews", error);
+      reviewsList.innerHTML = "<p class=\"no-reviews\">Error loading site reviews. Please try again.</p>";
+    }
+  };
+
+  const applyUserDefaults = () => {
+    const isLoggedIn = Boolean(state.user && (state.user.loggedIn || state.user.email));
+    if (isLoggedIn) {
+      const fallbackName = state.user.fullname || state.user.username || (state.user.email ? state.user.email.split("@")[0] : "");
+      nameInput.value = fallbackName || nameInput.value;
+      if (emailGroup) emailGroup.style.display = "block";
+      if (emailInput) {
+        emailInput.value = state.user.email || "";
+        emailInput.readOnly = true;
+        emailInput.disabled = true;
+      }
+    } else {
+      if (emailGroup) emailGroup.style.display = "none";
+      if (emailInput) {
+        emailInput.value = "";
+        emailInput.readOnly = false;
+        emailInput.disabled = false;
+      }
+    }
+  };
+
+  applyUserDefaults();
+  setRating(0);
+  loadSiteReviews();
+
+  starInput.querySelectorAll(".star").forEach((star) => {
+    star.addEventListener("click", () => setRating(Number(star.dataset.rating || 0)));
+    star.addEventListener("mouseenter", () => {
+      const hoverRating = Number(star.dataset.rating || 0);
+      starInput.querySelectorAll(".star").forEach((item) => {
+        const value = Number(item.dataset.rating || 0);
+        item.textContent = value <= hoverRating ? "★" : "☆";
+      });
+    });
+  });
+
+  starInput.addEventListener("mouseleave", () => {
+    starInput.querySelectorAll(".star").forEach((item) => {
+      const value = Number(item.dataset.rating || 0);
+      item.textContent = value <= selectedRating ? "★" : "☆";
+    });
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const isLoggedIn = Boolean(state.user && (state.user.loggedIn || state.user.email));
+    const userName = nameInput.value.trim() || (isLoggedIn ? (state.user.fullname || state.user.username || (state.user.email ? state.user.email.split("@")[0] : "")) : "");
+    const comment = commentInput.value.trim();
+    const rating = selectedRating;
+
+    if (!userName || !comment || rating === 0) {
+      showToast("Please fill in your name, rating, and review");
+      return;
+    }
+
+    if (comment.length < 10) {
+      showToast("Review must be at least 10 characters long");
+      return;
+    }
+
+    if (typeof addSiteReview !== "function") {
+      showToast("Site reviews API unavailable");
+      return;
+    }
+
+    try {
+      const userIdNumeric = Number(state.user?.id);
+      const payload = {
+        user_name: userName,
+        rating,
+        comment,
+        user_id: Number.isFinite(userIdNumeric) && userIdNumeric > 0 ? userIdNumeric : null,
+        user_email: isLoggedIn ? (state.user?.email || emailInput?.value?.trim() || "") : ""
+      };
+
+      const response = await addSiteReview(payload);
+      if (!response.success) {
+        showToast(response.data?.message || "Unable to submit site review");
+        return;
+      }
+
+      form.reset();
+      setRating(0);
+      applyUserDefaults();
+      showToast("Site review submitted successfully");
+      loadSiteReviews();
+    } catch (error) {
+      console.error("Failed to submit site review", error);
+      showToast("Error submitting site review");
+    }
+  });
+
+  return true;
+}
+
 // Load products from database
 async function loadProducts() {
   try {
@@ -219,12 +414,29 @@ const renderOrders = (orders) => {
     return;
   }
 
+  console.log("Rendering orders:", orders);
+
   ordersList.innerHTML = orders
     .map((order) => {
       const formattedDate = order.created_at
         ? new Date(order.created_at).toLocaleString()
         : "-";
       const status = String(order.status || "pending").toLowerCase();
+
+      // Generate items HTML
+      const itemsHTML = (order.items && Array.isArray(order.items) && order.items.length > 0)
+        ? `<div class="order-items-list">
+             <h5 style="margin: 8px 0 6px 0; font-size: 0.9rem; font-weight: 600;">Items Ordered:</h5>
+             ${order.items.map(item => `
+               <div class="order-item-row" style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; color: var(--text);">
+                 <span style="flex: 1;">${item.product_name || 'Unknown Product'}</span>
+                 <span style="color: var(--muted); margin: 0 8px;">×${item.quantity}</span>
+                 <span style="color: var(--primary); font-weight: 600; min-width: 70px; text-align: right;">${currency.format(item.price || 0)}</span>
+               </div>
+             `).join('')}
+           </div>`
+        : `<div style="margin-top: 8px; color: var(--muted); font-size: 0.85rem;">No items found for this order.</div>`;
+
       return `
         <article class="order-card">
           <div class="order-card-head">
@@ -233,6 +445,7 @@ const renderOrders = (orders) => {
           </div>
           <p><strong>Total:</strong> ${currency.format(order.total_amount || 0)}</p>
           <p><strong>Placed:</strong> ${formattedDate}</p>
+          ${itemsHTML}
         </article>
       `;
     })
@@ -255,13 +468,25 @@ const loadCustomerOrders = async () => {
   ordersList.innerHTML = "<p>Loading your orders...</p>";
 
   try {
+    console.log("Fetching orders for user:", {
+      email: state.user.email,
+      id: state.user.id
+    });
+
     const response = await getOrders({
       user_email: state.user.email,
       supabase_user_id: state.user.id || ""
     });
 
+    console.log("Orders response:", response);
+
     if (!response.success) {
       ordersList.innerHTML = `<p>${response.data?.message || "Unable to load orders."}</p>`;
+      return;
+    }
+
+    if (!response.data || response.data.length === 0) {
+      ordersList.innerHTML = "<p>You have no orders yet. Start shopping!</p>";
       return;
     }
 
@@ -327,15 +552,15 @@ const renderProducts = (items) => {
         <span class="price">${currency.format(product.price)}</span>
       </div>
       <div class="stock-status" style="font-size: 0.85rem; margin: 4px 0; font-weight: 500; color: ${product.is_available == 1 ? '#10b981' : '#ef4444'};">
-        ${product.is_available == 1 ? '✓ In Stock' : '✗ Out of Stock'}
-      </div>
-      <div class="product-actions">
-        <button class="ghost-btn" data-action="wishlist">${
-          state.wishlist.has(product.id) ? "Saved" : "Wishlist"
-        }</button>
-        <button class="primary-btn" data-action="cart" ${product.is_available == 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-          ${product.is_available == 0 ? 'Unavailable' : 'Add'}
-        </button>
+            ${((product.category === 'beverages') ? (product.is_available == 1 && Number(product.stock) > 0) : (product.is_available == 1)) ? '✓ Available' : '✗ Unavailable'}
+          </div>
+          <div class="product-actions">
+            <button class="ghost-btn" data-action="wishlist">${
+              state.wishlist.has(product.id) ? "Saved" : "Wishlist"
+            }</button>
+            <button class="primary-btn" data-action="cart" ${((product.category === 'beverages') ? (product.is_available == 0 || Number(product.stock) <= 0) : (product.is_available == 0)) ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+              ${((product.category === 'beverages') ? (product.is_available == 1 && Number(product.stock) > 0) : (product.is_available == 1)) ? 'Add' : 'Unavailable'}
+            </button>
       </div>
     </article>`
     )
@@ -570,9 +795,14 @@ if (productGrid) {
     if (event.target.dataset.action === "cart") {
       // Check if product is available before adding to cart
       const product = products.find(p => p.id === id);
-      if (product && product.is_available == 0) {
-        showToast("This item is currently out of stock");
-        return;
+      if (product) {
+        const isAvail = (String(product.category || '').toLowerCase() === 'beverages')
+          ? (product.is_available == 1 && Number(product.stock) > 0)
+          : (product.is_available == 1);
+        if (!isAvail) {
+          showToast("This item is currently unavailable");
+          return;
+        }
       }
       state.cart.set(id, (state.cart.get(id) || 0) + 1);
       saveCart();
@@ -654,6 +884,7 @@ Array.from(document.querySelectorAll(".category-grid button")).forEach((btn) => 
   });
 });
 
+// Newsletter form handler - Main form
 if (newsletterForm) {
   newsletterForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -676,42 +907,158 @@ if (newsletterForm) {
     }
 
     try {
-      // Submit as contact message if we're on contact page, otherwise just show thanks
-      const isContactPage = window.location.pathname.includes("contact");
+      // Try simpler path first
+      let response = await fetch("../backend/subscribe.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: email })
+      });
       
-      if (isContactPage && typeof submitContact !== "undefined") {
-        const response = await submitContact(
-          "Newsletter Signup",
-          email,
-          "Newsletter Subscription",
-          "User subscribed to newsletter"
-        );
-        
-        if (response.success) {
-          if (newsletterMsg) {
-            newsletterMsg.textContent = "Thanks! You are subscribed.";
-            newsletterMsg.style.color = "#10b981";
-          }
-        } else {
-          if (newsletterMsg) {
-            newsletterMsg.textContent = response.data.message || "Subscription failed. Try again.";
-            newsletterMsg.style.color = "#ef4444";
-          }
-        }
-      } else {
-        if (newsletterMsg) {
-          newsletterMsg.textContent = "Thanks! You are subscribed.";
-          newsletterMsg.style.color = "#10b981";
-        }
+      // If that fails, try the longer path
+      if (!response.ok) {
+        response = await fetch("../backend/products/subscription.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email: email })
+        });
       }
       
-      newsletterForm.reset();
+      // Check if response is ok
+      if (!response.ok) {
+        console.error("API Error:", response.status, response.statusText);
+        if (newsletterMsg) {
+          newsletterMsg.textContent = "❌ Server error (Status: " + response.status + ")";
+          newsletterMsg.style.color = "#ef4444";
+        }
+        return;
+      }
+      
+      // Get response text first to debug
+      const responseText = await response.text();
+      console.log("API Response:", responseText);
+      
+      // Try to parse JSON
+      if (!responseText) {
+        if (newsletterMsg) {
+          newsletterMsg.textContent = "❌ Empty response. Run: backend/setup-database.php";
+          newsletterMsg.style.color = "#ef4444";
+        }
+        return;
+      }
+      
+      let subscriptionData;
+      try {
+        subscriptionData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON Parse Error:", parseError);
+        console.error("Response was:", responseText.substring(0, 500));
+        if (newsletterMsg) {
+          newsletterMsg.textContent = "❌ Invalid response format";
+          newsletterMsg.style.color = "#ef4444";
+        }
+        return;
+      }
+      
+      if (subscriptionData.success) {
+        if (newsletterMsg) {
+          newsletterMsg.textContent = subscriptionData.message || "✅ Successfully subscribed! You'll receive emails about new products.";
+          newsletterMsg.style.color = "#10b981";
+        }
+        newsletterForm.reset();
+      } else {
+        if (newsletterMsg) {
+          newsletterMsg.textContent = subscriptionData.message || "Subscription failed. Please try again.";
+          newsletterMsg.style.color = "#ef4444";
+        }
+      }
     } catch (error) {
       console.error("Newsletter subscription error:", error);
       if (newsletterMsg) {
-        newsletterMsg.textContent = "An error occurred. Please try again.";
+        newsletterMsg.textContent = "❌ Error: " + error.message;
         newsletterMsg.style.color = "#ef4444";
       }
+    }
+  });
+}
+
+// Newsletter form handler - Footer form
+const footerNewsletterForm = document.getElementById("footerNewsletterForm");
+if (footerNewsletterForm) {
+  footerNewsletterForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = footerNewsletterForm.querySelector("input[type='email']")?.value.trim();
+    
+    if (!email) {
+      alert("Please enter your email.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      alert("Please enter a valid email.");
+      return;
+    }
+
+    try {
+      // Try simpler path first
+      let response = await fetch("../backend/subscribe.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: email })
+      });
+      
+      // If that fails, try the longer path
+      if (!response.ok) {
+        response = await fetch("../backend/products/subscription.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email: email })
+        });
+      }
+      
+      // Check if response is ok
+      if (!response.ok) {
+        console.error("API Error:", response.status, response.statusText);
+        alert("❌ Server error. Status: " + response.status);
+        return;
+      }
+      
+      // Get response text first to debug
+      const responseText = await response.text();
+      console.log("API Response:", responseText);
+      
+      // Try to parse JSON
+      if (!responseText) {
+        alert("❌ Empty response from server. Check if database table exists. Go to: ../backend/setup-database.php");
+        return;
+      }
+      
+      let subscriptionData;
+      try {
+        subscriptionData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON Parse Error:", parseError);
+        console.error("Response was:", responseText.substring(0, 500));
+        alert("❌ Invalid response format. Response: " + responseText.substring(0, 100));
+        return;
+      }
+      
+      if (subscriptionData.success) {
+        alert("✅ " + (subscriptionData.message || "Successfully subscribed! You'll receive emails about new products."));
+        footerNewsletterForm.reset();
+      } else {
+        alert("❌ " + (subscriptionData.message || "Subscription failed. Please try again."));
+      }
+    } catch (error) {
+      console.error("Newsletter subscription error:", error);
+      alert("❌ Error: " + error.message);
     }
   });
 }
@@ -913,10 +1260,11 @@ function setupWishlistSystem() {
       .map(id => {
         const product = products.find(p => p.id == id);
         if (!product) return "";
+        const imageSrc = product.image || "https://via.placeholder.com/100?text=BUY+LK";
         
         return `
           <div class="wishlist-item">
-            <img src="https://via.placeholder.com/100" alt="${product.name}" />
+            <img src="${imageSrc}" alt="${product.name}" onerror="this.onerror=null;this.src='https://via.placeholder.com/100?text=BUY+LK';" />
             <div class="wishlist-item-info">
               <h4>${product.name}</h4>
               <p>${product.tag}</p>
@@ -993,10 +1341,6 @@ function setupPaymentSystem() {
     console.error("Payment modal element not found");
     return false;
   }
-
-  if (paymentForm) {
-    paymentForm.setAttribute("novalidate", "novalidate");
-  }
   
   // Open payment modal
   function openPayment() {
@@ -1059,6 +1403,12 @@ function setupPaymentSystem() {
     paymentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       console.log("Payment form submitted");
+
+      if (!paymentForm.checkValidity()) {
+        paymentForm.reportValidity();
+        showToast("Please complete all billing information and accept the terms");
+        return;
+      }
       
       const submitBtn = paymentForm.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
@@ -1103,6 +1453,9 @@ function setupPaymentSystem() {
           0
         );
         const shipping = subtotal >= 200 ? 0 : 9.99;
+        const selectedPaymentMethod = paymentForm.querySelector('input[name="paymentMethod"]:checked')?.value || "credit_card";
+        const isCashOnDelivery = selectedPaymentMethod === "cash_on_delivery";
+        const paymentStatus = isCashOnDelivery ? "pending" : "paid";
 
         const checkoutPayload = {
           cartItems: cartItemsForCheckout,
@@ -1110,6 +1463,7 @@ function setupPaymentSystem() {
           shipping,
           total: subtotal + shipping,
           email,
+          payment_method: selectedPaymentMethod,
           billingDetails: {
             firstName,
             lastName,
@@ -1125,6 +1479,11 @@ function setupPaymentSystem() {
           user_id: Number.isFinite(userIdNumeric) && userIdNumeric > 0 ? userIdNumeric : null,
           supabase_user_id: state.user?.id && !Number.isFinite(userIdNumeric) ? String(state.user.id) : "",
           user_email: email,
+          customer_name: `${firstName} ${lastName}`.trim(),
+          customer_phone: phone,
+          customer_address: streetAddress,
+          payment_method: selectedPaymentMethod,
+          payment_status: paymentStatus,
           total_amount: subtotal + shipping,
           items: cartItemsForCheckout.map((item) => ({
             product_id: Number(item.id),
@@ -1134,6 +1493,35 @@ function setupPaymentSystem() {
         };
 
         localStorage.setItem("buyLkPendingOrder", JSON.stringify(pendingOrderData));
+
+        if (isCashOnDelivery) {
+          const orderResponse = await createOrder(pendingOrderData);
+
+          if (!orderResponse.success || !orderResponse.data?.success) {
+            throw new Error(orderResponse.data?.message || "Failed to place cash on delivery order.");
+          }
+
+          const orderId = orderResponse.data.order_id || orderResponse.data?.data?.order_id || null;
+          localStorage.removeItem("buyLkPendingOrder");
+          localStorage.removeItem("buyLkCart");
+          window.dispatchEvent(new Event("storage"));
+          if (typeof renderCart === "function") {
+            renderCart();
+          }
+          updateCounts();
+          paymentModal.classList.remove("show");
+          document.body.style.overflow = "auto";
+          localStorage.setItem(
+            "buyLkPaymentMessage",
+            JSON.stringify({
+              text: orderId ? `Order #${orderId} placed for cash on delivery.` : "Cash on delivery order placed successfully.",
+              expiresAt: Date.now() + 60000,
+            })
+          );
+          showToast(orderId ? `Order #${orderId} placed for cash on delivery` : "Cash on delivery order placed successfully");
+          window.location.href = state.user?.email ? "account.html" : "index.html";
+          return;
+        }
 
         const checkoutEndpoint =
           (typeof API_ENDPOINTS !== "undefined" &&
@@ -1175,10 +1563,12 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
     setupPaymentSystem();
     setupWishlistSystem();
+    setupSiteReviewsSection();
   });
 } else {
   setupPaymentSystem();
   setupWishlistSystem();
+  setupSiteReviewsSection();
 }
 
 // Counter Animation Function
@@ -1251,13 +1641,14 @@ const updateAuthUI = () => {
   const authLinks = document.getElementById("authLinks");
   const userMenu = document.getElementById("userMenu");
   const userBtn = document.getElementById("userBtn");
-  const showCustomerActions = state.user && state.user.loggedIn;
+  const showCustomerActions = state.user && (state.user.loggedIn || state.user.email);
 
   if (showCustomerActions) {
     if (authLinks) authLinks.style.display = "none";
     if (userMenu) userMenu.style.display = "flex";
     if (userBtn) {
-      const userName = state.user.fullname || state.user.email.split("@")[0];
+      const emailPart = state.user.email ? state.user.email.split("@")[0] : "Account";
+      const userName = state.user.fullname || emailPart;
       userBtn.textContent = `👤 ${userName}`;
     }
   } else {
@@ -1265,6 +1656,20 @@ const updateAuthUI = () => {
     if (userMenu) userMenu.style.display = "none";
   }
 };
+
+const userBtnEl = document.getElementById("userBtn");
+if (userBtnEl) {
+  userBtnEl.addEventListener("click", () => {
+    if (!state.user || (!state.user.loggedIn && !state.user.email)) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    if (!window.location.pathname.toLowerCase().includes("account.html")) {
+      window.location.href = "account.html";
+    }
+  });
+}
 
 if (myOrdersBtn) {
   myOrdersBtn.addEventListener("click", () => {
@@ -1303,8 +1708,24 @@ if (logoutBtn) {
     
     // Clear local storage and update UI
     localStorage.removeItem("user");
-    state.user = null;
+    localStorage.removeItem("buyLkCart");
+    localStorage.removeItem("buyLkWishlist");
+    if (typeof state !== "undefined") {
+      state.user = null;
+      if (Array.isArray(state.cart)) {
+        state.cart = [];
+      }
+      if (state.wishlist instanceof Set) {
+        state.wishlist.clear();
+      } else {
+        state.wishlist = new Set();
+      }
+    }
+    window.dispatchEvent(new Event("storage"));
     updateAuthUI();
+    if (typeof updateCounts === "function") {
+      updateCounts();
+    }
     showToast("Logged out successfully");
     setTimeout(() => {
       window.location.href = "index.html";
@@ -1313,3 +1734,224 @@ if (logoutBtn) {
 }
 
 updateAuthUI();
+
+const initChatbot = () => {
+  if (!document.body || document.getElementById("chatbotFab")) {
+    return;
+  }
+
+  const panel = document.createElement("div");
+  panel.className = "chatbot-panel";
+  panel.id = "chatbotPanel";
+  panel.innerHTML = `
+    <div class="chatbot-header">
+      <span class="chatbot-title">BUY LK Assistant</span>
+      <button class="icon-btn" id="chatbotClose" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages"></div>
+    <div class="chatbot-input">
+      <input type="text" id="chatbotInput" placeholder="Ask about orders, menu, or delivery..." />
+      <button id="chatbotSend">Send</button>
+    </div>
+  `;
+
+  const fab = document.createElement("button");
+  fab.className = "chatbot-fab";
+  fab.id = "chatbotFab";
+  fab.setAttribute("aria-label", "Open chat");
+  fab.innerHTML = '<i class="ri-chat-3-line" aria-hidden="true"></i>';
+
+  document.body.appendChild(panel);
+  document.body.appendChild(fab);
+
+  const messagesEl = document.getElementById("chatbotMessages");
+  const inputEl = document.getElementById("chatbotInput");
+  const sendBtn = document.getElementById("chatbotSend");
+  const closeBtn = document.getElementById("chatbotClose");
+
+  const systemPrompt =
+    "You are BUY LK Assistant. Use only the DATA provided. If the answer is not in DATA, say you do not have that information and suggest how to find it. Keep answers short and friendly.";
+
+  const buildChatContext = async () => {
+    const context = {
+      user: {
+        signedIn: Boolean(state.user && state.user.loggedIn),
+        email: state.user?.email || "",
+        id: state.user?.id || ""
+      },
+      products: [],
+      orders: [],
+      notes: []
+    };
+
+    let productList = Array.isArray(products) ? products : [];
+
+    if (productList.length === 0 && typeof getProducts === "function") {
+      try {
+        const response = await getProducts();
+        if (response.success && Array.isArray(response.data)) {
+          productList = response.data;
+        }
+      } catch (error) {
+        context.notes.push("Unable to refresh products.");
+      }
+    }
+
+    if (productList.length > 0) {
+      const limit = 60;
+      const trimmed = productList.slice(0, limit).map((product) => {
+        const stock = Number(product.stock ?? 0);
+        const isAvailable = String(product.category || '').toLowerCase() === 'beverages'
+          ? (Boolean(Number(product.is_available)) && stock > 0)
+          : Boolean(Number(product.is_available));
+        return {
+          id: Number(product.id),
+          name: String(product.name || ""),
+          category: String(product.category || ""),
+          price: Number(product.price || 0),
+          available: isAvailable,
+          stock
+        };
+      });
+
+      context.products = trimmed;
+
+      if (productList.length > limit) {
+        context.notes.push(`Products list truncated to ${limit} items.`);
+      }
+    } else {
+      context.notes.push("No product data available.");
+    }
+
+    if (context.user.signedIn && typeof getOrders === "function") {
+      try {
+        const userIdNumeric = Number(state.user?.id);
+        const filters = {
+          user_id: Number.isFinite(userIdNumeric) && userIdNumeric > 0 ? userIdNumeric : null,
+          supabase_user_id:
+            state.user?.id && !Number.isFinite(userIdNumeric) ? String(state.user.id) : "",
+          user_email: state.user?.email || ""
+        };
+
+        const response = await getOrders(filters);
+        if (response.success && Array.isArray(response.data)) {
+          context.orders = response.data.slice(0, 5).map((order) => ({
+            id: Number(order.id),
+            status: String(order.status || "pending"),
+            total_amount: Number(order.total_amount || 0),
+            created_at: String(order.created_at || ""),
+            items: Array.isArray(order.items)
+              ? order.items.map((item) => ({
+                  name: String(item.product_name || ""),
+                  quantity: Number(item.quantity || 0),
+                  price: Number(item.price || 0)
+                }))
+              : []
+          }));
+        }
+      } catch (error) {
+        context.notes.push("Unable to load order history.");
+      }
+    } else if (!context.user.signedIn) {
+      context.notes.push("User is not signed in; order history not available.");
+    }
+
+    return context;
+  };
+
+  const historyKey = "buyLkChatHistory";
+  const history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+
+  const renderMessage = (role, content) => {
+    const bubble = document.createElement("div");
+    bubble.className = `chatbot-message ${role}`;
+    bubble.textContent = content;
+    messagesEl.appendChild(bubble);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  };
+
+  if (history.length === 0) {
+    renderMessage("bot", "Hi! Ask me about menu items, orders, or delivery.");
+  } else {
+    history.forEach((item) => renderMessage(item.role, item.content));
+  }
+
+  const saveHistory = (role, content) => {
+    history.push({ role, content });
+    const trimmed = history.slice(-12);
+    localStorage.setItem(historyKey, JSON.stringify(trimmed));
+  };
+
+  const sendMessage = async () => {
+    const message = inputEl.value.trim();
+    if (!message) return;
+
+    renderMessage("user", message);
+    saveHistory("user", message);
+    inputEl.value = "";
+
+    const typing = document.createElement("div");
+    typing.className = "chatbot-typing";
+    typing.textContent = "Assistant is typing...";
+    messagesEl.appendChild(typing);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    try {
+      if (!window.puter || !puter.ai || !puter.ai.chat) {
+        typing.remove();
+        renderMessage("bot", "Puter AI is not available. Please refresh the page.");
+        return;
+      }
+
+      const historyText = history
+        .slice(-8)
+        .map((item) => `${item.role === "user" ? "User" : "Assistant"}: ${item.content}`)
+        .join("\n");
+
+      const context = await buildChatContext();
+      const prompt = `${systemPrompt}\n\nDATA:${JSON.stringify(context)}\n\nConversation:\n${historyText}\nUser: ${message}\nAssistant:`;
+
+      const response = await puter.ai.chat(prompt, {
+        model: "x-ai/grok-4-1-fast",
+      });
+
+      typing.remove();
+
+      const reply = response?.message?.content || response?.text || "";
+      if (!reply) {
+        renderMessage("bot", "Sorry, I could not reply right now.");
+        return;
+      }
+
+      renderMessage("bot", reply);
+      saveHistory("bot", reply);
+    } catch (error) {
+      typing.remove();
+      renderMessage("bot", "Chat error. Please try again.");
+    }
+  };
+
+  fab.addEventListener("click", () => {
+    panel.classList.toggle("open");
+    if (panel.classList.contains("open")) {
+      inputEl.focus();
+    }
+  });
+
+  closeBtn.addEventListener("click", () => {
+    panel.classList.remove("open");
+  });
+
+  sendBtn.addEventListener("click", sendMessage);
+  inputEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      sendMessage();
+    }
+  });
+};
+
+if (document.body) {
+  initChatbot();
+} else {
+  window.addEventListener("DOMContentLoaded", initChatbot);
+}

@@ -1,10 +1,48 @@
 <?php
+// Prevent any output before JSON
+ob_start();
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-require_once '../config/database.php';
+// Set error handler to return JSON errors (but ignore mail() warnings)
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    // Ignore mail() warnings - email sending shouldn't block product creation
+    if (strpos($errstr, 'mail()') !== false || strpos($errstr, 'mailserver') !== false) {
+        error_log("Mail warning ignored: $errstr");
+        return true; // Don't continue with default handler
+    }
+    
+    ob_clean();
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error',
+        'error' => $errstr,
+        'file' => $errfile,
+        'line' => $errline
+    ]);
+    exit;
+});
+
+try {
+    require_once '../config/database.php';
+    require_once '../config/EmailNotifier.php';
+} catch (Exception $e) {
+    ob_clean();
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Failed to load required files',
+        'error' => $e->getMessage()
+    ]);
+    ob_end_flush();
+    exit;
+}
 
 // Handle CORS preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -74,11 +112,53 @@ try {
         $stmt = $pdo->prepare("INSERT INTO products (name, category, price, rating, tag, image, description, stock, is_available) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)");
         $stmt->execute([$name, $category, $price, 0, $tag, $image, $description, $stock]);
         
+        $productId = $pdo->lastInsertId();
+        $emailsSent = 0;
+        $emailsFailed = 0;
+        
+        // Get all subscribed users
+        try {
+            $subscribersStmt = $pdo->prepare("SELECT email FROM email_subscriptions WHERE is_subscribed = 1");
+            $subscribersStmt->execute();
+            $subscribers = $subscribersStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($subscribers)) {
+                // Prepare product data for email
+                $productData = [
+                    'id' => $productId,
+                    'name' => $name,
+                    'category' => $category,
+                    'price' => $price,
+                    'tag' => $tag,
+                    'image' => $image,
+                    'description' => $description
+                ];
+                
+                // Send emails to all subscribers
+                $emailNotifier = new EmailNotifier();
+                $subscriberEmails = array_column($subscribers, 'email');
+                $sendResults = $emailNotifier->sendBatchNotifications($subscriberEmails, $productData);
+                
+                $emailsSent = $sendResults['success'];
+                $emailsFailed = $sendResults['failed'];
+                
+                // Log any errors
+                if (!empty($sendResults['errors'])) {
+                    error_log("Email sending errors: " . json_encode($sendResults['errors']));
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error sending subscriber emails: " . $e->getMessage());
+        }
+        
         http_response_code(201);
         echo json_encode([
             'success' => true,
             'message' => 'Product added successfully',
-            'productId' => $pdo->lastInsertId()
+            'productId' => $productId,
+            'emailsSent' => $emailsSent,
+            'emailsFailed' => $emailsFailed,
+            'totalSubscribers' => count($subscribers ?? [])
         ]);
         exit;
     }
@@ -161,7 +241,24 @@ try {
     }
     
 } catch (PDOException $e) {
+    ob_clean();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database error',
+        'error' => $e->getMessage()
+    ]);
+    ob_end_flush();
+} catch (Exception $e) {
+    ob_clean();
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error',
+        'error' => $e->getMessage()
+    ]);
+    ob_end_flush();
 }
+
+ob_end_flush();
 ?>

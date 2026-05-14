@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Endpoint Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        input {
+            border: 1px solid #ddd;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.9em;
+        }
+        .success-response {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        .error-response {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Subscription API</h1>
+        
+        <div class="info">
+            <strong>ℹ️ What to do:</strong>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Enter your email address</li>
+                <li>Click any of the test buttons below</li>
+                <li>Look at the response</li>
+                <li>If it says "405 Method Not Allowed", the path is wrong</li>
+                <li>If it says "Table does not exist", run the setup script</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>Email Address</h2>
+            <input type="email" id="email" placeholder="test@example.com" value="test@example.com">
+        </div>
+
+        <h2>Test Different API Paths:</h2>
+
+        <div class="test-section">
+            <h3>Option 1: Relative Path (Recommended)</h3>
+            <button onclick="testPath('../backend/products/subscription.php', 'Relative: ../backend/products/subscription.php')">
+                Test ../backend/products/subscription.php
+            </button>
+        </div>
+
+        <div class="test-section">
+            <h3>Option 2: Absolute Path</h3>
+            <button onclick="testPath('http://localhost/xampp/htdocs/E%20commerce/New-folder/backend/products/subscription.php', 'Absolute: http://localhost/xampp/...')">
+                Test Absolute URL
+            </button>
+        </div>
+
+        <div class="test-section">
+            <h3>Option 3: Site Root</h3>
+            <button onclick="testPath('/xampp/htdocs/E%20commerce/New-folder/backend/products/subscription.php', 'Root: /xampp/...')">
+                Test Root Path
+            </button>
+        </div>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        async function testPath(path, label) {
+            const email = document.getElementById('email').value;
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div class="info">⏳ Testing...</div>';
+
+            try {
+                console.log('Testing path:', path);
+                console.log('Email:', email);
+
+                const response = await fetch(path, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const responseText = await response.text();
+                console.log('Response status:', response.status);
+                console.log('Response text:', responseText);
+
+                let displayClass = 'error-response';
+                let displayContent = '';
+
+                displayContent += `Path: ${label}\n`;
+                displayContent += `Status: ${response.status} ${response.statusText}\n\n`;
+
+                if (response.status === 405) {
+                    displayContent += '❌ 405 Method Not Allowed\n';
+                    displayContent += '   This means the file path is wrong or not accessible.\n';
+                    displayContent += '   OR the subscription.php file is missing/not found.\n';
+                } else if (response.status === 404) {
+                    displayContent += '❌ 404 Not Found\n';
+                    displayContent += '   The file does not exist at this path.\n';
+                } else if (response.status === 200 || response.status === 201) {
+                    displayClass = 'success-response';
+                    displayContent += '✅ Success! API is working.\n\n';
+                }
+
+                if (responseText) {
+                    try {
+                        const data = JSON.parse(responseText);
+                        displayContent += 'Response:\n' + JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        displayContent += 'Raw Response:\n' + responseText.substring(0, 500);
+                    }
+                } else {
+                    displayContent += 'Response: (empty)';
+                }
+
+                responseDiv.innerHTML = `<div class="response ${displayClass}">${displayContent}</div>`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = `<div class="response error-response">
+❌ Error: ${error.message}
+${error.stack}
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

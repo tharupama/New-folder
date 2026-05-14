@@ -15,7 +15,7 @@ async function getSupabaseClient() {
 }
 
 // PHP backend configuration for non-auth endpoints
-const API_BASE_URL = 'http://localhost/New%20folder%20(2)/New-folder/backend';
+const API_BASE_URL = 'http://localhost/E%20commerce/New-folder/backend';
 const API_ENDPOINTS = {
   contact: `${API_BASE_URL}/contact/submit.php`,
   products: `${API_BASE_URL}/products/list.php`,
@@ -24,9 +24,17 @@ const API_ENDPOINTS = {
   payments: {
     createCheckout: `${API_BASE_URL}/payments/create-checkout.php`
   },
+  users: {
+    profile: `${API_BASE_URL}/users/profile.php`
+  },
   reviews: {
     get: `${API_BASE_URL}/reviews/get.php`,
-    add: `${API_BASE_URL}/reviews/add.php`
+    add: `${API_BASE_URL}/reviews/add.php`,
+    user: `${API_BASE_URL}/reviews/user.php`
+  },
+  siteReviews: {
+    get: `${API_BASE_URL}/site-reviews/get.php`,
+    add: `${API_BASE_URL}/site-reviews/add.php`
   }
 };
 
@@ -212,6 +220,9 @@ async function logoutUser() {
         data: { message: error.message || 'Logout failed. Please try again.' }
       };
     }
+
+    localStorage.removeItem('buyLkCart');
+    localStorage.removeItem('buyLkWishlist');
 
     return {
       success: true,
@@ -409,13 +420,102 @@ async function getProductReviews(productId) {
 }
 
 // Add product review - unchanged (still uses PHP)
-async function addProductReview(productId, userName, rating, comment) {
+async function addProductReview(productId, userName, rating, comment, userId = null, userEmail = '') {
   return phpApiCall(API_ENDPOINTS.reviews.add, 'POST', {
     product_id: productId,
     user_name: userName,
+    user_id: userId,
+    user_email: userEmail,
     rating: rating,
     comment: comment
   });
+}
+
+async function getSiteReviews() {
+  const response = await phpApiCall(API_ENDPOINTS.siteReviews.get, 'GET');
+
+  if (response.success && response.data && Array.isArray(response.data.data?.reviews)) {
+    return {
+      ...response,
+      data: response.data.data
+    };
+  }
+
+  if (response.success && Array.isArray(response.data)) {
+    return response;
+  }
+
+  return {
+    ...response,
+    data: {
+      reviews: [],
+      average_rating: 0,
+      total_reviews: 0
+    }
+  };
+}
+
+async function addSiteReview(payload) {
+  return phpApiCall(API_ENDPOINTS.siteReviews.add, 'POST', payload);
+}
+
+async function getUserReviews(filters = {}) {
+  const queryParams = new URLSearchParams();
+
+  if (filters.user_id) {
+    queryParams.set('user_id', String(filters.user_id));
+  }
+  if (filters.email) {
+    queryParams.set('email', filters.email);
+  } else if (filters.user_email) {
+    queryParams.set('email', filters.user_email);
+  }
+  if (filters.user_name) {
+    queryParams.set('user_name', filters.user_name);
+  }
+
+  const endpoint = queryParams.toString()
+    ? `${API_ENDPOINTS.reviews.user}?${queryParams.toString()}`
+    : API_ENDPOINTS.reviews.user;
+
+  const response = await phpApiCall(endpoint, 'GET');
+  if (response.success && response.data && Array.isArray(response.data.data)) {
+    return {
+      ...response,
+      data: response.data.data
+    };
+  }
+
+  if (response.success && Array.isArray(response.data)) {
+    return response;
+  }
+
+  return {
+    ...response,
+    data: []
+  };
+}
+
+async function getUserProfile(filters = {}) {
+  const queryParams = new URLSearchParams();
+
+  if (filters.user_id) {
+    queryParams.set('user_id', String(filters.user_id));
+  }
+
+  if (filters.email) {
+    queryParams.set('email', filters.email);
+  }
+
+  const endpoint = queryParams.toString()
+    ? `${API_ENDPOINTS.users.profile}?${queryParams.toString()}`
+    : API_ENDPOINTS.users.profile;
+
+  return phpApiCall(endpoint, 'GET');
+}
+
+async function updateUserProfile(payload) {
+  return phpApiCall(API_ENDPOINTS.users.profile, 'POST', payload);
 }
 
 // Expose helpers globally for plain browser script tags
@@ -435,6 +535,11 @@ window.createOrder = createOrder;
 window.updateOrderStatus = updateOrderStatus;
 window.getProductReviews = getProductReviews;
 window.addProductReview = addProductReview;
+window.getSiteReviews = getSiteReviews;
+window.addSiteReview = addSiteReview;
+window.getUserReviews = getUserReviews;
+window.getUserProfile = getUserProfile;
+window.updateUserProfile = updateUserProfile;
 
 // Floating social share widget (all non-admin pages)
 function shouldShowShareWidget() {

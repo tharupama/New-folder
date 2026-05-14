@@ -37,6 +37,14 @@ async function openProductModal(productId) {
   
   // Reset review form
   resetReviewForm();
+
+  const reviewNameInput = document.getElementById("reviewName");
+  if (reviewNameInput && state?.user?.email) {
+    const fallbackName = state.user.fullname || state.user.username || state.user.email.split("@")[0];
+    if (!reviewNameInput.value.trim()) {
+      reviewNameInput.value = fallbackName;
+    }
+  }
 }
 
 // Close product details modal
@@ -132,6 +140,26 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+const getActiveUserKey = () => {
+  if (typeof state === "undefined" || !state.user || !state.user.loggedIn) {
+    return "";
+  }
+  return state.user.email || state.user.id || state.user.username || "";
+};
+
+const storeUserReview = (review) => {
+  if (!review || !review.userKey) return;
+
+  try {
+    const stored = JSON.parse(localStorage.getItem("buyLkUserReviews") || "[]");
+    const updated = Array.isArray(stored) ? stored : [];
+    updated.unshift(review);
+    localStorage.setItem("buyLkUserReviews", JSON.stringify(updated));
+  } catch (error) {
+    console.warn("Unable to store user review", error);
+  }
+};
+
 // Reset review form
 function resetReviewForm() {
   document.getElementById("reviewForm").reset();
@@ -155,7 +183,8 @@ async function submitReview(event) {
     return;
   }
   
-  const userName = document.getElementById("reviewName").value.trim();
+  const defaultName = (state?.user?.fullname || state?.user?.username || (state?.user?.email ? state.user.email.split("@")[0] : "")).trim();
+  const userName = document.getElementById("reviewName").value.trim() || defaultName;
   const comment = document.getElementById("reviewComment").value.trim();
   const rating = selectedRating;
   
@@ -177,13 +206,34 @@ async function submitReview(event) {
   // Submit review
   try {
     console.log("Calling addProductReview API...");
-    const response = await addProductReview(currentProductId, userName, rating, comment);
+    const response = await addProductReview(
+      currentProductId,
+      userName,
+      rating,
+      comment,
+      state?.user?.id,
+      state?.user?.email || ""
+    );
     
     console.log("API Response:", response);
     
     if (response.success || (response.data && response.data.success)) {
       showToast("Review submitted successfully!");
       resetReviewForm();
+
+      const userKey = getActiveUserKey();
+      const product = products.find((item) => item.id === currentProductId);
+      if (userKey && product) {
+        storeUserReview({
+          id: `${currentProductId}-${Date.now()}`,
+          userKey,
+          product_id: currentProductId,
+          product_name: product.name || "Product",
+          rating,
+          comment,
+          created_at: new Date().toISOString()
+        });
+      }
       
       // Reload reviews
       console.log("Reloading reviews...");

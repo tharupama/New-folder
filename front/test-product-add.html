@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Product Addition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            width: 100%;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.85em;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success-response {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        .error-response {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        .info-box {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .test-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .test-buttons button {
+            width: auto;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Product Addition</h1>
+        
+        <div class="info-box">
+            This page helps debug why adding products might fail. It runs tests and shows you exactly what's going wrong.
+        </div>
+
+        <div class="section">
+            <h2>Step 1: Diagnostic Tests</h2>
+            <div class="test-buttons">
+                <button onclick="runDiagnostics()">🔍 Run Diagnostics</button>
+                <button onclick="testDatabase()">💾 Test Database</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Step 2: Add Test Product</h2>
+            <input type="text" id="name" placeholder="Product Name" value="Test Product">
+            <input type="text" id="category" placeholder="Category" value="electronics">
+            <input type="number" id="price" placeholder="Price" value="99.99" step="0.01" min="0.01">
+            <input type="text" id="token" placeholder="Admin Token" value="admin">
+            <button onclick="testAddProduct()">➕ Add Product (No Email)</button>
+            <button onclick="testAddProductWithEmail()">📧 Add Product (With Email)</button>
+        </div>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        async function runDiagnostics() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div class="info-box">⏳ Running diagnostics...</div>';
+
+            try {
+                const response = await fetch('../backend/products/test-add.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Diagnostic Test',
+                        category: 'test',
+                        price: 0.01
+                    })
+                });
+
+                const data = await response.json();
+                
+                let html = `<div class="response ${data.success ? 'success-response' : 'error-response'}">`;
+                html += `Status: ${response.status}\n\n`;
+                html += JSON.stringify(data, null, 2);
+                html += `</div>`;
+                
+                responseDiv.innerHTML = html;
+            } catch (e) {
+                responseDiv.innerHTML = `<div class="response error-response">Error: ${e.message}</div>`;
+            }
+        }
+
+        async function testDatabase() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div class="info-box">⏳ Testing database...</div>';
+
+            try {
+                // Try to fetch the diagnostics without adding a product
+                const response = await fetch('./test-add.php', {
+                    method: 'OPTIONS'
+                });
+
+                responseDiv.innerHTML = `<div class="response info-box">
+Database test completed.
+Status: ${response.status}
+See browser console for details.
+                </div>`;
+            } catch (e) {
+                responseDiv.innerHTML = `<div class="response error-response">Database Error: ${e.message}</div>`;
+            }
+        }
+
+        async function testAddProduct() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div class="info-box">⏳ Adding product...</div>';
+
+            const name = document.getElementById('name').value;
+            const category = document.getElementById('category').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const token = document.getElementById('token').value;
+
+            if (!name || !category || price <= 0) {
+                responseDiv.innerHTML = '<div class="response error-response">Please fill all fields with valid values</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch('../backend/products/test-add.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name, category, price,
+                        adminToken: token
+                    })
+                });
+
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    responseDiv.innerHTML = `<div class="response error-response">
+❌ Invalid JSON Response
+
+The server returned HTML instead of JSON, which usually means there's a PHP error.
+
+Raw Response:
+${responseText.substring(0, 500)}
+
+Check the error above. Common issues:
+1. EmailNotifier.php has an error
+2. Database connection failed
+3. A required file is missing
+                    </div>`;
+                    return;
+                }
+
+                const isSuccess = data.product_added?.status === 'OK' || data.success;
+                responseDiv.innerHTML = `<div class="response ${isSuccess ? 'success-response' : 'error-response'}">
+Status: ${response.status}
+
+${JSON.stringify(data, null, 2)}
+                </div>`;
+            } catch (e) {
+                console.error('Error:', e);
+                responseDiv.innerHTML = `<div class="response error-response">Request Error: ${e.message}</div>`;
+            }
+        }
+
+        async function testAddProductWithEmail() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div class="info-box">⏳ Adding product with email notifications...</div>';
+
+            const name = document.getElementById('name').value;
+            const category = document.getElementById('category').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const token = document.getElementById('token').value;
+
+            if (!name || !category || price <= 0) {
+                responseDiv.innerHTML = '<div class="response error-response">Please fill all fields</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch('../backend/products/list.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name, category, price,
+                        adminToken: token,
+                        tag: 'Test',
+                        description: 'Test product from debug page'
+                    })
+                });
+
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    responseDiv.innerHTML = `<div class="response error-response">
+❌ Invalid JSON Response
+
+Error: ${e.message}
+
+Raw Response (first 500 chars):
+${responseText.substring(0, 500)}
+
+This usually means:
+1. A PHP error occurred (check error log)
+2. EmailNotifier is throwing an exception
+3. Database query failed
+
+Try the "Add Product (No Email)" button to isolate the issue.
+                    </div>`;
+                    return;
+                }
+
+                const isSuccess = data.success;
+                responseDiv.innerHTML = `<div class="response ${isSuccess ? 'success-response' : 'error-response'}">
+Status: ${response.status}
+
+${JSON.stringify(data, null, 2)}
+                </div>`;
+            } catch (e) {
+                console.error('Error:', e);
+                responseDiv.innerHTML = `<div class="response error-response">Request Error: ${e.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

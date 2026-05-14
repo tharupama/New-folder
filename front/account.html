@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BUY LK — Account</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="wishlist.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+  </head>
+  <body data-page="account">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <img src="assests/logo.png" alt="BUY LK" class="logo-img">
+          <span class="brand-name">BUYLK</span>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+          <button class="nav-cart" id="cartBtn">
+            <i class="ri-shopping-cart-line"></i> Cart <span id="cartCount">0</span>
+          </button>
+        </nav>
+        <div class="actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+            <i class="ri-moon-line"></i> Theme
+          </button>
+          <button class="icon-btn" id="wishlistBtn" aria-label="Wishlist">
+            <i class="ri-heart-line"></i> Wishlist <span id="wishlistCount">0</span>
+          </button>
+          <div id="authLinks" class="auth-links">
+            <a href="login.html" class="primary-btn">Sign in</a>
+          </div>
+          <div id="userMenu" class="user-menu" style="display: none;">
+            <button id="userBtn" class="primary-btn"><i class="ri-user-line"></i> Account</button>
+            <button id="myOrdersBtn" class="ghost-btn">My Orders</button>
+            <button id="logoutBtn" class="ghost-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="account-hero">
+        <div>
+          <p class="badge">Account Center</p>
+          <h2 id="accountGreeting">Manage your profile</h2>
+          <p>Update your details, track orders, and review your activity.</p>
+        </div>
+        <div class="account-quick-stats">
+          <div class="stat-card">
+            <strong id="accountOrderCount">0</strong>
+            <span>Orders</span>
+          </div>
+          <div class="stat-card">
+            <strong id="accountReviewCount">0</strong>
+            <span>Reviews</span>
+          </div>
+          <div class="stat-card">
+            <strong id="accountSavedCount">0</strong>
+            <span>Wishlist</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="accountGate" class="account-gate" style="display: none;">
+        <div>
+          <h3>Sign in to manage your account</h3>
+          <p>Log in to edit your profile, view orders, and track your reviews.</p>
+          <a href="login.html" class="primary-btn">Sign in</a>
+        </div>
+      </section>
+
+      <section id="accountContent" class="account-grid">
+        <div class="account-card">
+          <h3>Profile details</h3>
+          <form id="profileForm" class="account-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="profileName">Full name</label>
+                <input type="text" id="profileName" placeholder="Your name" required />
+              </div>
+              <div class="form-group">
+                <label for="profileEmail">Email</label>
+                <input type="email" id="profileEmail" placeholder="you@example.com" disabled />
+                <small class="hint">Email changes must be done in the login system.</small>
+              </div>
+              <div class="form-group">
+                <label for="profilePhone">Phone</label>
+                <input type="tel" id="profilePhone" placeholder="+94 77 123 4567" />
+              </div>
+              <div class="form-group">
+                <label for="profileAddress">Delivery address</label>
+                <input type="text" id="profileAddress" placeholder="Street, city" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="primary-btn">Save changes</button>
+              <button type="button" id="profileReset" class="ghost-btn">Reset</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="account-card">
+          <h3>Order history</h3>
+          <div id="accountOrdersList" class="orders-list">Loading orders...</div>
+        </div>
+
+        <div class="account-card">
+          <h3>My reviews</h3>
+          <div id="accountReviewsList" class="reviews-list">No reviews yet.</div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>BUY LK</h3>
+          <p>Fast food delivery service bringing fresh meals to your doorstep in 30 minutes or less.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook" class="social-icon" title="Facebook">f</a>
+            <a href="#" aria-label="Twitter" class="social-icon" title="Twitter">X</a>
+            <a href="#" aria-label="Instagram" class="social-icon" title="Instagram">◉</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Categories</h4>
+          <ul>
+            <li><a href="#">Kottu</a></li>
+            <li><a href="#">Pizza</a></li>
+            <li><a href="#">Bakery</a></li>
+            <li><a href="#">Beverages</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <ul class="contact-info">
+            <li><span class="contact-icon">📍</span> Colombo, Sri Lanka</li>
+            <li><span class="contact-icon">☎</span> +94 11 234 5678</li>
+            <li><span class="contact-icon">✉</span> support@buylk.lk</li>
+            <li><span class="contact-icon">🕒</span> 9:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BUY LK. All rights reserved. | Crafted for fast food delivery</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <span>•</span>
+          <a href="#">Terms of Service</a>
+          <span>•</span>
+          <a href="#">Cookie Policy</a>
+        </div>
+      </div>
+    </footer>
+
+    <aside class="cart-drawer" id="cartDrawer">
+      <div class="cart-header">
+        <h3>Your order</h3>
+        <button class="icon-btn" id="closeCart"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">USD 0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span id="cartShipping">USD 0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="cartTotal">USD 0.00</span>
+        </div>
+        <button class="primary-btn" id="checkoutBtn">Checkout</button>
+      </div>
+    </aside>
+
+    <!-- Wishlist Modal -->
+    <div class="wishlist-modal" id="wishlistModal">
+      <div class="wishlist-container">
+        <div class="wishlist-header">
+          <h2>My Wishlist</h2>
+          <button class="wishlist-close" id="closeWishlist"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="wishlist-items" id="wishlistItems"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="api.js?v=20260425"></script>
+    <script src="script.js?v=20260425"></script>
+    <script src="account.js?v=20260425"></script>
+  </body>
+</html>

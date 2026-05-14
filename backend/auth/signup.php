@@ -25,6 +25,8 @@ $username = trim($input['username'] ?? '');
 $email = trim($input['email'] ?? '');
 $password = $input['password'] ?? '';
 $confirmPassword = $input['confirmPassword'] ?? '';
+$phone = trim($input['phone'] ?? '');
+$address = trim($input['address'] ?? '');
 
 // Validation
 if (empty($username) || empty($email) || empty($password)) {
@@ -74,8 +76,14 @@ try {
     
     // Hash password and insert user
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-    $stmt->execute([$username, $email, $hashedPassword]);
+    $stmt = $pdo->prepare("INSERT INTO users (username, email, password, phone, address) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $username,
+        $email,
+        $hashedPassword,
+        $phone !== '' ? $phone : null,
+        $address !== '' ? $address : null
+    ]);
     
     http_response_code(201);
     echo json_encode([

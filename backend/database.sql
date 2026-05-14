@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    phone VARCHAR(40) DEFAULT NULL,
+    address VARCHAR(200) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -34,6 +36,11 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id INT DEFAULT NULL,
     supabase_user_id VARCHAR(64) DEFAULT NULL,
     user_email VARCHAR(100) DEFAULT NULL,
+    customer_name VARCHAR(150) DEFAULT NULL,
+    customer_phone VARCHAR(40) DEFAULT NULL,
+    customer_address VARCHAR(200) DEFAULT NULL,
+    payment_method VARCHAR(40) DEFAULT 'credit_card',
+    payment_status VARCHAR(20) DEFAULT 'paid',
     total_amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -67,11 +74,24 @@ CREATE TABLE IF NOT EXISTS product_reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     user_name VARCHAR(100) NOT NULL,
+    user_email VARCHAR(100) DEFAULT NULL,
     user_id INT DEFAULT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Site reviews table
+CREATE TABLE IF NOT EXISTS site_reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_name VARCHAR(100) NOT NULL,
+    user_email VARCHAR(100) DEFAULT NULL,
+    user_id INT DEFAULT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
@@ -85,6 +105,15 @@ CREATE TABLE IF NOT EXISTS advertisements (
     footer_text VARCHAR(150) DEFAULT '',
     sort_order INT DEFAULT 0,
     is_active BOOLEAN DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Email Subscriptions table for product notifications
+CREATE TABLE IF NOT EXISTS email_subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    is_subscribed BOOLEAN DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -107,4 +136,11 @@ INSERT INTO product_reviews (product_id, user_name, rating, comment) VALUES
 (2, 'Mike Johnson', 5, 'This air purifier changed my life. Highly recommend!'),
 (3, 'Emily Brown', 4, 'Good fitness band, accurate tracking and long battery life.'),
 (5, 'David Wilson', 5, 'Most comfortable sneakers ever! Love the eco-friendly design.');
+
+-- Sample site reviews
+INSERT INTO site_reviews (user_name, user_email, rating, comment) VALUES
+('Ayesha Perera', 'ayesha@example.com', 5, 'The site is easy to use and the delivery updates are clear and helpful.'),
+('Kasun Silva', 'kasun@example.com', 4, 'Great selection and the checkout flow was smooth.'),
+('Nadeesha Fernando', 'nadeesha@example.com', 5, 'Fast delivery and very responsive customer support.'),
+('Imran Khan', 'imran@example.com', 4, 'Overall a solid experience. I would definitely order again.');
 

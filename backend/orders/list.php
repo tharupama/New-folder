@@ -41,6 +41,11 @@ function ensureOrdersSchema($pdo) {
         user_id INT DEFAULT NULL,
         supabase_user_id VARCHAR(64) DEFAULT NULL,
         user_email VARCHAR(100) DEFAULT NULL,
+        customer_name VARCHAR(150) DEFAULT NULL,
+        customer_phone VARCHAR(40) DEFAULT NULL,
+        customer_address VARCHAR(200) DEFAULT NULL,
+        payment_method VARCHAR(40) DEFAULT 'credit_card',
+        payment_status VARCHAR(20) DEFAULT 'paid',
         total_amount DECIMAL(10, 2) NOT NULL,
         status VARCHAR(20) DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -58,6 +63,26 @@ function ensureOrdersSchema($pdo) {
 
     if (!columnExists($pdo, 'orders', 'user_email')) {
         $pdo->exec("ALTER TABLE orders ADD COLUMN user_email VARCHAR(100) DEFAULT NULL AFTER supabase_user_id");
+    }
+
+    if (!columnExists($pdo, 'orders', 'customer_name')) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN customer_name VARCHAR(150) DEFAULT NULL AFTER user_email");
+    }
+
+    if (!columnExists($pdo, 'orders', 'customer_phone')) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN customer_phone VARCHAR(40) DEFAULT NULL AFTER customer_name");
+    }
+
+    if (!columnExists($pdo, 'orders', 'customer_address')) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN customer_address VARCHAR(200) DEFAULT NULL AFTER customer_phone");
+    }
+
+    if (!columnExists($pdo, 'orders', 'payment_method')) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN payment_method VARCHAR(40) DEFAULT 'credit_card' AFTER customer_address");
+    }
+
+    if (!columnExists($pdo, 'orders', 'payment_status')) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN payment_status VARCHAR(20) DEFAULT 'paid' AFTER payment_method");
     }
 
     if (!columnExists($pdo, 'orders', 'updated_at')) {
@@ -88,12 +113,23 @@ try {
                 respond(403, ['success' => false, 'message' => 'Unauthorized access']);
             }
 
-            $stmt = $pdo->prepare("SELECT o.id, o.user_id, o.supabase_user_id, o.user_email, o.total_amount, o.status, o.created_at, o.updated_at, COALESCE(u.username, o.user_email, 'Customer') AS customer_name
+            $stmt = $pdo->prepare("SELECT o.id, o.user_id, o.supabase_user_id, o.user_email, o.customer_name, o.customer_phone, o.customer_address, o.payment_method, o.payment_status, o.total_amount, o.status, o.created_at, o.updated_at, COALESCE(o.customer_name, u.username, o.user_email, 'Customer') AS customer_name
                                    FROM orders o
                                    LEFT JOIN users u ON o.user_id = u.id
                                    ORDER BY o.created_at DESC");
             $stmt->execute();
             $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch items for each order
+            foreach ($orders as &$order) {
+                $itemStmt = $pdo->prepare("SELECT oi.id, oi.product_id, oi.quantity, oi.price, p.name as product_name
+                                           FROM order_items oi
+                                           LEFT JOIN products p ON oi.product_id = p.id
+                                           WHERE oi.order_id = ?
+                                           ORDER BY oi.id");
+                $itemStmt->execute([$order['id']]);
+                $order['items'] = $itemStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
 
             respond(200, ['success' => true, 'data' => $orders]);
         }
@@ -124,7 +160,7 @@ try {
             $params[] = $userEmail;
         }
 
-        $query = "SELECT o.id, o.user_id, o.supabase_user_id, o.user_email, o.total_amount, o.status, o.created_at, o.updated_at
+        $query = "SELECT o.id, o.user_id, o.supabase_user_id, o.user_email, o.customer_name, o.customer_phone, o.customer_address, o.payment_method, o.payment_status, o.total_amount, o.status, o.created_at, o.updated_at
                   FROM orders o
                   WHERE " . implode(' OR ', $whereParts) . "
                   ORDER BY o.created_at DESC";
@@ -132,6 +168,17 @@ try {
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Fetch items for each order
+        foreach ($orders as &$order) {
+            $itemStmt = $pdo->prepare("SELECT oi.id, oi.product_id, oi.quantity, oi.price, p.name as product_name
+                                       FROM order_items oi
+                                       LEFT JOIN products p ON oi.product_id = p.id
+                                       WHERE oi.order_id = ?
+                                       ORDER BY oi.id");
+            $itemStmt->execute([$order['id']]);
+            $order['items'] = $itemStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
 
         respond(200, ['success' => true, 'data' => $orders]);
     }
@@ -142,6 +189,11 @@ try {
         $userId = intval($input['user_id'] ?? 0);
         $supabaseUserId = trim($input['supabase_user_id'] ?? '');
         $userEmail = trim($input['user_email'] ?? '');
+        $customerName = trim($input['customer_name'] ?? '');
+        $customerPhone = trim($input['customer_phone'] ?? '');
+        $customerAddress = trim($input['customer_address'] ?? '');
+        $paymentMethod = trim($input['payment_method'] ?? 'credit_card');
+        $paymentStatus = trim($input['payment_status'] ?? 'paid');
         $totalAmount = floatval($input['total_amount'] ?? 0);
         $status = trim($input['status'] ?? 'pending');
         $items = $input['items'] ?? [];
@@ -159,13 +211,28 @@ try {
             $status = 'pending';
         }
 
+        $allowedPaymentMethods = ['credit_card', 'cash_on_delivery'];
+        if (!in_array($paymentMethod, $allowedPaymentMethods, true)) {
+            $paymentMethod = 'credit_card';
+        }
+
+        $allowedPaymentStatuses = ['paid', 'pending'];
+        if (!in_array($paymentStatus, $allowedPaymentStatuses, true)) {
+            $paymentStatus = $paymentMethod === 'cash_on_delivery' ? 'pending' : 'paid';
+        }
+
         $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare('INSERT INTO orders (user_id, supabase_user_id, user_email, total_amount, status) VALUES (?, ?, ?, ?, ?)');
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id, supabase_user_id, user_email, customer_name, customer_phone, customer_address, payment_method, payment_status, total_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute([
             $userId > 0 ? $userId : null,
             $supabaseUserId !== '' ? $supabaseUserId : null,
             $userEmail !== '' ? $userEmail : null,
+            $customerName !== '' ? $customerName : null,
+            $customerPhone !== '' ? $customerPhone : null,
+            $customerAddress !== '' ? $customerAddress : null,
+            $paymentMethod,
+            $paymentStatus,
             $totalAmount,
             $status
         ]);
